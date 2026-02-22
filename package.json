@@ -1,0 +1,20 @@
+{
+  "name": "sos2526-24",
+  "version": "0.0.0",
+  "description": "- **Team**\r   - Isaac Rodríguez Godino (https://github.com/IsaacRg25)\r   - Elena Bejarano Periñán (https://github.com/elenabejper)\r   - María Jesús Jiménez-Espada Pallarés (https://github.com/mariaajesuus)\r - **Project description**: Our project integrates global datasets on construction costs, household spending on leisure and culture, and average monthly wages. We analyze the economic impact of rising construction prices between 2020/21 and 2024, exploring the correlation between cost increases, purchasing power, and shifts in leisure expenditure to identify global trends and cross-country comparisons.\r - **Repository**: [gti-sos/SOS2526-24](https://github.com/gti-sos/SOS2526-24)",
+  "homepage": "https://github.com/gti-sos/SOS2526-24#readme",
+  "bugs": {
+    "url": "https://github.com/gti-sos/SOS2526-24/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gti-sos/SOS2526-24.git"
+  },
+  "license": "ISC",
+  "author": "SOS2526-24",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
