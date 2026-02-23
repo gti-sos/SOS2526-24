@@ -1,7 +1,4 @@
-/**
- * Entrega F03 - Aplicación Node.js
- * Alumna: Maria Jesús (MJP)
- */
+
 
 // 1. Inicialización del array con los 10 datos de la ficha de trabajo
 const wagesData = [
