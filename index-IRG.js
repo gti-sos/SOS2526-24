@@ -1,4 +1,4 @@
-const datos = [
+const datosIsaac = [
   { year: 2024, country: "USA", city: "New York", cost_usd_per_m2: 5723, cost_change_range: "5%", rank: 1 },
   { year: 2024, country: "Canada", city: "Toronto", cost_usd_per_m2: 2973, cost_change_range: "5.01%", rank: 24 },
   { year: 2024, country: "uk", city: "London", cost_usd_per_m2: 4473, cost_change_range: "15%", rank: 5 },
@@ -15,7 +15,7 @@ const datos = [
 const pais = "Canada";
 
 // 1. Filtramos los datos para tenerlos listos
-const filtrados = datos.filter(d => d.country === pais);
+const filtrados = datosIsaac.filter(d => d.country === pais);
 
 // 2. Creamos la lista de ciudades (solo si no están ya en el array)
 const listaCiudades = [];
@@ -30,3 +30,7 @@ const mediaCostoM2 = filtrados.reduce((acum, valor) => acum + valor.cost_usd_per
 
 // 4. Resultado
 console.log(`Media del costo m2 en ${pais} tomando las ciudades ${listaCiudades.join(", ")}: ${mediaCostoM2.toFixed(2)} USD`);
+
+
+// ... al final de index-irg.js
+module.exports = { datosIsaac };
