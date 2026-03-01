@@ -4,6 +4,8 @@ console.log(cool());
 let express = require("express");
 const irg = require("./index-IRG.js");
 
+const mjp = require("./index-MJP.js");
+
 // 1. Usamos el nombre que tú has elegido
 const datosIsaac = irg.datosIsaac; 
 
@@ -45,6 +47,39 @@ app.get("/samples/IRG", (req, res) => {
     const mensaje = `Media del costo m2 en ${pais} tomando las ciudades ${listaCiudades.join(", ")}: ${mediaCostoM2.toFixed(2)} USD`;
     
     res.send(`<h1>Resultado del Algoritmo (IRG)</h1><p>${mensaje}</p>`);
+});
+
+
+
+// REQUISITO F04: Algoritmo de María Jesús (MJP)
+app.get("/samples/MJP", (req, res) => {
+    const datos = mjp.datosMaria; // Cogemos el array que exportaste
+    const targetCountry = "canada";
+
+    // Replicamos el algoritmo:
+    const canadaRows = datos.filter((row) => row.country === targetCountry);
+    
+    let totalUsd = 0;
+    canadaRows.forEach((row) => {
+        totalUsd += row.avg_monthly_usd;
+    });
+
+    const averageUsd = totalUsd / canadaRows.length;
+
+    // Enviamos la respuesta al navegador
+    res.send(`
+        <html>
+            <head><title>Algoritmo MJP</title></head>
+            <body>
+                <h1>Resultado del Algoritmo (MJP)</h1>
+                <p><b>País analizado:</b> ${targetCountry.toUpperCase()}</p>
+                <p><b>Registros encontrados:</b> ${canadaRows.length}</p>
+                <p><b>Media del salario mensual:</b> ${averageUsd.toFixed(2)} USD</p>
+                <hr>
+                <a href="/about">Volver al About</a>
+            </body>
+        </html>
+    `);
 });
 
 app.listen(port, () => {

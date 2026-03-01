@@ -1,7 +1,7 @@
 
 
 // 1. Inicialización del array con los 10 datos de la ficha de trabajo
-const wagesData = [
+const datosMaria = [
     { year: 2024, country: "canada", avg_monthly_nc: 6926.7, avg_monthly_usd: 5056.8, currency: "CAD" },
     { year: 2023, country: "canada", avg_monthly_nc: 6750.4, avg_monthly_usd: 5001.8, currency: "CAD" },
     { year: 2022, country: "canada", avg_monthly_nc: 6513.1, avg_monthly_usd: 5004.2, currency: "CAD" },
@@ -18,7 +18,7 @@ const wagesData = [
 const targetCountry = "canada";
 
 // Filtramos el subconjunto de filas de Canada usando .filter()
-const canadaRows = wagesData.filter((row) => {
+const canadaRows = datosMaria.filter((row) => {
     return row.country === targetCountry;
 });
 
@@ -37,3 +37,5 @@ console.log(`Análisis de datos para el país: ${targetCountry.toUpperCase()}`);
 console.log(`Registros encontrados: ${canadaRows.length}`);
 console.log(`La media del salario mensual en USD es: ${averageUsd.toFixed(2)}`);
 console.log("---------------------------------------------------------");
+
+module.exports = { datosMaria };
