@@ -1,4 +1,6 @@
 let cool = require("cool-ascii-faces");
+console.log(cool());
+
 let express = require("express");
 const irg = require("./index-IRG.js");
 
