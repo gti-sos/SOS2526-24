@@ -12,6 +12,7 @@ const mjp = require("./index-MJP.js");
 const app = express();
 let BASE_URL_API = "/api/v1";
 let MJP_API_PATH = BASE_URL_API + "/average-monthly-wages"; 
+let IRG_API_PATH=BASE_URL_API+"/international-construccion-costs"
 const port = process.env.PORT || 3000;
 
 
@@ -32,6 +33,7 @@ let initialDatosMaria = [
 ];
 
 // 1. Usamos el nombre que tú has elegido
+let datosIrg=[]
 const datosIsaac = irg.datosIsaac; 
 
 
@@ -146,7 +148,6 @@ app.delete(MJP_API_PATH, (req, res) => {
 app.put(MJP_API_PATH, (req, res) => {
     res.status(405).json({ error: "Método PUT no permitido en la lista completa." }); // 405 Method Not Allowed
 });
-
 // 3. Operaciones sobre RECURSOS INDIVIDUALES (/:país/:año)
 app.get(MJP_API_PATH + "/:country/:year", (req, res) => {
     const { country, year } = req.params;
@@ -157,6 +158,7 @@ app.get(MJP_API_PATH + "/:country/:year", (req, res) => {
         res.status(404).json({ error: "Recurso no encontrado." }); // 404 Not Found
     }
 });
+
 
 app.put(MJP_API_PATH + "/:country/:year", (req, res) => {
     const { country, year } = req.params;
@@ -193,4 +195,145 @@ app.post(MJP_API_PATH + "/:country/:year", (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
+});
+
+
+
+
+///////////////////////////////////////////////////
+//colecci
+
+
+
+
+app.get(IRG_API_PATH+"/loadInitialData", (req, res) => {
+    if (datosIrg.length === 0) {
+        datosIrg = [...datosIsaac];
+        res.status(201).json(datosIrg); // 201 Created
+    } else {
+        res.status(400).json({ error: "El array ya contiene datos." }); // 400 Bad Request
+    }
+});
+
+
+app.get(IRG_API_PATH, (req, res) => {
+    res.status(200).json(datosIrg); // 200 OK
+});
+
+
+app.post(IRG_API_PATH, (req, res) => {
+    const newData = req.body;
+    // Validación: Comprobar campos obligatorios
+    if (!newData || !newData.country || !newData.year || !newData.city || !newData.cost_usd_per_m2 || !newData.cost_change_range || !newData.rank) {
+        return res.status(400).json({ error: "Datos incompletos o incorrectos." });
+    }
+    // Validación: Comprobar duplicados (409 Conflict)
+    const exists = datosIrg.some(d => d.country === newData.country && d.year === parseInt(newData.year) && newData.city===d.city);
+    if (exists) {
+        res.status(409).json({ error: "El recurso ya existe para ese país y año y ciudad." });
+    } else {
+        datosIrg.push(newData);
+        res.status(201).json({ message: "Recurso creado con éxito." });
+    }
+});
+
+
+app.delete(IRG_API_PATH, (req, res) => {
+    datosIrg = [];
+    res.status(200).json({ message: "Colección eliminada correctamente." });
+});
+
+
+
+app.put(IRG_API_PATH, (req, res) => {
+    res.status(405).json({ error: "Método PUT no permitido en la lista completa." }); // 405 Method Not Allowed
+});
+
+
+///individuales
+
+// Datos
+
+
+// Ruta base (ajústala a tu proyecto)
+
+
+// Helpers
+
+
+/////////////////////////////////////////////////
+
+const sameId = (d, country, year, city) =>
+  d.country === country &&
+  d.year === year &&
+  d.city === city;
+
+// GET individual
+app.get(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
+  const { country, year, city } = req.params;
+  const yearNum = parseInt(year, 10);
+
+  const resource = datosIrg.find(d =>
+    sameId(d, country, yearNum, city)
+  );
+
+  if (resource) {
+    res.status(200).json(resource);
+  } else {
+    res.status(404).json({ error: "Recurso no encontrado." });
+  }
+});
+
+// PUT individual
+app.put(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
+  const { country, year, city } = req.params;
+  const yearNum = parseInt(year, 10);
+  const body = req.body;
+
+  if (
+    !body ||
+    body.country !== country ||
+    body.year !== yearNum ||
+    body.city !== city
+  ) {
+    return res.status(400).json({
+      error: "El ID del recurso no coincide con la URL."
+    });
+  }
+
+  const index = datosIrg.findIndex(d =>
+    sameId(d, country, yearNum, city)
+  );
+
+  if (index !== -1) {
+    datosIrg[index] = body;
+    res.status(200).json({ message: "Recurso actualizado con éxito." });
+  } else {
+    res.status(404).json({ error: "Recurso no encontrado para actualizar." });
+  }
+});
+
+// DELETE individual
+app.delete(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
+  const { country, year, city } = req.params;
+  const yearNum = parseInt(year, 10);
+
+  const initialLen = datosIrg.length;
+
+  datosIrg = datosIrg.filter(d =>
+    !sameId(d, country, yearNum, city)
+  );
+
+  if (datosIrg.length < initialLen) {
+    res.status(200).json({ message: "Recurso eliminado correctamente." });
+  } else {
+    res.status(404).json({ error: "Recurso no encontrado para eliminar." });
+  }
+});
+
+// POST individual no permitido
+app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
+  res.status(405).json({
+    error: "No se permite POST sobre un recurso concreto."
+  });
 });
