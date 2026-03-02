@@ -32,13 +32,13 @@ let initialDatosMaria = [
     { year: 2022, country: "germany", avg_monthly_nc: 3790.4, avg_monthly_usd: 3986.0, currency: "EUR" }
 ];
 
-// 1. Usamos el nombre que tú has elegido
+
 let datosIrg=[]
 const datosIsaac = irg.datosIsaac; 
 
 
-// ERROR CORREGIDO: Es app.use, no app.arguments. 
-// Y mejor apuntar a "./public" si ahí tienes tu about.html
+
+
 app.use("/", express.static("./public")); 
 app.use(bodyParser.json());
 
@@ -53,7 +53,6 @@ app.get("/cool", (req, res) => {
 app.get("/samples/IRG", (req, res) => {
     const pais = "Canada";
 
-    // ERROR CORREGIDO: Aquí usamos datosIsaac
     const filtrados = datosIsaac.filter(d => d.country === pais);
 
     if (filtrados.length === 0) {
@@ -201,7 +200,7 @@ app.listen(port, () => {
 
 
 ///////////////////////////////////////////////////
-//colecci
+
 
 
 
@@ -250,15 +249,6 @@ app.put(IRG_API_PATH, (req, res) => {
 });
 
 
-///individuales
-
-// Datos
-
-
-// Ruta base (ajústala a tu proyecto)
-
-
-// Helpers
 
 
 /////////////////////////////////////////////////
@@ -336,4 +326,5 @@ app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
   res.status(405).json({
     error: "No se permite POST sobre un recurso concreto."
   });
+
 });
