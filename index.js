@@ -39,6 +39,9 @@ let datosIrg=[]
 const datosIsaac = irg.datosIsaac; 
 
 
+let datosEBP=[]
+const initialDatosEBP = ebp.datos; 
+
 
 
 app.use("/", express.static("./public")); 
@@ -352,4 +355,129 @@ app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
     error: "No se permite POST sobre un recurso concreto."
   });
 
+});
+
+
+// ========================
+// EBP (recreation-culture-expenditure) DATA
+// ========================
+
+//Inicialización de datos
+app.get(EBP_API_PATH + "/loadInitialData", (req, res) => {
+  if (datosEBP.length === 0) {
+    datosEBP = [...initialDatosEBP];
+    return res.status(201).json(datosEBP); // 201 Created
+  }
+  return res.status(400).json({ error: "El array ya contiene datos." }); // 400
+});
+
+// ########### DATOS ##############
+// GET datos codigo 200
+app.get(EBP_API_PATH, (req, res) => {
+  res.status(200).json(datosEBP);
+});
+
+// POST datos codigo 400
+app.post(EBP_API_PATH, (req, res) => {
+  const newData = req.body;
+
+  // Validación campos obligatorios
+  if (!newData ||
+      newData.year === undefined ||
+      !newData.country ||
+      newData.recreation_value === undefined ||
+      newData.total_household_consumption === undefined ||
+      newData.recreation_share === undefined ||
+      newData.population === undefined ||
+      newData.recreation_per_capita === undefined) {
+    return res.status(400).json({ error: "Datos incompletos o incorrectos." });
+  }
+
+  const country = String(newData.country).toLowerCase();
+  const year = parseInt(newData.year);
+
+  const exists = datosEBP.some(d => d.country === country && d.year === year);
+  if (exists) return res.status(409).json({ error: "El recurso ya existe para ese país y año." });
+
+  const normalized = {
+    year,
+    country,
+    recreation_value: Number(newData.recreation_value),
+    total_household_consumption: Number(newData.total_household_consumption),
+    recreation_share: Number(newData.recreation_share),
+    population: Number(newData.population),
+    recreation_per_capita: Number(newData.recreation_per_capita)
+  };
+
+  datosEBP.push(normalized);
+  return res.status(201).json({ message: "Recurso creado con éxito." });
+});
+
+// DELETE datos codigo 200
+app.delete(EBP_API_PATH, (req, res) => {
+  datosEBP = [];
+  res.status(200).json({ message: "Datos eliminados correctamente." });
+});
+
+// PUT datos no permitido
+app.put(EBP_API_PATH, (req, res) => {
+  res.status(405).json({ error: "Método PUT no permitido en los datos." });
+});
+
+
+// ########### RECURSOS INDIVIDUALES ##############
+// GET recurso codigo 200
+app.get(EBP_API_PATH + "/:country/:year", (req, res) => {
+  const country = String(req.params.country).toLowerCase();
+  const year = parseInt(req.params.year);
+
+  const resource = datosEBP.find(d => d.country === country && d.year === year);
+  if (!resource) return res.status(404).json({ error: "Recurso no encontrado." });
+
+  res.status(200).json(resource);
+});
+
+// PUT recurso codigo 400
+app.put(EBP_API_PATH + "/:country/:year", (req, res) => {
+  const country = String(req.params.country).toLowerCase();
+  const year = parseInt(req.params.year);
+  const body = req.body;
+
+  // El ID del body debe coincidir con la URL (patrón L05)
+  if (!body || String(body.country).toLowerCase() !== country || parseInt(body.year) !== year) {
+    return res.status(400).json({ error: "El ID del recurso no coincide con la URL." });
+  }
+
+  const index = datosEBP.findIndex(d => d.country === country && d.year === year);
+  if (index === -1) return res.status(404).json({ error: "Recurso no encontrado para actualizar." });
+
+  datosEBP[index] = {
+    year,
+    country,
+    recreation_value: Number(body.recreation_value),
+    total_household_consumption: Number(body.total_household_consumption),
+    recreation_share: Number(body.recreation_share),
+    population: Number(body.population),
+    recreation_per_capita: Number(body.recreation_per_capita)
+  };
+
+  res.status(200).json({ message: "Recurso actualizado con éxito." });
+});
+
+// DELETE recurso codigo 200
+app.delete(EBP_API_PATH + "/:country/:year", (req, res) => {
+  const country = String(req.params.country).toLowerCase();
+  const year = parseInt(req.params.year);
+
+  const before = datosEBP.length;
+  datosEBP = datosEBP.filter(d => !(d.country === country && d.year === year));
+
+  if (datosEBP.length === before) return res.status(404).json({ error: "Recurso no encontrado para eliminar." });
+
+  res.status(200).json({ message: "Recurso eliminado correctamente." });
+});
+
+// POST recurso no permitido
+app.post(EBP_API_PATH + "/:country/:year", (req, res) => {
+  res.status(405).json({ error: "No se permite POST sobre un recurso concreto." });
 });
