@@ -29,4 +29,7 @@ const mediaConsumoPaisPorHogar= fitrados.map( d => d.per_capita)
         .reduce((acum, valor) => acum + valor, 0) / fitrados.length;
 
 //Mostramos el resultado
-console.log(`Media del gasto por hogar en ocio en ${countryTarget}: ${mediaConsumoPaisPorHogar.toFixed(2)}`)
+//console.log(`Media del gasto por hogar en ocio en ${countryTarget}: ${mediaConsumoPaisPorHogar.toFixed(2)}`)
+
+//Exporta datos
+module.exports = {datos};
