@@ -393,7 +393,7 @@ app.post(EBP_API_PATH, (req, res) => {
     return res.status(400).json({ error: "Datos incompletos o incorrectos." });
   }
 
-  const country = String(newData.country).toLowerCase();
+  const country = String(newData.country);
   const year = parseInt(newData.year);
 
   const exists = datosEBP.some(d => d.country === country && d.year === year);
@@ -428,7 +428,7 @@ app.put(EBP_API_PATH, (req, res) => {
 // ########### RECURSOS INDIVIDUALES ##############
 // GET recurso codigo 200
 app.get(EBP_API_PATH + "/:country/:year", (req, res) => {
-  const country = String(req.params.country).toLowerCase();
+  const country = String(req.params.country);
   const year = parseInt(req.params.year);
 
   const resource = datosEBP.find(d => d.country === country && d.year === year);
@@ -439,12 +439,12 @@ app.get(EBP_API_PATH + "/:country/:year", (req, res) => {
 
 // PUT recurso codigo 400
 app.put(EBP_API_PATH + "/:country/:year", (req, res) => {
-  const country = String(req.params.country).toLowerCase();
+  const country = String(req.params.country);
   const year = parseInt(req.params.year);
   const body = req.body;
 
   // El ID del body debe coincidir con la URL (patrón L05)
-  if (!body || String(body.country).toLowerCase() !== country || parseInt(body.year) !== year) {
+  if (!body || String(body.country) !== country || parseInt(body.year) !== year) {
     return res.status(400).json({ error: "El ID del recurso no coincide con la URL." });
   }
 
@@ -466,7 +466,7 @@ app.put(EBP_API_PATH + "/:country/:year", (req, res) => {
 
 // DELETE recurso codigo 200
 app.delete(EBP_API_PATH + "/:country/:year", (req, res) => {
-  const country = String(req.params.country).toLowerCase();
+  const country = String(req.params.country);
   const year = parseInt(req.params.year);
 
   const before = datosEBP.length;
