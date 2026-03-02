@@ -7,12 +7,14 @@ let bodyParser = require("body-parser");
 //Importacion de modulos
 const irg = require("./index-IRG.js");
 const mjp = require("./index-MJP.js");
+const ebp = require("./index-EBP.js")
 
 
 const app = express();
 let BASE_URL_API = "/api/v1";
-let MJP_API_PATH = BASE_URL_API + "/average-monthly-wages"; 
-let IRG_API_PATH=BASE_URL_API+"/international-construccion-costs"
+let MJP_API_PATH = BASE_URL_API + "/average-monthly-wages";
+let IRG_API_PATH = BASE_URL_API+"/international-construccion-costs"; 
+let EBP_API_PATH = BASE_URL_API + "/recreation-culture-expenditure"; 
 const port = process.env.PORT || 3000;
 
 
@@ -106,7 +108,30 @@ app.get("/samples/MJP", (req, res) => {
     `);
 });
 
+//Algoritmo de index-EBP.js
+app.get("/samples/EBP", (req, res) => {
+    const countryTarget = "Canada";
 
+    const filtrados = ebp.datos.filter(d => d.country === countryTarget);
+
+    if (filtrados.length === 0) {
+        return res.status(404).json({ error: "No hay datos para ese país." });
+    }
+
+    const media = filtrados
+        .map(d => d.per_capita)
+        .reduce((acum, valor) => acum + valor, 0) / filtrados.length;
+
+    const resultado = Number(media.toFixed(2));
+
+    res.status(200).json({
+        sample: "EBP",
+        country: countryTarget,
+        registros: filtrados.length,
+        average_per_capita: resultado,
+        message: `Media del gasto por hogar en ocio en ${countryTarget}: ${resultado}`
+    });
+});
 
 // 1. GET /loadInitialData - Carga los 10 datos si está vacío
 app.get(MJP_API_PATH + "/loadInitialData", (req, res) => {
