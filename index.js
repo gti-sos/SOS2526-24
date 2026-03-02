@@ -48,7 +48,7 @@ app.use("/", express.static("./public"));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-    res.send('Hello World');
+    res.send('buenas tardes ;)');
 });
 
 app.get("/cool", (req, res) => {
@@ -480,4 +480,5 @@ app.delete(EBP_API_PATH + "/:country/:year", (req, res) => {
 // POST recurso no permitido
 app.post(EBP_API_PATH + "/:country/:year", (req, res) => {
   res.status(405).json({ error: "No se permite POST sobre un recurso concreto." });
+
 });
