@@ -12,7 +12,8 @@ const ebp = require("./index-EBP.js")
 
 const app = express();
 let BASE_URL_API = "/api/v1";
-let MJP_API_PATH = BASE_URL_API + "/average-monthly-wages"; 
+let MJP_API_PATH = BASE_URL_API + "/average-monthly-wages";
+let IRG_API_PATH = BASE_URL_API+"/international-construccion-costs"; 
 let EBP_API_PATH = BASE_URL_API + "/recreation-culture-expenditure"; 
 const port = process.env.PORT || 3000;
 
