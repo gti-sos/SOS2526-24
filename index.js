@@ -80,14 +80,20 @@ app.get("/samples/IRG", (req, res) => {
 
 
 
+
 // REQUISITO F04: Algoritmo de María Jesús (MJP)
 app.get("/samples/MJP", (req, res) => {
-    const datos = mjp.datosMaria; // Cogemos el array que exportaste
+    const datos = mjp.datosMaria; 
     const targetCountry = "canada";
 
-    // Replicamos el algoritmo:
     const canadaRows = datos.filter((row) => row.country === targetCountry);
     
+    if (canadaRows.length === 0) {
+        return res.status(404).json({
+            error: "No se encontraron datos para el país especificado."
+        });
+    }
+
     let totalUsd = 0;
     canadaRows.forEach((row) => {
         totalUsd += row.avg_monthly_usd;
@@ -95,20 +101,14 @@ app.get("/samples/MJP", (req, res) => {
 
     const averageUsd = totalUsd / canadaRows.length;
 
-    // Enviamos la respuesta al navegador
-    res.send(`
-        <html>
-            <head><title>Algoritmo MJP</title></head>
-            <body>
-                <h1>Resultado del Algoritmo (MJP)</h1>
-                <p><b>País analizado:</b> ${targetCountry.toUpperCase()}</p>
-                <p><b>Registros encontrados:</b> ${canadaRows.length}</p>
-                <p><b>Media del salario mensual:</b> ${averageUsd.toFixed(2)} USD</p>
-                <hr>
-                <a href="/about">Volver al About</a>
-            </body>
-        </html>
-    `);
+    // Enviamos un objeto JSON con los resultados
+    res.status(200).json({
+        sample: "MJP",
+        country: targetCountry,
+        records_found: canadaRows.length,
+        average_monthly_usd: Number(averageUsd.toFixed(2)),
+        explanation: `La media del salario mensual en ${targetCountry} es de ${averageUsd.toFixed(2)} USD.`
+    });
 });
 
 //Algoritmo de index-EBP.js
