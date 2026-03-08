@@ -368,7 +368,7 @@ app.get(EBP_API_PATH + "/loadInitialData", (req, res) => {
     datosEBP = [...initialDatosEBP];
     return res.status(201).json(datosEBP); // 201 Created
   }
-  return res.status(400).json({ error: "El array ya contiene datos." }); // 400
+  return res.status(409).json({ error: "El array ya contiene datos." }); // 400
 });
 
 // ########### DATOS ##############
@@ -443,7 +443,7 @@ app.put(EBP_API_PATH + "/:country/:year", (req, res) => {
   const year = parseInt(req.params.year);
   const body = req.body;
 
-  // El ID del body debe coincidir con la URL (patrón L05)
+  // El ID del body debe coincidir con la URL
   if (!body || String(body.country) !== country || parseInt(body.year) !== year) {
     return res.status(400).json({ error: "El ID del recurso no coincide con la URL." });
   }
