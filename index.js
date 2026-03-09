@@ -252,28 +252,28 @@ app.post(IRG_API_PATH, (req, res) => {
     const newData = req.body;
     // Validación: Comprobar campos obligatorios
     if (!newData || !newData.country || !newData.year || !newData.city || !newData.cost_usd_per_m2 || !newData.cost_change_range || !newData.rank) {
-        return res.status(400).json({ error: "Datos incompletos o incorrectos." });
+        return res.status(400).json({ error: "Datos incompletos o incorrectos.,error 400" });
     }
     // Validación: Comprobar duplicados (409 Conflict)
     const exists = datosIrg.some(d => d.country === newData.country && d.year === parseInt(newData.year) && newData.city===d.city);
     if (exists) {
-        res.status(409).json({ error: "El recurso ya existe para ese país y año y ciudad." });
+        res.status(409).json({ error: "El recurso ya existe para ese país y año y ciudad., error 409" });
     } else {
         datosIrg.push(newData);
-        res.status(201).json({ message: "Recurso creado con éxito." });
+        res.status(201).json({ message: "Recurso creado con éxito. codigo 201" });
     }
 });
 
 
 app.delete(IRG_API_PATH, (req, res) => {
     datosIrg = [];
-    res.status(200).json({ message: "Colección eliminada correctamente." });
+    res.status(200).json({ message: "Colección eliminada correctamente. codigo 200" });
 });
 
 
 
 app.put(IRG_API_PATH, (req, res) => {
-    res.status(405).json({ error: "Método PUT no permitido en la lista completa." }); // 405 Method Not Allowed
+    res.status(405).json({ error: "Método PUT no permitido en la lista completa, error 405." }); // 405 Method Not Allowed
 });
 
 
@@ -298,7 +298,7 @@ app.get(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
   if (resource) {
     res.status(200).json(resource);
   } else {
-    res.status(404).json({ error: "Recurso no encontrado." });
+    res.status(404).json({ error: "Recurso no encontrado. error 404" });
   }
 });
 
@@ -315,7 +315,7 @@ app.put(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
     body.city !== city
   ) {
     return res.status(400).json({
-      error: "El ID del recurso no coincide con la URL."
+      error: "El ID del recurso no coincide con la URL., error 400"
     });
   }
 
@@ -327,7 +327,7 @@ app.put(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
     datosIrg[index] = body;
     res.status(200).json({ message: "Recurso actualizado con éxito." });
   } else {
-    res.status(404).json({ error: "Recurso no encontrado para actualizar." });
+    res.status(404).json({ error: "Recurso no encontrado para actualizar. codigo 404" });
   }
 });
 
@@ -352,7 +352,7 @@ app.delete(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
 // POST individual no permitido
 app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
   res.status(405).json({
-    error: "No se permite POST sobre un recurso concreto."
+    error: "No se permite POST sobre un recurso concreto, error 405."
   });
 
 });
