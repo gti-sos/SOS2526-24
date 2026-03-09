@@ -238,7 +238,7 @@ app.get(IRG_API_PATH+"/loadInitialData", (req, res) => {
         datosIrg = [...datosIsaac];
         res.status(201).json(datosIrg); // 201 Created
     } else {
-        res.status(400).json({ error: "El array ya contiene datos." }); // 400 Bad Request
+        res.status(409).json({ error: "El array ya contiene datos." }); // 400 Bad Request
     }
 });
 
