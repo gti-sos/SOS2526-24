@@ -1,16 +1,33 @@
-let cool = require("cool-ascii-faces");
-console.log(cool());
 
-let express = require("express");
-let bodyParser = require("body-parser");
+
+
+//let cool = require("cool-ascii-faces");
+//console.log(cool());
+
+
+
+import express from "express";
+
+import bodyParser from "body-parser";
+
 
 //Importacion de modulos
-const irg = require("./index-IRG.js");
-const mjp = require("./index-MJP.js");
-const ebp = require("./index-EBP.js")
+//aqui va estar el import de las funciones de cada uno :)
+import  {loadBackendIsaac} from "./src/back/index-IRG.js";
+
+import { loadBackendMaria } from "./src/back/index-MJP.js";
+
+import { loadBackendElena } from "./src/back/index-EBP.js";
+
+
+///////
+//const mjp = require("./src/back/index-MJP.js");
+//const ebp = require("./src/back/index-EBP.js")
+
 
 
 const app = express();
+
 let BASE_URL_API = "/api/v1";
 let MJP_API_PATH = BASE_URL_API + "/average-monthly-wages";
 let IRG_API_PATH = BASE_URL_API+"/international-construccion-costs"; 
@@ -19,14 +36,17 @@ const port = process.env.PORT || 3000;
 
 
 //Datos
-let datosMaria = [];
-const initialDatosMaria = mjp.datosMaria;
+//let datosMaria = [];
+//const initialDatosMaria = mjp.datosMaria;
 
-let datosIrg=[]
-const datosIsaac = irg.datosIsaac; 
+//let datosIrg=[]
+//const datosIsaac = irg.datosIsaac; 
 
-let datosEBP=[]
-const initialDatosEBP = ebp.datos; 
+//let datosEBP=[]
+//const initialDatosEBP = ebp.datos; 
+
+
+
 
 
 //Rutas simples (F04)
@@ -37,10 +57,28 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 });
 
+
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
+
+
+loadBackendIsaac(app);
+
+loadBackendElena(app);
+
+
+loadBackendMaria(app);
+
+
+/*
 app.get("/cool", (req, res) => {
     res.send("<html><body><h1>" + cool() + "</h1></body></html>");
 });
+*/
 
+/*
+/------------------------------------------------------------------------------------------
 app.get("/samples/IRG", (req, res) => {
     const pais = "Canada";
 
@@ -64,10 +102,11 @@ app.get("/samples/IRG", (req, res) => {
     res.send(`<h1>Resultado del Algoritmo (IRG)</h1><p>${mensaje}</p>`);
 });
 
+*/
 
-
-
+//-----------------------------------------------------------------------------------------------------
 // REQUISITO F04: Algoritmo de María Jesús (MJP)
+/*
 app.get("/samples/MJP", (req, res) => {
     const datos = mjp.datosMaria; 
     const targetCountry = "canada";
@@ -203,12 +242,8 @@ app.delete(MJP_API_PATH + "/:country/:year", (req, res) => {
 app.post(MJP_API_PATH + "/:country/:year", (req, res) => {
     res.status(405).json({ error: "No se permite POST sobre un recurso concreto." });
 });
+*/
 
-
-
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
 
 
 
@@ -216,7 +251,10 @@ app.listen(port, () => {
 ///////////////////////////////////////////////////
 
 
+//isaac
 
+
+/*
 
 
 app.get(IRG_API_PATH+"/loadInitialData", (req, res) => {
@@ -342,12 +380,12 @@ app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
   });
 
 });
-
+*/
 
 // ========================
 // EBP (recreation-culture-expenditure) DATA
 // ========================
-
+/*
 //Inicialización de datos
 app.get(EBP_API_PATH + "/loadInitialData", (req, res) => {
   if (datosEBP.length === 0) {
@@ -467,3 +505,5 @@ app.delete(EBP_API_PATH + "/:country/:year", (req, res) => {
 app.post(EBP_API_PATH + "/:country/:year", (req, res) => {
   res.status(405).json({ error: "No se permite POST sobre un recurso concreto." });
 });
+
+*/
