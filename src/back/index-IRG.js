@@ -1,3 +1,5 @@
+import Datastore from "nedb";
+
 const datosIsaac = [
   { year: 2024, country: "USA", city: "New York", cost_usd_per_m2: 5723, cost_change_range: "5%", rank: 1 },
   { year: 2024, country: "Canada", city: "Toronto", cost_usd_per_m2: 2973, cost_change_range: "5.01%", rank: 24 },
@@ -13,26 +15,10 @@ const datosIsaac = [
 ];
 
 const pais = "Canada";
+//crea nueva base de datos
 
-// 1. Filtramos los datos para tenerlos listos
-const filtrados = datosIsaac.filter(d => d.country === pais);
-
-// 2. Creamos la lista de ciudades (solo si no están ya en el array)
-const listaCiudades = [];
-filtrados.forEach(d => {
-    if (!listaCiudades.includes(d.city)) {
-        listaCiudades.push(d.city);
-    }
-});
-
-// 3. Tu cálculo de la media (tal cual lo tenías)
-const mediaCostoM2 = filtrados.reduce((acum, valor) => acum + valor.cost_usd_per_m2, 0) / filtrados.length;
-
-// 4. Resultado
-// console.log(`Media del costo m2 en ${pais} tomando las ciudades ${listaCiudades.join(", ")}: ${mediaCostoM2.toFixed(2)} USD`);
-
-
-
+//tengo que comprobar que sea persistente con esto
+let db = new Datastore({ filename: "./src/back/international-costs.db", autoload: true })
 
 
 
@@ -42,49 +28,180 @@ function loadBackendIsaac(app){
 let BASE_URL_API = "/api/v1";
 let IRG_API_PATH = BASE_URL_API+"/international-construccion-costs"; 
 
-let datosIrg=[]
 
+//inicializar base
 
+app.get(IRG_API_PATH + "/loadInitialData", (req, res) => {
+    // 1. Buscamos si ya hay algo en la base de datos
+    db.find({}, (err, datos) => {
+        if (err) {
+            return res.status(500).json({ error: "Error consultando la base de datos" });
+        }
 
-
-app.get(IRG_API_PATH+"/loadInitialData", (req, res) => {
-    if (datosIrg.length === 0) {
-        datosIrg = [...datosIsaac];
-        res.status(201).json(datosIrg); // 201 Created
-    } else {
-        res.status(409).json({ error: "El array ya contiene datos." }); // 400 Bad Request
-    }
+        if (datos.length === 0) {
+            // 2. Si está vacía, insertamos los datos iniciales (datosIsaac) en la DB
+            db.insert(datosIsaac, (err, nuevosDatos) => {
+                if (err) {
+                    return res.status(500).json({ error: "Error al insertar datos iniciales" });
+                }
+                // 3. Respondemos con los datos que acabamos de guardar
+                return res.status(201).json(nuevosDatos);
+            });
+        } else {
+            // 4. Si ya había datos, lanzamos el error 409 (Conflict)
+            return res.status(409).json({ error: "La base de datos ya contiene datos." });
+        }
+    });
 });
 
 
+
+//get de la base 
+
+
+//get de la base 
+// GET de la colección con BÚSQUEDA (Toronto) y PAGINACIÓN
 app.get(IRG_API_PATH, (req, res) => {
-    res.status(200).json(datosIrg); // 200 OK
+    // 1. FILTRADO (Búsqueda)
+    // Creamos un objeto de consulta vacío
+    let query = {};
+
+    // Si  ?city=Toronto, NeDB buscará solo ciudades "Toronto"
+    if (req.query.country) query.country = req.query.country;
+    if (req.query.city) query.city = req.query.city;
+    if (req.query.year) query.year = parseInt(req.query.year);
+
+    // 2. PAGINACIÓN
+    // Leemos limit y offset de la URL. Si no existen, ponemos valores por defecto.
+    let offset = parseInt(req.query.offset) || 0; 
+    let limit = parseInt(req.query.limit) || 100;
+
+    // 3. CONSULTA NEDB
+    // find(query): Filtra (ej: solo Toronto)
+    // skip(offset): Se salta los primeros N resultados (para cambiar de página)
+    // limit(limit): Solo devuelve el número de resultados pedido
+    db.find(query).skip(offset).limit(limit).exec((err, datos) => {
+        if (err) {
+            return res.status(500).json({ error: "Error al consultar la base de datos." });
+        }
+
+        //quitar id
+        datos.forEach(d => { delete d._id; });
+
+        // Devolvemos el array 
+        res.status(200).json(datos);
+    });
 });
+
+
+//post de la base 
 
 
 app.post(IRG_API_PATH, (req, res) => {
     const newData = req.body;
-    // Validación: Comprobar campos obligatorios
-    if (!newData || !newData.country || !newData.year || !newData.city || !newData.cost_usd_per_m2 || !newData.cost_change_range || !newData.rank) {
-        return res.status(400).json({ error: "Datos incompletos o incorrectos.,error 400" });
+
+    // 1. Validación de campos (Status 400)
+    if (!newData || !newData.country || !newData.year || !newData.city || 
+        !newData.cost_usd_per_m2 || !newData.cost_change_range || !newData.rank) {
+        return res.status(400).json({ error: "Datos incompletos o incorrectos." });
     }
-    // Validación: Comprobar duplicados (409 Conflict)
-    const exists = datosIrg.some(d => d.country === newData.country && d.year === parseInt(newData.year) && newData.city===d.city);
-    if (exists) {
-        res.status(409).json({ error: "El recurso ya existe para ese país y año y ciudad., error 409" });
-    } else {
-        datosIrg.push(newData);
-        res.status(201).json({ message: "Recurso creado con éxito. codigo 201" });
-    }
+
+    
+    const yearSearch = parseInt(newData.year);
+
+    //Validación de duplicados en la BD (Status 409)
+
+    db.find({ country: newData.country, year: yearSearch, city: newData.city }, (err,datos) => {
+        if (err) {
+            return res.status(500).json({ error: "Error al consultar la base de datos." });
+        }
+
+        if (datos.length > 0) {
+            // El recurso ya existe
+            return res.status(409).json({ error: "El recurso ya existe para ese país, año y ciudad." });
+        } else {
+            // 3. Si no existe, lo insertamos (Status 201)
+            // Aseguramos que el año guardado sea un número
+            newData.year = yearSearch; 
+            
+            db.insert(newData, (err, newDoc) => {
+                if (err) {
+                    return res.status(500).json({ error: "Error al insertar en la base de datos." });
+                }
+                return res.status(201).json({ message: "Recurso creado con éxito." });
+            });
+        }
+    });
 });
 
 
+// GET individual (Ej: /api/v1/international-construccion-costs/Canada/2024/Toronto)
+app.get(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
+    const { country, year, city } = req.params;
+    const yearNum = parseInt(year, 10);
+
+    
+    db.findOne({ country: country, year: yearNum, city: city }, (err, resource) => {
+       
+        if (err) {
+            return res.status(500).json({ error: "Error al consultar la base de datos." });
+        }
+
+        // 3. Si NeDB no encuentra nada, resource será 'null'
+        if (!resource) {
+            return res.status(404).json({ error: "Recurso no encontrado. error 404" });
+        } else {
+            // 4. Limpieza del campo _id antes de enviar
+            delete resource._id;
+            
+            // 5. Respondemos con el recurso encontrado
+            return res.status(200).json(resource);
+        }
+    });
+});
+
+ // DELETE individual (Ej: /api/v1/international-construccion-costs/Canada/2024/Toronto)
+app.delete(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
+    const { country, year, city } = req.params;
+    const yearNum = parseInt(year, 10);
+
+    // 1. Ejecutamos el borrado en la base de datos
+    // El segundo parámetro {} son opciones (no necesitamos multi:true porque la clave es única)
+    db.remove({ country: country, year: yearNum, city: city }, {}, (err, numRemoved) => {
+        
+        // 2. Control de errores de la base de datos
+        if (err) {
+            console.error("Error al borrar en la DB:", err);
+            return res.status(500).json({ error: "Error interno al intentar eliminar el recurso." });
+        }
+
+        // 3. Comprobamos si realmente se borró algo
+        if (numRemoved === 0) {
+            // No se encontró nada que coincida con esos parámetros
+            return res.status(404).json({ error: "Recurso no encontrado para eliminar." });
+        } else {
+            // Se borró correctamente
+            console.log(`Recurso eliminado: ${country} (${yearNum}) - ${city}`);
+            return res.status(200).json({ message: "Recurso eliminado correctamente." });
+        }
+    });
+});
+
+
+
+
+//delete base
 app.delete(IRG_API_PATH, (req, res) => {
-    datosIrg = [];
-    res.status(200).json({ message: "Colección eliminada correctamente. codigo 200" });
+    // El segundo parámetro { multi: true } es CLAVE para borrar todo
+    db.remove({}, { multi: true }, (err, datos) => {
+        if (err) {
+            return res.status(500).json({ error: "Error al borrar la base de datos." });
+        }
+        return res.status(200).json({ message: `Se han eliminado ${datos} recursos.` });
+    });
 });
 
-
+//put en la base (no se puede)
 
 app.put(IRG_API_PATH, (req, res) => {
     res.status(405).json({ error: "Método PUT no permitido en la lista completa, error 405." }); // 405 Method Not Allowed
@@ -95,73 +212,52 @@ app.put(IRG_API_PATH, (req, res) => {
 
 /////////////////////////////////////////////////
 
-const sameId = (d, country, year, city) =>
-  d.country === country &&
-  d.year === year &&
-  d.city === city;
 
-// GET individual
-app.get(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
-  const { country, year, city } = req.params;
-  const yearNum = parseInt(year, 10);
-
-  const resource = datosIrg.find(d =>
-    sameId(d, country, yearNum, city)
-  );
-
-  if (resource) {
-    res.status(200).json(resource);
-  } else {
-    res.status(404).json({ error: "Recurso no encontrado. error 404" });
-  }
-});
-
-// PUT individual
+// PUT individual (Ej: /api/v1/international-construccion-costs/Canada/2024/Toronto)
 app.put(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
-  const { country, year, city } = req.params;
-  const yearNum = parseInt(year, 10);
-  const body = req.body;
+    const { country, year, city } = req.params;
+    const yearNum = parseInt(year, 10);
+    const body = req.body;
 
-  if (
-    !body ||
-    body.country !== country ||
-    body.year !== yearNum ||
-    body.city !== city
-  ) {
-    return res.status(400).json({
-      error: "El ID del recurso no coincide con la URL., error 400"
+    
+    // Comprobamos que los datos del cuerpo coincidan con los de la URL
+    if (
+        !body ||
+        body.country !== country ||
+        parseInt(body.year) !== yearNum ||
+        body.city !== city
+    ) {
+        return res.status(400).json({
+            error: "El ID del recurso no coincide con la URL. Error 400"
+        });
+    }
+
+    
+    // NeDB no permite modificar el campo _id. Lo eliminamos del body por si acaso.
+    delete body._id;
+
+    // 3. Actualización en la base de datos
+  
+    db.update({ country, year: yearNum, city }, body, {}, (err, numReplaced) => {
+        
+        // 4. Error de base de datos (Status 500)
+        if (err) {
+            console.error("Error al actualizar en la DB:", err);
+            return res.status(500).json({ error: "Error interno al actualizar el recurso." });
+        }
+
+        // 5. Comprobar si se encontró y actualizó (Status 200 vs 404)
+        if (numReplaced === 0) {
+            return res.status(404).json({ 
+                error: "Recurso no encontrado para actualizar. Código 404" 
+            });
+        } else {
+            console.log(`Recurso actualizado: ${country} ${yearNum}`);
+            return res.status(200).json({ message: "Recurso actualizado con éxito." });
+        }
     });
-  }
-
-  const index = datosIrg.findIndex(d =>
-    sameId(d, country, yearNum, city)
-  );
-
-  if (index !== -1) {
-    datosIrg[index] = body;
-    res.status(200).json({ message: "Recurso actualizado con éxito." });
-  } else {
-    res.status(404).json({ error: "Recurso no encontrado para actualizar. codigo 404" });
-  }
 });
 
-// DELETE individual
-app.delete(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
-  const { country, year, city } = req.params;
-  const yearNum = parseInt(year, 10);
-
-  const initialLen = datosIrg.length;
-
-  datosIrg = datosIrg.filter(d =>
-    !sameId(d, country, yearNum, city)
-  );
-
-  if (datosIrg.length < initialLen) {
-    res.status(200).json({ message: "Recurso eliminado correctamente." });
-  } else {
-    res.status(404).json({ error: "Recurso no encontrado para eliminar." });
-  }
-});
 
 // POST individual no permitido
 app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
@@ -172,7 +268,7 @@ app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
 });
 
 
-
+/*
 app.get("/samples/IRG", (req, res) => {
     const pais = "Canada";
 
@@ -195,7 +291,7 @@ app.get("/samples/IRG", (req, res) => {
     
     res.send(`<h1>Resultado del Algoritmo (IRG)</h1><p>${mensaje}</p>`);
 });
-
+*/
 }
 
 
