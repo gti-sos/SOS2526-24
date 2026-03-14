@@ -1,0 +1,17 @@
+name: CI_CD
+on:
+  push:
+    branches: [ Isaac ]
+  pull_request:
+    branches: [ Isaac ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Install dependencies
+        run: npm install
+      - name: Test
+        run: npm test
