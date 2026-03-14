@@ -277,10 +277,11 @@ app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
 
 //redireccion hacia mi coleccion
 
-
 app.get(IRG_API_PATH + "/docs", (req, res) => {
     res.redirect(301, DOCS_URL);
 });
+
+//prueba
 
 /*
 app.get("/samples/IRG", (req, res) => {
