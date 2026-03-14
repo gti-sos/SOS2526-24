@@ -1,174 +1,221 @@
 
+import Datastore from "nedb";
 
-// 1. Inicialización del array con los 10 datos de la ficha de trabajo
-const datosMaria2 = [
-    { year: 2024, country: "canada", avg_monthly_nc: 6926.7, avg_monthly_usd: 5056.8, currency: "CAD" },
-    { year: 2023, country: "canada", avg_monthly_nc: 6750.4, avg_monthly_usd: 5001.8, currency: "CAD" },
-    { year: 2022, country: "canada", avg_monthly_nc: 6513.1, avg_monthly_usd: 5004.2, currency: "CAD" },
-    { year: 2023, country: "usa", avg_monthly_nc: 6678.3, avg_monthly_usd: 6678.3, currency: "USD" },
-    { year: 2024, country: "uk", avg_monthly_nc: 3733.8, avg_monthly_usd: 4771.6, currency: "GBP" },
-    { year: 2022, country: "spain", avg_monthly_nc: 2531.6, avg_monthly_usd: 2662.2, currency: "EUR" },
-    { year: 2023, country: "ireland", avg_monthly_nc: 4496.2, avg_monthly_usd: 4862.3, currency: "EUR" },
-    { year: 2023, country: "poland", avg_monthly_nc: 6873.8, avg_monthly_usd: 1636.4, currency: "PLN" },
-    { year: 2023, country: "italy", avg_monthly_nc: 2704.2, avg_monthly_usd: 2924.4, currency: "EUR" },
-    { year: 2022, country: "germany", avg_monthly_nc: 3790.4, avg_monthly_usd: 3986.0, currency: "EUR" }
+// Datos iniciales
+const datosMaria = [
+    { year: 2024, country: "canada", avg_monthly_nc: 6926.7, avg_monthly_usd: 5056.8, exchange_rate: 1.369779307, currency: "CAD" },
+    { year: 2023, country: "canada", avg_monthly_nc: 6750.4, avg_monthly_usd: 5001.8, exchange_rate: 1.349594146, currency: "CAD" },
+    { year: 2022, country: "canada", avg_monthly_nc: 6513.1, avg_monthly_usd: 5004.2, exchange_rate: 1.301526718, currency: "CAD" },
+    { year: 2023, country: "usa",    avg_monthly_nc: 6678.3, avg_monthly_usd: 6678.3, exchange_rate: 1,           currency: "USD" },
+    { year: 2024, country: "uk",     avg_monthly_nc: 3733.8, avg_monthly_usd: 4771.6, exchange_rate: 0.7825048202, currency: "GBP" },
+    { year: 2022, country: "spain",  avg_monthly_nc: 2531.6, avg_monthly_usd: 2662.2, exchange_rate: 0.9509428292, currency: "EUR" },
+    { year: 2023, country: "ireland",avg_monthly_nc: 4496.2, avg_monthly_usd: 4862.3, exchange_rate: 0.9247064147, currency: "EUR" },
+    { year: 2023, country: "poland", avg_monthly_nc: 6873.8, avg_monthly_usd: 1636.4, exchange_rate: 4.20056221,  currency: "PLN" },
+    { year: 2023, country: "italy",  avg_monthly_nc: 2704.2, avg_monthly_usd: 2924.4, exchange_rate: 0.9247025031, currency: "EUR" },
+    { year: 2022, country: "germany",avg_monthly_nc: 3790.4, avg_monthly_usd: 3986.0, exchange_rate: 0.9509282489, currency: "EUR" }
 ];
 
-// 2. Algoritmo usando iteradores para calcular la media de Canada
-const targetCountry = "canada";
+// Base de datos NeDB persistente
+let db = new Datastore({ filename: "./src/back/average-wages.db", autoload: true });
 
-// Filtramos el subconjunto de filas de Canada usando .filter()
-const canadaRows = datosMaria2.filter((row) => {
-    return row.country === targetCountry;
-});
-
-// Sumamos los valores de 'avg_monthly_usd' usando .forEach()
-let totalUsd = 0;
-canadaRows.forEach((row) => {
-    totalUsd += row.avg_monthly_usd;
-});
-
-// Calculamos la media final
-const averageUsd = totalUsd / canadaRows.length;
-
-// 3. Resultado por consola
-/*
-console.log("---------------------------------------------------------");
-console.log(`Análisis de datos para el país: ${targetCountry.toUpperCase()}`);
-console.log(`Registros encontrados: ${canadaRows.length}`);
-console.log(`La media del salario mensual en USD es: ${averageUsd.toFixed(2)}`);
-console.log("---------------------------------------------------------");
-*/
+// URL de la colección de Postman (sustitúyela por la tuya cuando la publiques)
+const DOCS_URL = "https://documenter.getpostman.com/view/TU_COLECCION_AQUI";
 
 
+function loadBackendMaria(app) {
 
-
-function loadBackendMaria(app){
-    let datosMaria = [];
-    //te he cambiado el nombre arriba a tus datos y te lo he puesto con un 2 cambialo si no te gusta
-    const initialDatosMaria = datosMaria2;
     let BASE_URL_API = "/api/v1";
     let MJP_API_PATH = BASE_URL_API + "/average-monthly-wages";
 
-//tu codigo del samples (creo que hay que quitarlo luego pero por si acaso )
-app.get("/samples/MJP", (req, res) => {
-    const datos = datosMaria2; 
-    const targetCountry = "canada";
 
-    const canadaRows = datos.filter((row) => row.country === targetCountry);
-    
-    if (canadaRows.length === 0) {
-        return res.status(404).json({
-            error: "No se encontraron datos para el país especificado."
+    // ------------------------------------------
+    // LOAD INITIAL DATA
+    // ------------------------------------------
+    app.get(MJP_API_PATH + "/loadInitialData", (req, res) => {
+        db.find({}, (err, datos) => {
+            if (err) {
+                return res.status(500).json({ error: "Error consultando la base de datos." });
+            }
+            if (datos.length === 0) {
+                db.insert(datosMaria, (err, nuevosDatos) => {
+                    if (err) {
+                        return res.status(500).json({ error: "Error al insertar datos iniciales." });
+                    }
+                    nuevosDatos.forEach(d => { delete d._id; });
+                    return res.status(201).json(nuevosDatos);
+                });
+            } else {
+                return res.status(409).json({ error: "La base de datos ya contiene datos." });
+            }
         });
-    }
-
-    let totalUsd = 0;
-    canadaRows.forEach((row) => {
-        totalUsd += row.avg_monthly_usd;
     });
 
-    const averageUsd = totalUsd / canadaRows.length;
 
-    // Enviamos un objeto JSON con los resultados
-    res.status(200).json({
-        sample: "MJP",
-        country: targetCountry,
-        records_found: canadaRows.length,
-        average_monthly_usd: Number(averageUsd.toFixed(2)),
-        explanation: `La media del salario mensual en ${targetCountry} es de ${averageUsd.toFixed(2)} USD.`
+    // ------------------------------------------
+    // COLECCIÓN: GET con búsqueda por todos los campos y paginación
+    // Ejemplos:
+    //   GET /average-monthly-wages
+    //   GET /average-monthly-wages?country=canada
+    //   GET /average-monthly-wages?year=2023
+    //   GET /average-monthly-wages?currency=EUR
+    //   GET /average-monthly-wages?offset=0&limit=5
+    // ------------------------------------------
+    app.get(MJP_API_PATH, (req, res) => {
+        let query = {};
+
+        // Búsqueda por todos los campos del recurso
+        if (req.query.country)         query.country         = req.query.country;
+        if (req.query.year)            query.year            = parseInt(req.query.year);
+        if (req.query.currency)        query.currency        = req.query.currency;
+        if (req.query.avg_monthly_nc)  query.avg_monthly_nc  = parseFloat(req.query.avg_monthly_nc);
+        if (req.query.avg_monthly_usd) query.avg_monthly_usd = parseFloat(req.query.avg_monthly_usd);
+        if (req.query.exchange_rate)   query.exchange_rate   = parseFloat(req.query.exchange_rate);
+
+        // Paginación
+        let offset = parseInt(req.query.offset) || 0;
+        let limit  = parseInt(req.query.limit)  || 100;
+
+        db.find(query).skip(offset).limit(limit).exec((err, datos) => {
+            if (err) return res.status(500).json({ error: "Error en la base de datos." });
+            datos.forEach(d => { delete d._id; });
+            res.status(200).json(datos);
+        });
     });
-});
 
 
+    // COLECCIÓN: POST
+    app.post(MJP_API_PATH, (req, res) => {
+        const newData = req.body;
+
+        // Validación de campos obligatorios (400)
+        if (!newData || !newData.country || !newData.year || !newData.avg_monthly_nc ||
+            !newData.avg_monthly_usd || !newData.exchange_rate || !newData.currency) {
+            return res.status(400).json({ error: "Datos incompletos o incorrectos." });
+        }
+
+        const yearSearch = parseInt(newData.year);
+
+        // Validación de duplicados (409)
+        db.find({ country: newData.country, year: yearSearch }, (err, datos) => {
+            if (err) {
+                return res.status(500).json({ error: "Error al consultar la base de datos." });
+            }
+            if (datos.length > 0) {
+                return res.status(409).json({ error: "El recurso ya existe para ese país y año." });
+            } else {
+                newData.year = yearSearch;
+                db.insert(newData, (err, newDoc) => {
+                    if (err) {
+                        return res.status(500).json({ error: "Error al insertar en la base de datos." });
+                    }
+                    delete newDoc._id;
+                    return res.status(201).json({ message: "Recurso creado con éxito." });
+                });
+            }
+        });
+    });
 
 
-// 1. GET /loadInitialData - Carga los 10 datos si está vacío
-app.get(MJP_API_PATH + "/loadInitialData", (req, res) => {
-    if (datosMaria.length === 0) {
-        datosMaria = [...initialDatosMaria];
-        res.status(201).json(datosMaria); // 201 Created
-    } else {
-        res.status(409).json({ error: "El array ya contiene datos." }); // 409 Conflict
-    }
-});
-
-// 2. Operaciones sobre la COLECCIÓN (Lista completa)
-app.get(MJP_API_PATH, (req, res) => {
-    res.status(200).json(datosMaria); // 200 OK
-});
-
-app.post(MJP_API_PATH, (req, res) => {
-    const newData = req.body;
-    // Validación: Comprobar campos obligatorios
-    if (!newData || !newData.country || !newData.year || !newData.avg_monthly_nc || !newData.avg_monthly_usd || !newData.currency) {
-        return res.status(400).json({ error: "Datos incompletos o incorrectos." });
-    }
-    // Validación: Comprobar duplicados (409 Conflict)
-    const exists = datosMaria.some(d => d.country === newData.country && d.year === parseInt(newData.year));
-    if (exists) {
-        res.status(409).json({ error: "El recurso ya existe para ese país y año." });
-    } else {
-        datosMaria.push(newData);
-        res.status(201).json({ message: "Recurso creado con éxito." });
-    }
-});
-
-app.delete(MJP_API_PATH, (req, res) => {
-    datosMaria = [];
-    res.status(200).json({ message: "Colección eliminada correctamente." });
-});
-
-app.put(MJP_API_PATH, (req, res) => {
-    res.status(405).json({ error: "Método PUT no permitido en la lista completa." }); // 405 Method Not Allowed
-});
-// 3. Operaciones sobre RECURSOS INDIVIDUALES (/:país/:año)
-app.get(MJP_API_PATH + "/:country/:year", (req, res) => {
-    const { country, year } = req.params;
-    const resource = datosMaria.find(d => d.country === country && d.year === parseInt(year));
-    if (resource) {
-        res.status(200).json(resource);
-    } else {
-        res.status(404).json({ error: "Recurso no encontrado." }); // 404 Not Found
-    }
-});
+    // COLECCIÓN: DELETE (borra todo)
+    app.delete(MJP_API_PATH, (req, res) => {
+        db.remove({}, { multi: true }, (err, numRemoved) => {
+            if (err) {
+                return res.status(500).json({ error: "Error al borrar la base de datos." });
+            }
+            return res.status(200).json({ message: `Se han eliminado ${numRemoved} recursos.` });
+        });
+    });
 
 
-app.put(MJP_API_PATH + "/:country/:year", (req, res) => {
-    const { country, year } = req.params;
-    const body = req.body;
-    // El ID de la URL y el del JSON deben coincidir según los patrones SOS
-    if (country !== body.country || parseInt(year) !== body.year) {
-        return res.status(400).json({ error: "El ID del recurso no coincide con la URL." });
-    }
-    const index = datosMaria.findIndex(d => d.country === country && d.year === parseInt(year));
-    if (index !== -1) {
-        datosMaria[index] = body;
-        res.status(200).json({ message: "Recurso actualizado con éxito." });
-    } else {
-        res.status(404).json({ error: "Recurso no encontrado para actualizar." });
-    }
-});
-
-app.delete(MJP_API_PATH + "/:country/:year", (req, res) => {
-    const { country, year } = req.params;
-    const initialLen = datosMaria.length;
-    datosMaria = datosMaria.filter(d => !(d.country === country && d.year === parseInt(year)));
-    if (datosMaria.length < initialLen) {
-        res.status(200).json({ message: "Recurso eliminado correctamente." });
-    } else {
-        res.status(404).json({ error: "Recurso no encontrado para eliminar." });
-    }
-});
-
-app.post(MJP_API_PATH + "/:country/:year", (req, res) => {
-    res.status(405).json({ error: "No se permite POST sobre un recurso concreto." });
-});
+    // COLECCIÓN: PUT no permitido
+    app.put(MJP_API_PATH, (req, res) => {
+        res.status(405).json({ error: "Método PUT no permitido en la lista completa." });
+    });
 
 
+    // ------------------------------------------
+    // RECURSO INDIVIDUAL: /:country/:year
+    // ------------------------------------------
+
+    // GET individual
+    app.get(MJP_API_PATH + "/:country/:year", (req, res) => {
+        const { country, year } = req.params;
+        const yearNum = parseInt(year, 10);
+
+        db.findOne({ country: country, year: yearNum }, (err, resource) => {
+            if (err) {
+                return res.status(500).json({ error: "Error al consultar la base de datos." });
+            }
+            if (!resource) {
+                return res.status(404).json({ error: "Recurso no encontrado." });
+            } else {
+                delete resource._id;
+                return res.status(200).json(resource);
+            }
+        });
+    });
 
 
+    // PUT individual
+    app.put(MJP_API_PATH + "/:country/:year", (req, res) => {
+        const { country, year } = req.params;
+        const yearNum = parseInt(year, 10);
+        const body = req.body;
 
+        // Validar que el ID del body coincide con la URL (400)
+        if (
+            !body ||
+            body.country !== country ||
+            parseInt(body.year) !== yearNum
+        ) {
+            return res.status(400).json({ error: "El ID del recurso no coincide con la URL." });
+        }
+
+        delete body._id;
+
+        db.update({ country: country, year: yearNum }, body, {}, (err, numReplaced) => {
+            if (err) {
+                return res.status(500).json({ error: "Error interno al actualizar el recurso." });
+            }
+            if (numReplaced === 0) {
+                return res.status(404).json({ error: "Recurso no encontrado para actualizar." });
+            } else {
+                return res.status(200).json({ message: "Recurso actualizado con éxito." });
+            }
+        });
+    });
+
+
+    // DELETE individual
+    app.delete(MJP_API_PATH + "/:country/:year", (req, res) => {
+        const { country, year } = req.params;
+        const yearNum = parseInt(year, 10);
+
+        db.remove({ country: country, year: yearNum }, {}, (err, numRemoved) => {
+            if (err) {
+                return res.status(500).json({ error: "Error interno al intentar eliminar el recurso." });
+            }
+            if (numRemoved === 0) {
+                return res.status(404).json({ error: "Recurso no encontrado para eliminar." });
+            } else {
+                return res.status(200).json({ message: "Recurso eliminado correctamente." });
+            }
+        });
+    });
+
+
+    // POST individual no permitido
+    app.post(MJP_API_PATH + "/:country/:year", (req, res) => {
+        res.status(405).json({ error: "No se permite POST sobre un recurso concreto." });
+    });
+
+
+    // ------------------------------------------
+    // DOCS — redirige al portal de Postman
+    // ------------------------------------------
+    app.get(MJP_API_PATH + "/docs", (req, res) => {
+        res.redirect(301, DOCS_URL);
+    });
 
 }
 
