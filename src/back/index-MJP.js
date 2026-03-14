@@ -44,8 +44,10 @@ function loadBackendMaria(app) {
                 return res.status(500).json({ error: "Error consultando la base de datos." });
             }
             if (datos.length === 0) {
+                
                 db.insert(datosMaria, (err, nuevosDatos) => {
                     if (err) {
+                        console.log("ERROR AL INSERTAR:", JSON.stringify(err));
                         return res.status(500).json({ error: "Error al insertar datos iniciales." });
                     }
                     nuevosDatos.forEach(d => { delete d._id; });
