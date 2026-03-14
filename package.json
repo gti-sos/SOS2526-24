@@ -24,10 +24,10 @@
     "test-local-Isaac": "start-server-and-test start http://localhost:3000 test-international-construccion-costs",
     "test-online-Isaac": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-construccion-costs-render",
 
+    "test": "npm run test-online-Isaac",
 
-
-
-    "test": "npm run test-online-Isaac"
+    "test-average-monthly-wages": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-local.json",
+    "test-api-online-MJP-render": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-render.json"
   },
   "dependencies": {
     "body-parser": "^2.2.2",

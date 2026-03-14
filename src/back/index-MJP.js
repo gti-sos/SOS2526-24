@@ -1,5 +1,5 @@
 
-import Datastore from "nedb";
+import Datastore from "nedb/lib/datastore.js";
 
 // Datos iniciales
 const datosMaria = [
@@ -20,7 +20,7 @@ const datosMaria = [
 let db = new Datastore({ filename: "average-wages.db", autoload: true });
 
 // URL de la colección de Postman (sustitúyela por la tuya cuando la publiques)
-//const DOCS_URL = "https://documenter.getpostman.com/view/TU_COLECCION_AQUI";
+const DOCS_URL = "https://documenter.getpostman.com/view/TU_COLECCION_AQUI";
 
 
 function loadBackendMaria(app) {
@@ -28,7 +28,14 @@ function loadBackendMaria(app) {
     let BASE_URL_API = "/api/v1";
     let MJP_API_PATH = BASE_URL_API + "/average-monthly-wages";
 
+   // ------------------------------------------
+    // DOCS — redirige al portal de Postman
+    // ------------------------------------------
+    app.get(MJP_API_PATH + "/docs", (req, res) => {
+        res.redirect(301, DOCS_URL);
+    });
 
+    
     // ------------------------------------------
     // LOAD INITIAL DATA
     // ------------------------------------------
@@ -211,13 +218,7 @@ function loadBackendMaria(app) {
     });
 
 
-    // ------------------------------------------
-    // DOCS — redirige al portal de Postman
-    // ------------------------------------------
-    app.get(MJP_API_PATH + "/docs", (req, res) => {
-        res.redirect(301, DOCS_URL);
-    });
-
+ 
 }
 
 export { loadBackendMaria };
