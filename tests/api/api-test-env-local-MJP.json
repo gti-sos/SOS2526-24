@@ -1,0 +1,15 @@
+{
+  "id": "mjp-env-local-001",
+  "name": "MJP Local",
+  "values": [
+    {
+      "key": "url",
+      "value": "http://localhost:3000",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "color": null,
+  "_postman_variable_scope": "environment",
+  "_postman_exported_using": "Postman/12.1.4"
+}

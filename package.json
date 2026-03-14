@@ -26,8 +26,9 @@
 
     "test": "npm run test-online-Isaac",
 
-    "test-average-monthly-wages": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-local.json",
-    "test-api-online-MJP-render": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-render.json"
+    "test-average-monthly-wages": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-local-MJP.json",
+    "test-api-online-MJP-render": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-render-MJP.json"
+
   },
   "dependencies": {
     "body-parser": "^2.2.2",
