@@ -17,6 +17,9 @@ const datosIsaac = [
 const pais = "Canada";
 //crea nueva base de datos
 
+
+
+
 //tengo que comprobar que sea persistente con esto
 let db = new Datastore({ filename: "./src/back/international-costs.db", autoload: true })
 
@@ -27,6 +30,9 @@ function loadBackendIsaac(app){
 //rutas
 let BASE_URL_API = "/api/v1";
 let IRG_API_PATH = BASE_URL_API+"/international-construccion-costs"; 
+
+//mi url 
+const DOCS_URL = "https://documenter.getpostman.com/view/52380629/2sBXiesuH7";
 
 
 //inicializar base
@@ -267,6 +273,15 @@ app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
 
 });
 
+
+
+//redireccion hacia mi coleccion
+
+app.get(IRG_API_PATH + "/docs", (req, res) => {
+    res.redirect(301, DOCS_URL);
+});
+
+//prueba
 
 /*
 app.get("/samples/IRG", (req, res) => {
