@@ -19,7 +19,7 @@ const datosMaria = [
 let db = new Datastore({ filename: "average-wages.db", autoload: true });
 
 // URL de la colección de Postman (sustitúyela por la tuya cuando la publiques)
-const DOCS_URL = "https://documenter.getpostman.com/view/TU_COLECCION_AQUI";
+const DOCS_URL = "https://documenter.getpostman.com/view/52434605/2sBXigMDXA";
 
 
 function loadBackendMaria(app) {
