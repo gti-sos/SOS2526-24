@@ -11,3 +11,4 @@
   - https://sos2526-24.onrender.com/api/v1/average-monthly-wages (developed by María Jesús Jiménez-Espada Pallarés)
   - https://sos2526-24.onrender.com/api/v1/international-construccion-costs (developed by Isaac Rodríguez Godino)
   - https://sos2526-24.onrender.com/api/v1/recreation-culture-expenditure (developed by Elena Bejarano Periñán)
+ 
