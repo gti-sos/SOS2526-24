@@ -17,6 +17,9 @@ const datosIsaac = [
 const pais = "Canada";
 //crea nueva base de datos
 
+
+
+
 //tengo que comprobar que sea persistente con esto
 let db = new Datastore({ filename: "./src/back/international-costs.db", autoload: true })
 
@@ -27,6 +30,9 @@ function loadBackendIsaac(app){
 //rutas
 let BASE_URL_API = "/api/v1";
 let IRG_API_PATH = BASE_URL_API+"/international-construccion-costs"; 
+
+//mi url 
+const DOCS_URL = "https://documenter.getpostman.com/view/52380629/2sBXiesuH7";
 
 
 //inicializar base
@@ -62,38 +68,27 @@ app.get(IRG_API_PATH + "/loadInitialData", (req, res) => {
 //get de la base 
 // GET de la colección con BÚSQUEDA (Toronto) y PAGINACIÓN
 app.get(IRG_API_PATH, (req, res) => {
-    // 1. FILTRADO (Búsqueda)
-    // Creamos un objeto de consulta vacío
     let query = {};
 
-    // Si  ?city=Toronto, NeDB buscará solo ciudades "Toronto"
+    // Búsquedas por todos los campos
     if (req.query.country) query.country = req.query.country;
     if (req.query.city) query.city = req.query.city;
     if (req.query.year) query.year = parseInt(req.query.year);
+    
+    
+    if (req.query.cost_usd_per_m2) query.cost_usd_per_m2 = parseInt(req.query.cost_usd_per_m2);
+    if (req.query.cost_change_range) query.cost_change_range = req.query.cost_change_range;
+    if (req.query.rank) query.rank = parseInt(req.query.rank);
 
-    // 2. PAGINACIÓN
-    // Leemos limit y offset de la URL. Si no existen, ponemos valores por defecto.
     let offset = parseInt(req.query.offset) || 0; 
     let limit = parseInt(req.query.limit) || 100;
 
-    // 3. CONSULTA NEDB
-    // find(query): Filtra (ej: solo Toronto)
-    // skip(offset): Se salta los primeros N resultados (para cambiar de página)
-    // limit(limit): Solo devuelve el número de resultados pedido
     db.find(query).skip(offset).limit(limit).exec((err, datos) => {
-        if (err) {
-            return res.status(500).json({ error: "Error al consultar la base de datos." });
-        }
-
-        //quitar id
+        if (err) return res.status(500).json({ error: "Error en la base de datos." });
         datos.forEach(d => { delete d._id; });
-
-        // Devolvemos el array 
         res.status(200).json(datos);
     });
 });
-
-
 //post de la base 
 
 
@@ -267,6 +262,15 @@ app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
 
 });
 
+
+
+//redireccion hacia mi coleccion
+
+app.get(IRG_API_PATH + "/docs", (req, res) => {
+    res.redirect(301, DOCS_URL);
+});
+
+//prueba
 
 /*
 app.get("/samples/IRG", (req, res) => {

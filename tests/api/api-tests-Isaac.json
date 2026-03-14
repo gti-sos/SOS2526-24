@@ -1,0 +1,743 @@
+{
+  "info": {
+    "_postman_id": "9bbc84ed-ad75-4644-8dfd-23d7b3452746",
+    "name": "NeDB",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52380629",
+    "_collection_link": "https://go.postman.co/collection/52380629-9bbc84ed-ad75-4644-8dfd-23d7b3452746?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "inicializar base",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Validar que el código es 201\r",
+              "pm.test(\"Estado de respuesta es 201 (Carga exitosa)\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "// 2. Validar que lo que devuelve es un array\r",
+              "pm.test(\"La respuesta devuelve un array de objetos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.be.an(\"array\");\r",
+              "    pm.expect(jsonData.length).to.be.above(0);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs/loadInitialData",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs",
+            "loadInitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "inicializar base error duplicados 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "\r",
+              "pm.test(\"Status de respuesta es 409 (Conflicto por duplicado)\", function () {\r",
+              "    pm.response.to.have.status(409);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El error indica que el recurso ya existe\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.error).to.include(\"La base de datos ya contiene datos.\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs/loadInitialData",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs",
+            "loadInitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get base",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Comprobar que el servidor responde con un 200 OK\r",
+              "pm.test(\"Estado de respuesta es 200 (Éxito)\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// 2. Comprobar que la respuesta es un array (fundamental para una colección)\r",
+              "pm.test(\"La respuesta es un array\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "\r",
+              "// Si hay datos, comprobar que los campos obligatorios existen en el primer elemento\r",
+              "pm.test(\"Los elementos tienen la estructura correcta\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    if (jsonData.length > 0) {\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"country\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"year\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"city\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"cost_usd_per_m2\");\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get base toronto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Comprobar que el servidor responde con un 200 OK\r",
+              "pm.test(\"Estado de respuesta es 200 (Éxito)\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// 2. Comprobar que la respuesta es un array (fundamental para una colección)\r",
+              "pm.test(\"La respuesta es un array\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "\r",
+              "// Si hay datos, comprobar que los campos obligatorios existen en el primer elemento\r",
+              "pm.test(\"Los elementos tienen la estructura correcta\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    if (jsonData.length > 0) {\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"country\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"year\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"city\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"cost_usd_per_m2\");\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs?city=Toronto",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ],
+          "query": [
+            {
+              "key": "city",
+              "value": "Toronto"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get base toronto paginado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Comprobar que el servidor responde con un 200 OK\r",
+              "pm.test(\"Estado de respuesta es 200 (Éxito)\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// 2. Comprobar que la respuesta es un array (fundamental para una colección)\r",
+              "pm.test(\"La respuesta es un array\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "\r",
+              "// Si hay datos, comprobar que los campos obligatorios existen en el primer elemento\r",
+              "pm.test(\"Los elementos tienen la estructura correcta\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    if (jsonData.length > 0) {\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"country\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"year\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"city\");\r",
+              "        pm.expect(jsonData[0]).to.have.property(\"cost_usd_per_m2\");\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs?city=Toronto&limit=1&offset=1",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ],
+          "query": [
+            {
+              "key": "city",
+              "value": "Toronto"
+            },
+            {
+              "key": "limit",
+              "value": "1"
+            },
+            {
+              "key": "offset",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post base de datos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 201 (Creado)\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El mensaje de confirmación es correcto\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.message).to.equal(\"Recurso creado con éxito.\");\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"country\": \"xxxx\",\r\n    \"year\": 2024,\r\n    \"city\": \"xxxx\",\r\n    \"cost_usd_per_m2\": 3150.50,\r\n    \"cost_change_range\": \"6.5%\",\r\n    \"rank\": 22\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post base de datos- error 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "\r",
+              "\r",
+              "pm.test(\"Status de respuesta es 409 (Conflicto por duplicado)\", function () {\r",
+              "    pm.response.to.have.status(409);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El error indica que el recurso ya existe\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.error).to.include(\"El recurso ya existe para ese país, año y ciudad.\");\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"country\": \"Canada\",\r\n    \"year\": 2024,\r\n    \"city\": \"Toronto\",\r\n    \"cost_usd_per_m2\": 3150.50,\r\n    \"cost_change_range\": \"6.5%\",\r\n    \"rank\": 22\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post base de datos- error 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "\r",
+              "\r",
+              "\r",
+              "\r",
+              "pm.test(\"Status de respuesta es 400 (Bad Request)\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El mensaje de error indica datos incompletos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.error).to.include(\"Datos incompletos o incorrectos.\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"country\": \"Canada\",\r\n    \"year\": 2024,\r\n    \"city\": \"Toronto\",\r\n    \"cost_usd_per_m2\": 3150.50,\r\n    \"cost_change_range\": \"6.5%\"\r\n    \r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get individual",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Verificar éxito\r",
+              "pm.test(\"Status es 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// 2. Verificar que los datos coinciden con la URL\r",
+              "pm.test(\"El recurso devuelto es el correcto\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    // Comprobamos que el país coincide con lo que pedimos (ej: Canada)\r",
+              "    pm.expect(jsonData.country).to.eql(pm.request.url.path[3]); \r",
+              "    pm.expect(jsonData.year).to.be.a(\"number\");\r",
+              "});\r",
+              "\r",
+              "// 3. Verificar que no hay campos internos de NeDB\r",
+              "pm.test(\"No existe el campo _id\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData._id).to.be.undefined;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs/Canada/2024/Toronto",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs",
+            "Canada",
+            "2024",
+            "Toronto"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put individual",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Verificar éxito de la actualización\r",
+              "pm.test(\"Status es 200 (Actualizado)\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// 2. Verificar mensaje de confirmación\r",
+              "pm.test(\"El mensaje de respuesta es correcto\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.message).to.eql(\"Recurso actualizado con éxito.\");\r",
+              "});\r",
+              "\r",
+              "// 3. Verificar idempotencia (Opcional)\r",
+              "// Si lanzas el PUT dos veces, el resultado debe seguir siendo 200 con el mismo estado.\r",
+              "pm.test(\"La respuesta es coherente para re-ejecución\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"country\": \"Canada\",\r\n    \"year\": 2024,\r\n    \"city\": \"Toronto\",\r\n    \"cost_usd_per_m2\": 3150.50,\r\n    \"cost_change_range\": \"6.5%\",\r\n    \"rank\": 22\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs/Canada/2024/Toronto",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs",
+            "Canada",
+            "2024",
+            "Toronto"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete individual",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Comprobar que el borrado fue exitoso\r",
+              "pm.test(\"Status es 200 (Eliminado)\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// 2. Comprobar el mensaje de confirmación\r",
+              "pm.test(\"El mensaje confirma la eliminación\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.message).to.eql(\"Recurso eliminado correctamente.\");\r",
+              "});\r",
+              "\r",
+              "// 3. Opcional: Test de error 404 (si ejecutas este DELETE dos veces seguidas)\r",
+              "/*\r",
+              "pm.test(\"Si ya no existe, devuelve 404\", function () {\r",
+              "    if (pm.response.code === 404) {\r",
+              "        pm.expect(pm.response.json().error).to.include(\"no encontrado\");\r",
+              "    }\r",
+              "});\r",
+              "*/"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"country\": \"Germany\",\r\n    \"year\": 2024,\r\n    \"city\": \"Berlin\",\r\n    \"cost_usd_per_m2\": 4200,\r\n    \"cost_change_range\": \"10%\",\r\n    \"rank\": 12\r\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs/xxxx/2024/xxxx",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs",
+            "xxxx",
+            "2024",
+            "xxxx"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post indivdual (no se puede )",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test para verificar la restricción de seguridad 405\r",
+              "pm.test(\"Status es 405 (Method Not Allowed)\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El mensaje de error es el definido en el código\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.error).to.include(\"No se permite POST sobre un recurso concreto, error 405.\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs/Canada/2024/Toronto",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs",
+            "Canada",
+            "2024",
+            "Toronto"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put base (no se puede)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Comprobar que el servidor rechaza la petición con un 405\r",
+              "pm.test(\"Status de respuesta es 405 (Method Not Allowed)\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});\r",
+              "\r",
+              "// 2. Comprobar que el mensaje de error es el correcto\r",
+              "pm.test(\"El mensaje de error indica que el PUT en colección está prohibido\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.error).to.include(\"Método PUT no permitido en la lista completa, error 405.\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"country\": \"Germany\",\r\n    \"year\": 2024,\r\n    \"city\": \"Berlin\",\r\n    \"cost_usd_per_m2\": 4200,\r\n    \"cost_change_range\": \"10%\",\r\n    \"rank\": 12\r\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete base",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Validar que el borrado masivo fue exitoso\r",
+              "pm.test(\"Status de respuesta es 200 (Colección borrada)\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El mensaje confirma la eliminación de recursos\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    \r",
+              "    // Verificamos que exista la propiedad 'message'\r",
+              "    pm.expect(jsonData).to.have.property('message');\r",
+              "    \r",
+              "    // Verificamos que el texto contenga la palabra 'eliminado'\r",
+              "    pm.expect(jsonData.message).to.include(\"Se han eliminado\");\r",
+              "    \r",
+              "    // Verifica que el mensaje mencione un número de recursos\r",
+              "    pm.expect(jsonData.message).to.match(/\\d+/); \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"country\": \"Germany\",\r\n    \"year\": 2024,\r\n    \"city\": \"Berlin\",\r\n    \"cost_usd_per_m2\": 4200,\r\n    \"cost_change_range\": \"10%\",\r\n    \"rank\": 12\r\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
