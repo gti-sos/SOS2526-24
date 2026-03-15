@@ -1,4 +1,10 @@
 
+let BASE_URL_API = "/api/v1";
+let EBP_API_PATH = BASE_URL_API + "/recreation-culture-expenditure"; 
+
+//función
+function loadBackendElena(app){
+
 //Declaración de los datos
 const datos = [
   { year: 2024, country: "Canada", recreation_exp: 127727000000, total_exp: 1654821000000, percentage: 7.72, population: 41288599, per_capita: 3093.52 },
@@ -190,6 +196,7 @@ app.get("/samples/EBP", (req, res) => {
         message: `Media del gasto por hogar en ocio en ${countryTarget}: ${resultado}`
     });
 });
+}
 }
 
 export {loadBackendElena}
