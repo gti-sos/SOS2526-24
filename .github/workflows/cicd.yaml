@@ -1,9 +1,9 @@
 name: CI_CD
 on:
   push:
-    branches: [ Isaac ]
+    branches: [ main ]
   pull_request:
-    branches: [ Isaac ]
+    branches: [ main ]
 
 jobs:
   test:
