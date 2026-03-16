@@ -16,7 +16,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    
+
     "test-international-construccion-costs": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-local.json",
     "test-api-online-construccion-costs-render": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-render.json",
     "test-local-Isaac": "start-server-and-test start http://localhost:3000 test-international-construccion-costs",
@@ -32,7 +32,7 @@
     "test-local-EBP": "start-server-and-test start http://localhost:3000 test-recreation-culture-expenditure",
     "test-online-EBP": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-EBP-render",
 
-    "test": "npm run test-online-Isaac && npm run test-online-MJP && npm run test-online-EBP"
+    "test": "npm run test-local-Isaac && npm run test-local-MJP && npm run test-local-EBP"
   },
   "dependencies": {
     "body-parser": "^2.2.2",
