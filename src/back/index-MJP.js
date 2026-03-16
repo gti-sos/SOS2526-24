@@ -16,7 +16,10 @@ const datosMaria = [
 ];
 
 // Base de datos NeDB persistente
-let db = new Datastore({ filename: "average-wages.db", autoload: true });
+let db = new Datastore({ 
+    filename: "./src/back/average-wages.db", 
+    autoload: true 
+});
 
 // URL de la colección de Postman
 const DOCS_URL = "https://documenter.getpostman.com/view/52434605/2sBXigMDXA";

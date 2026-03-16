@@ -8,6 +8,58 @@
   },
   "item": [
     {
+      "name": "delete base inicial",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// 1. Validar que el borrado masivo fue exitoso\r",
+              "pm.test(\"Status de respuesta es 200 (Colección borrada)\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El mensaje confirma la eliminación de recursos\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    \r",
+              "    // Verificamos que exista la propiedad 'message'\r",
+              "    pm.expect(jsonData).to.have.property('message');\r",
+              "    \r",
+              "    // Verificamos que el texto contenga la palabra 'eliminado'\r",
+              "    pm.expect(jsonData.message).to.include(\"Se han eliminado\");\r",
+              "    \r",
+              "    // Verifica que el mensaje mencione un número de recursos\r",
+              "    pm.expect(jsonData.message).to.match(/\\d+/); \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"country\": \"Germany\",\r\n    \"year\": 2024,\r\n    \"city\": \"Berlin\",\r\n    \"cost_usd_per_m2\": 4200,\r\n    \"cost_change_range\": \"10%\",\r\n    \"rank\": 12\r\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "inicializar base",
       "event": [
         {
@@ -478,6 +530,59 @@
             "Canada",
             "2024",
             "Toronto"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get individual 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"El código de estado es 404\", function () {\r",
+              "    // Aquí verificamos el código HTTP real\r",
+              "    pm.response.to.have.status(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El cuerpo contiene el mensaje de error correcto\", function () {\r",
+              "    // Aquí verificamos el JSON que envías con res.json()\r",
+              "    var jsonData = pm.response.json();\r",
+              "    \r",
+              "    // Comprobamos que la propiedad 'error' sea exactamente la que definiste en Express\r",
+              "    pm.expect(jsonData.error).to.eql(\"Recurso no encontrado. error 404\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/international-construccion-costs/Canada/2024/Toront",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "international-construccion-costs",
+            "Canada",
+            "2024",
+            "Toront"
           ]
         }
       },
