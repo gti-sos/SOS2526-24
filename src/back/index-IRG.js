@@ -265,33 +265,6 @@ app.post(IRG_API_PATH + "/:country/:year/:city", (req, res) => {
 app.get(IRG_API_PATH + "/docs", (req, res) => {
     res.redirect(301, DOCS_URL);
 });
-
-//prueba
-
-/*
-app.get("/samples/IRG", (req, res) => {
-    const pais = "Canada";
-
-    const filtrados = datosIsaac.filter(d => d.country === pais);
-
-    if (filtrados.length === 0) {
-        return res.send("No hay datos para ese país.");
-    }
-
-    const listaCiudades = [];
-    filtrados.forEach(d => {
-        if (!listaCiudades.includes(d.city)) {
-            listaCiudades.push(d.city);
-        }
-    });
-
-    const mediaCostoM2 = filtrados.reduce((acum, valor) => acum + valor.cost_usd_per_m2, 0) / filtrados.length;
-
-    const mensaje = `Media del costo m2 en ${pais} tomando las ciudades ${listaCiudades.join(", ")}: ${mediaCostoM2.toFixed(2)} USD`;
-    
-    res.send(`<h1>Resultado del Algoritmo (IRG)</h1><p>${mensaje}</p>`);
-});
-*/
 }
 
 
