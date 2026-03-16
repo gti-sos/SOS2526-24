@@ -1,0 +1,618 @@
+{
+  "info": {
+    "_postman_id": "6e03c761-9fcb-4b7c-9c8d-0f6de64b2e37",
+    "name": "SOS2526-24 PRUEBAS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52412956"
+  },
+  "item": [
+    {
+      "name": "DELETE /recreation-culture-expenditure - 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 38000000,\r\n  \"recreation_per_capita\": 2894.74\r\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /LoadInitialData - 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/loadinitialData",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "loadinitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /LoadInitialData - 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {\r",
+              "    pm.response.to.have.status(409);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/loadinitialData",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "loadinitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /recreation-culture-expenditure - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure?country=Canada&limit=2&offset=0",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure"
+          ],
+          "query": [
+            {
+              "key": "country",
+              "value": "Canada"
+            },
+            {
+              "key": "limit",
+              "value": "2"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /recreation-culture-expenditure/Canada/2021 - 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/Canada/2021",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "Canada",
+            "2021"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT /recreation-culture-expenditure/Canada/2021 - 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 35000000,\r\n  \"recreation_per_capita\": 3142.85\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/Canada/2021",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "Canada",
+            "2021"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /recreation-culture-expenditure - 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 38000000,\r\n  \"recreation_per_capita\": 2894.74\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /recreation-culture-expenditure - 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {\r",
+              "    pm.response.to.have.status(409);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 38000000,\r\n  \"recreation_per_capita\": 2894.74\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /recreation-culture-expenditure/Canada/2024 - 405",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2024,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 1,\r\n  \"total_household_consumption\": 1,\r\n  \"recreation_share\": 1,\r\n  \"population\": 1,\r\n  \"recreation_per_capita\": 1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/Canada/2024",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "Canada",
+            "2024"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /recreation-culture-expenditure/Canada/2021 - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/Canada/2021",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "Canada",
+            "2021"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT /recreation-culture-expenditure/Canada/2021 - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 35000000,\r\n  \"recreation_per_capita\": 3142.85\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/Canada/2021",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "Canada",
+            "2021"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT /recreation-culture-expenditure - 405 Copy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 38000000,\r\n  \"recreation_per_capita\": 2894.74\r\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE /recreation-culture-expenditure/Canada/2021 - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 35000000,\r\n  \"recreation_per_capita\": 3142.85\r\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/Canada/2021",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "Canada",
+            "2021"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE /recreation-culture-expenditure/Canada/2021 - 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 35000000,\r\n  \"recreation_per_capita\": 3142.85\r\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure/Canada/2021",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure",
+            "Canada",
+            "2021"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE /recreation-culture-expenditure - 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 38000000,\r\n  \"recreation_per_capita\": 2894.74\r\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

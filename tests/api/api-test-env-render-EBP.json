@@ -1,0 +1,16 @@
+{
+	"id": "d36c69a1-557f-4f9b-aa29-ba285ad0b6c9",
+	"name": "render",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "https://sos2526-24.onrender.com",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"color": null,
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2026-03-16T07:25:54.966Z",
+	"_postman_exported_using": "Postman/12.2.0-260316-0232"
+}
