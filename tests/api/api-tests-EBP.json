@@ -15,6 +15,11 @@
             "exec": [
               "pm.test(\"Status code is 404\", function () {\r",
               "    pm.response.to.have.status(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -53,6 +58,11 @@
             "exec": [
               "pm.test(\"Status code is 201\", function () {\r",
               "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve un array con datos\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.be.an(\"array\").and.not.empty;\r",
               "});"
             ],
             "type": "text/javascript",
@@ -88,6 +98,11 @@
             "exec": [
               "pm.test(\"Status code is 409\", function () {\r",
               "    pm.response.to.have.status(409);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -123,6 +138,20 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve un array\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Si hay datos, el primer elemento tiene country\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    if (data.length > 0) {\r",
+              "        pm.expect(data[0]).to.have.property(\"country\");\r",
+              "    } else {\r",
+              "        pm.expect(data.length).to.eql(0);\r",
+              "    }\r",
               "});"
             ],
             "type": "text/javascript",
@@ -174,6 +203,11 @@
             "exec": [
               "pm.test(\"Status code is 404\", function () {\r",
               "    pm.response.to.have.status(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -210,6 +244,11 @@
             "exec": [
               "pm.test(\"Status code is 404\", function () {\r",
               "    pm.response.to.have.status(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -247,6 +286,57 @@
       "response": []
     },
     {
+      "name": "POST /recreation-culture-expenditure - 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 38000000\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://sos2526-24.onrender.com/api/v1/recreation-culture-expenditure",
+          "protocol": "https",
+          "host": [
+            "sos2526-24",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "POST /recreation-culture-expenditure - 201",
       "event": [
         {
@@ -255,6 +345,17 @@
             "exec": [
               "pm.test(\"Status code is 201\", function () {\r",
               "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve el country del recurso creado\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"country\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El year devuelto coincide con el enviado\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    const body = JSON.parse(pm.request.body.raw);\r",
+              "    pm.expect(data.year).to.eql(body.year);\r",
               "});"
             ],
             "type": "text/javascript",
@@ -298,6 +399,11 @@
             "exec": [
               "pm.test(\"Status code is 409\", function () {\r",
               "    pm.response.to.have.status(409);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -341,6 +447,11 @@
             "exec": [
               "pm.test(\"Status code is 405\", function () {\r",
               "    pm.response.to.have.status(405);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -386,6 +497,16 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve el país correcto\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data.country).to.eql(\"Canada\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve el año correcto\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data.year).to.eql(2021);\r",
               "});"
             ],
             "type": "text/javascript",
@@ -422,6 +543,11 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve mensaje de éxito\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"message\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -467,6 +593,11 @@
             "exec": [
               "pm.test(\"Status code is 405\", function () {\r",
               "    pm.response.to.have.status(405);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -505,6 +636,11 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve mensaje de borrado\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"message\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -545,6 +681,11 @@
             "exec": [
               "pm.test(\"Status code is 404\", function () {\r",
               "    pm.response.to.have.status(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve campo error\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"error\");\r",
               "});"
             ],
             "type": "text/javascript",
@@ -585,6 +726,11 @@
             "exec": [
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Devuelve cuántos elementos ha borrado\", function () {\r",
+              "    const data = pm.response.json();\r",
+              "    pm.expect(data).to.have.property(\"deleted\");\r",
               "});"
             ],
             "type": "text/javascript",
