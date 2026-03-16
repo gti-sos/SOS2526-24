@@ -68,45 +68,107 @@ function loadBackendElena(app) {
 
   // ########### DATOS ##############
 
-  // GET colección completa, por país o por año y paginación
+  // ---- GET colección completa, busquedas por todos los recursos y paginación
   app.get(EBP_API_PATH, (req, res) => {
-    let query = {};
+  let query = {};
 
-    const hasCountry = req.query.country !== undefined;
-    const hasYear = req.query.year !== undefined;
+  // Búsqueda exacta por campos de texto
+  if (req.query.country !== undefined) {
+    query.country = String(req.query.country);
+  }
 
-    // Si mandan country y year a la vez, no lo permites aquí
-    if (hasCountry && hasYear) {
-      return res.status(400).json({
-        error: "No se permite filtrar por country y year a la vez en la colección. Usa /api/v1/recreation-culture-expenditure/:country/:year"
-      });
+  // Búsqueda exacta o por rangos en campos numéricos
+  // YEAR
+  if (req.query.year !== undefined) {
+    query.year = parseInt(req.query.year);
+  } else if (req.query.year_gte !== undefined || req.query.year_lte !== undefined) {
+    query.year = {};
+    if (req.query.year_gte !== undefined) query.year.$gte = parseInt(req.query.year_gte);
+    if (req.query.year_lte !== undefined) query.year.$lte = parseInt(req.query.year_lte);
+  }
+
+  // RECREATION VALUE
+  if (req.query.recreation_value !== undefined) {
+    query.recreation_value = Number(req.query.recreation_value);
+  } else if (
+    req.query.recreation_value_gte !== undefined ||
+    req.query.recreation_value_lte !== undefined
+  ) {
+    query.recreation_value = {};
+    if (req.query.recreation_value_gte !== undefined) query.recreation_value.$gte = Number(req.query.recreation_value_gte);
+    if (req.query.recreation_value_lte !== undefined) query.recreation_value.$lte = Number(req.query.recreation_value_lte);
+  }
+
+  // TOTAL HOUSEHOLD CONSUMPTION
+  if (req.query.total_household_consumption !== undefined) {
+    query.total_household_consumption = Number(req.query.total_household_consumption);
+  } else if (
+    req.query.total_household_consumption_gte !== undefined ||
+    req.query.total_household_consumption_lte !== undefined
+  ) {
+    query.total_household_consumption = {};
+    if (req.query.total_household_consumption_gte !== undefined) {
+      query.total_household_consumption.$gte = Number(req.query.total_household_consumption_gte);
+    }
+    if (req.query.total_household_consumption_lte !== undefined) {
+      query.total_household_consumption.$lte = Number(req.query.total_household_consumption_lte);
+    }
+  }
+
+  // RECREATION SHARE
+  if (req.query.recreation_share !== undefined) {
+    query.recreation_share = Number(req.query.recreation_share);
+  } else if (
+    req.query.recreation_share_gte !== undefined ||
+    req.query.recreation_share_lte !== undefined
+  ) {
+    query.recreation_share = {};
+    if (req.query.recreation_share_gte !== undefined) query.recreation_share.$gte = Number(req.query.recreation_share_gte);
+    if (req.query.recreation_share_lte !== undefined) query.recreation_share.$lte = Number(req.query.recreation_share_lte);
+  }
+
+  // POPULATION
+  if (req.query.population !== undefined) {
+    query.population = Number(req.query.population);
+  } else if (
+    req.query.population_gte !== undefined ||
+    req.query.population_lte !== undefined
+  ) {
+    query.population = {};
+    if (req.query.population_gte !== undefined) query.population.$gte = Number(req.query.population_gte);
+    if (req.query.population_lte !== undefined) query.population.$lte = Number(req.query.population_lte);
+  }
+
+  // RECREATION PER CAPITA
+  if (req.query.recreation_per_capita !== undefined) {
+    query.recreation_per_capita = Number(req.query.recreation_per_capita);
+  } else if (
+    req.query.recreation_per_capita_gte !== undefined ||
+    req.query.recreation_per_capita_lte !== undefined
+  ) {
+    query.recreation_per_capita = {};
+    if (req.query.recreation_per_capita_gte !== undefined) {
+      query.recreation_per_capita.$gte = Number(req.query.recreation_per_capita_gte);
+    }
+    if (req.query.recreation_per_capita_lte !== undefined) {
+      query.recreation_per_capita.$lte = Number(req.query.recreation_per_capita_lte);
+    }
+  }
+
+  // Paginación
+  let limit = req.query.limit ? parseInt(req.query.limit) : 0;
+  let offset = req.query.offset ? parseInt(req.query.offset) : 0;
+
+  db.find(query).skip(offset).limit(limit).exec((err, docs) => {
+    if (err) {
+      return res.status(500).json({ error: "Error en la base de datos." });
     }
 
-    // Solo por país
-    if (hasCountry) {
-      query.country = String(req.query.country);
-    }
-
-    // Solo por año
-    if (hasYear) {
-      query.year = parseInt(req.query.year);
-    }
-
-    //PAGINACIÓN
-    let limit = req.query.limit ? parseInt(req.query.limit) : 0;
-    let offset = req.query.offset ? parseInt(req.query.offset) : 0;
-
-    db.find(query).skip(offset).limit(limit).exec((err, docs) => {
-      if (err) {
-        return res.status(500).json({ error: "Error en la base de datos." });
-      }
-
-      const cleanDocs = docs.map(sanitize);
-      return res.status(200).json(cleanDocs);
-    });
+    return res.status(200).json(sanitizeArray(docs));
   });
+});
 
-  // POST datos codigo 400
+  // ---- POST datos codigo 400
   app.post(EBP_API_PATH, (req, res) => {
     const newData = req.body;
 
@@ -159,26 +221,31 @@ function loadBackendElena(app) {
     });
   });
 
-  // DELETE datos codigo 200
+  // ---- DELETE datos codigo 200 y 404
   app.delete(EBP_API_PATH, (req, res) => {
-    //Borrado de la base de datos
-    db.remove({}, { multi: true }, (err, numRemoved) => {
-      if (err) return res.status(500).json({ error: "Error borrando datos." });
+  db.remove({}, { multi: true }, (err, numRemoved) => {
+    if (err) {
+      return res.status(500).json({ error: "Error borrando datos." });
+    }
 
-      res.status(200).json({
-        message: "Datos eliminados correctamente.",
-        deleted: numRemoved
-      });
+    if (numRemoved === 0) {
+      return res.status(404).json({ error: "No hay datos para borrar." });
+    }
+
+    return res.status(200).json({
+      message: "Datos eliminados correctamente.",
+      deleted: numRemoved
     });
   });
+});
 
-  // PUT datos no permitido
+  // ---- PUT datos no permitido
   app.put(EBP_API_PATH, (req, res) => {
     res.status(405).json({ error: "Método PUT no permitido en los datos." });
   });
 
   // ########### RECURSOS INDIVIDUALES ##############
-  // GET recurso codigo 200
+  // ---- GET recurso codigo 200
   app.get(EBP_API_PATH + "/:country/:year", (req, res) => {
     const country = String(req.params.country);
     const year = parseInt(req.params.year);
@@ -191,7 +258,7 @@ function loadBackendElena(app) {
     });
   });
 
-  // PUT recurso codigo 400
+  // ---- PUT recurso codigo 400
   app.put(EBP_API_PATH + "/:country/:year", (req, res) => {
     const country = String(req.params.country);
     const year = parseInt(req.params.year);
@@ -241,7 +308,7 @@ function loadBackendElena(app) {
     });
   });
 
-  // DELETE recurso codigo 200
+  // ---- DELETE recurso codigo 200
   app.delete(EBP_API_PATH + "/:country/:year", (req, res) => {
     const country = String(req.params.country);
     const year = parseInt(req.params.year);
@@ -257,7 +324,7 @@ function loadBackendElena(app) {
     });
   });
 
-  // POST recurso no permitido
+  // ---- POST recurso no permitido
   app.post(EBP_API_PATH + "/:country/:year", (req, res) => {
     res
       .status(405)
