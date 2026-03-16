@@ -1,5 +1,5 @@
 import express from "express";
-//import bodyParser from "body-parser";
+import bodyParser from "body-parser";
 
 // ---- IMPORTACIÓN DE MÓDULOS (modularizados correctamente) ----
 import  {loadBackendIsaac} from "./src/back/index-IRG.js"; // MODULO ISAAC
