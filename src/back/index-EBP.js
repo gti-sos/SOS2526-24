@@ -4,6 +4,8 @@ import dataStore from "nedb";
 // Constantes de RUTAS
 let BASE_URL_API = "/api/v1";
 let EBP_API_PATH = BASE_URL_API + "/recreation-culture-expenditure";
+// Ruta /docs
+const DOCS_URL= "https://documenter.getpostman.com/view/52412956/2sBXigMtQf";
 
 //VARIABLE BASE DE DATOS (en memoria)
 let db = new dataStore({
@@ -330,6 +332,12 @@ function loadBackendElena(app) {
       .status(405)
       .json({ error: "No se permite POST sobre un recurso concreto." });
   });
+
+  app.get(EBP_API_PATH + "/docs", (req, res) => {
+    res.redirect(301, DOCS_URL);
+});
+
+
 }
 
 export {loadBackendElena};
