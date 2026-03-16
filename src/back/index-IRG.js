@@ -17,14 +17,10 @@ const datosIsaac = [
 const pais = "Canada";
 //crea nueva base de datos
 
-
-
-
 //tengo que comprobar que sea persistente con esto
 let db = new Datastore({ filename: "./src/back/international-costs.db", autoload: true })
 
-
-
+//funcion
 function loadBackendIsaac(app){
    
 //rutas
