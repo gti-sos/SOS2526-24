@@ -320,12 +320,10 @@
           }
         },
         "url": {
+          
           "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
-          "protocol": "https",
           "host": [
-            "sos2526-24",
-            "onrender",
-            "com"
+            "{{base_url}}"
           ],
           "path": [
             "api",
