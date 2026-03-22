@@ -320,7 +320,7 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-24.onrender.com/api/v1/recreation-culture-expenditure",
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
           "protocol": "https",
           "host": [
             "sos2526-24",
