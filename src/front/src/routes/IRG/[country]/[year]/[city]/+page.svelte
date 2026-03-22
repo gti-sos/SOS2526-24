@@ -1,4 +1,5 @@
 <script>
+import { onMount } from 'svelte';
     import { page } from '$app/stores';
     let { country, year, city } = $page.params;
     

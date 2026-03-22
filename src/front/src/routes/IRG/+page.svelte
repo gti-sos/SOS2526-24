@@ -1,4 +1,5 @@
 <script>
+import { onMount } from 'svelte';
     let datos = $state([]);
     let nuevoDato = $state({ country: "", year: "", city: "", cost_usd_per_m2: "", cost_change_range: "", rank: "" });
     let mensaje = $state("");
@@ -53,7 +54,9 @@
         }
     }
 
-    getDatos();
+    onMount(() => {
+        getDatos();
+    });
 </script>
 
 <h1>Gestión de Costes de Construcción</h1>
