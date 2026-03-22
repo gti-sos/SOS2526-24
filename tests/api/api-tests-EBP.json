@@ -320,6 +320,7 @@
           }
         },
         "url": {
+          
           "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
           "host": [
             "{{base_url}}"

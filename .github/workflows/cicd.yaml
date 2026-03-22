@@ -11,7 +11,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Install dependencies
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20  # Aseguramos que use la misma versión que tú
+
+      - name: Install root dependencies
         run: npm install
+
+      - name: Build Frontend
+        run: |
+          cd src/front
+          npm install
+          npm run build
+          cd ../..
+
       - name: Test
         run: npm test
