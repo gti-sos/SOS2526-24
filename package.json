@@ -28,6 +28,8 @@
     "test-api-online-EBP-render": "npx newman run tests/api/api-tests-EBP.json -e tests/api/api-test-env-render-EBP.json",
     "test-local-EBP": "start-server-and-test start http://localhost:3000 test-recreation-culture-expenditure",
     "test-online-EBP": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-EBP-render",
+    "build": "cd src/front && npm run build",
+    "dev-front": "cd src/front &&  npm run dev -- --open",
     "test": "npm run test-local-Isaac && npm run test-local-MJP && npm run test-local-EBP"
   },
   "dependencies": {
