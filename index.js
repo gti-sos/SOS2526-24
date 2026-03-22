@@ -6,7 +6,7 @@ import  {loadBackendIsaac} from "./src/back/index-IRG.js"; // MODULO ISAAC
 import {loadBackendMaria} from "./src/back/index-MJP.js"; //MODULO MARIA
 import {loadBackendElena} from "./src/back/index-EBP.js"; //MODULO ELENA
 import cors from 'cors';
-import {handler} from './src/front/svelte-app/build/handler.js';
+import {handler} from './src/front/build/handler.js';
 
 const app = express();
 app.use(cors());

@@ -15,7 +15,7 @@ To recreate this project with the same configuration:
 
 ```sh
 # recreate this project
-npx sv@0.12.8 create --template minimal --types jsdoc --add prettier eslint sveltekit-adapter="adapter:node" --install npm src/front/svelte-app
+npx sv@0.12.8 create --template minimal --types jsdoc --add prettier eslint sveltekit-adapter="adapter:node" --install npm src/front
 ```
 
 ## Developing
