@@ -13,16 +13,16 @@
       member: 'María Jesús Jiménez-Espada Pallarés',
       resource: 'average-monthly-wages',
       frontend: '/MJP',
-      api: '/api/v1/average-monthly-wages',
-      docs: '/api/v1/average-monthly-wages/docs'
+      api: '/api/v2/average-monthly-wages',
+      docs: '/api/v2/average-monthly-wages/docs'
     },
     {
       short: 'IRG',
       member: 'Isaac Rodríguez Godino',
       resource: 'international-construction-costs',
       frontend: '/IRG',
-      api: '/api/v1/international-construction-costs',
-      docs: '/api/v1/international-construction-costs/docs'
+      api: '/api/v2/international-construccion-costs',
+      docs: '/api/v2/international-construccion-costs/docs'
     },
     {
       short: 'EBP',

@@ -1,0 +1,731 @@
+{
+  "info": {
+    "_postman_id": "mjp-collection-001",
+    "name": "MJP - average-monthly-wages",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "DELETE base (limpiar antes)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 200 (Colección borrada)\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"El mensaje confirma la eliminación de recursos\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "    pm.expect(jsonData.message).to.include(\"Se han eliminado\");",
+              "    pm.expect(jsonData.message).to.match(/\\d+/);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "inicializar base",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 201 (Carga exitosa)\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"La respuesta devuelve un array de objetos\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "    pm.expect(jsonData.length).to.eql(10);",
+              "});",
+              "",
+              "pm.test(\"No existe el campo _id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData[0]._id).to.be.undefined;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/loadInitialData",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "loadInitialData"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "inicializar base error duplicados 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 409 (Conflicto por duplicado)\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test(\"El error indica que la base ya contiene datos\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"La base de datos ya contiene datos.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/loadInitialData",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "loadInitialData"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get base",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 200 (Éxito)\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"La respuesta es un array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "});",
+              "",
+              "pm.test(\"Los elementos tienen la estructura correcta\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.length > 0) {",
+              "        pm.expect(jsonData[0]).to.have.property(\"country\");",
+              "        pm.expect(jsonData[0]).to.have.property(\"year\");",
+              "        pm.expect(jsonData[0]).to.have.property(\"avg_monthly_nc\");",
+              "        pm.expect(jsonData[0]).to.have.property(\"avg_monthly_usd\");",
+              "        pm.expect(jsonData[0]).to.have.property(\"exchange_rate\");",
+              "        pm.expect(jsonData[0]).to.have.property(\"currency\");",
+              "    }",
+              "});",
+              "",
+              "pm.test(\"No existe el campo _id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.length > 0) {",
+              "        pm.expect(jsonData[0]._id).to.be.undefined;",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get base filtrado por país",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 200 (Éxito)\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"La respuesta es un array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "});",
+              "",
+              "pm.test(\"Todos los resultados son de canada\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    jsonData.forEach(function(item) {",
+              "        pm.expect(item.country).to.eql(\"canada\");",
+              "    });",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages?country=canada",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"],
+          "query": [{ "key": "country", "value": "canada" }]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get base paginado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 200 (Éxito)\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"La respuesta es un array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "});",
+              "",
+              "pm.test(\"La paginación devuelve máximo 3 elementos\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.length).to.be.at.most(3);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages?offset=0&limit=3",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"],
+          "query": [
+            { "key": "offset", "value": "0" },
+            { "key": "limit", "value": "3" }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post base de datos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 201 (Creado)\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"El mensaje de confirmación es correcto\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.equal(\"Recurso creado con éxito.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"year\": 2023,\n    \"country\": \"france\",\n    \"avg_monthly_nc\": 3200.0,\n    \"avg_monthly_usd\": 3450.0,\n    \"exchange_rate\": 0.928,\n    \"currency\": \"EUR\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post base de datos - error 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 409 (Conflicto por duplicado)\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test(\"El error indica que el recurso ya existe\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"El recurso ya existe para ese país y año.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"year\": 2024,\n    \"country\": \"canada\",\n    \"avg_monthly_nc\": 9999.0,\n    \"avg_monthly_usd\": 9999.0,\n    \"exchange_rate\": 1.3,\n    \"currency\": \"CAD\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post base de datos - error 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 400 (Bad Request)\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"El mensaje de error indica datos incompletos\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"Datos incompletos o incorrectos.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"country\": \"spain\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get individual",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status es 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"El recurso devuelto es el correcto\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.country).to.eql(\"canada\");",
+              "    pm.expect(jsonData.year).to.eql(2024);",
+              "    pm.expect(jsonData).to.have.property(\"avg_monthly_usd\");",
+              "    pm.expect(jsonData).to.have.property(\"currency\");",
+              "});",
+              "",
+              "pm.test(\"No existe el campo _id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData._id).to.be.undefined;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/canada/2024",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "canada", "2024"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get individual error 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status es 404 (No encontrado)\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"El mensaje de error es correcto\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"Recurso no encontrado.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/xyz/9999",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "xyz", "9999"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put individual",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status es 200 (Actualizado)\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"El mensaje de respuesta es correcto\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.eql(\"Recurso actualizado con éxito.\");",
+              "});",
+              "",
+              "pm.test(\"La respuesta es coherente para re-ejecución\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"year\": 2024,\n    \"country\": \"canada\",\n    \"avg_monthly_nc\": 9999.9,\n    \"avg_monthly_usd\": 8888.8,\n    \"exchange_rate\": 1.4,\n    \"currency\": \"CAD\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/canada/2024",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "canada", "2024"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put individual error 400 (ID no coincide)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status es 400 (Bad Request)\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"El error indica que el ID no coincide\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"El ID del recurso no coincide con la URL.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"year\": 1999,\n    \"country\": \"spain\",\n    \"avg_monthly_nc\": 9999.9,\n    \"avg_monthly_usd\": 8888.8,\n    \"exchange_rate\": 0.9,\n    \"currency\": \"EUR\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/canada/2024",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "canada", "2024"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put individual error 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status es 404 (No encontrado)\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"El error indica recurso no encontrado\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"Recurso no encontrado para actualizar.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"year\": 9999,\n    \"country\": \"xyz\",\n    \"avg_monthly_nc\": 100.0,\n    \"avg_monthly_usd\": 100.0,\n    \"exchange_rate\": 1.0,\n    \"currency\": \"USD\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/xyz/9999",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "xyz", "9999"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post individual (no se puede)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status es 405 (Method Not Allowed)\", function () {",
+              "    pm.response.to.have.status(405);",
+              "});",
+              "",
+              "pm.test(\"El mensaje de error es el correcto\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"No se permite POST sobre un recurso concreto.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/canada/2024",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "canada", "2024"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "put base (no se puede)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 405 (Method Not Allowed)\", function () {",
+              "    pm.response.to.have.status(405);",
+              "});",
+              "",
+              "pm.test(\"El mensaje de error indica que el PUT en colección está prohibido\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"Método PUT no permitido en la lista completa.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete individual",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status es 200 (Eliminado)\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"El mensaje confirma la eliminación\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.eql(\"Recurso eliminado correctamente.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/france/2023",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "france", "2023"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete individual error 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status es 404 (No encontrado)\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"El error indica recurso no encontrado\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"error\");",
+              "    pm.expect(jsonData.error).to.include(\"Recurso no encontrado para eliminar.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/xyz/9999",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "xyz", "9999"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE base (limpiar al final)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"El mensaje confirma la eliminación\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "    pm.expect(jsonData.message).to.include(\"Se han eliminado\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "inicializar base (restaurar estado inicial)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status de respuesta es 201 (Restaurado)\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"La base queda con 10 elementos (estado inicial)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "    pm.expect(jsonData.length).to.eql(10);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/v1/average-monthly-wages/loadInitialData",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "average-monthly-wages", "loadInitialData"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
