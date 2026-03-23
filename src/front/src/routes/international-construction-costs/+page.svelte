@@ -4,8 +4,7 @@ import { onMount } from 'svelte';
     let nuevoDato = $state({ country: "", year: "", city: "", cost_usd_per_m2: "", cost_change_range: "", rank: "" });
     let mensaje = $state("");
     let esError = $state(false);
-
-    const API = "/api/v2/international-construccion-costs"; // Usamos la v2
+    const API = "/api/v2/international-construction-costs"; // Usamos la v2
 
     async function getDatos() {
         const res = await fetch(API);
@@ -91,7 +90,7 @@ import { onMount } from 'svelte';
                 <td>{d.year}</td>
                 <td>{d.city}</td>
                 <td>
-                    <a href="/IRG/{d.country}/{d.year}/{d.city}">
+                    <a href="/international-construction-costs/{d.country}/{d.year}/{d.city}">
                         <button>Editar</button>
                     </a>
                     <button onclick={() => borrarDato(d.country, d.year, d.city)} style="background: #ffcccc;">

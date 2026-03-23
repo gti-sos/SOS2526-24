@@ -7,7 +7,7 @@ import { onMount } from 'svelte';
     let mensaje = $state("");
     let esError = $state(false);
 
-    const API = `/api/v2/international-construccion-costs/${country}/${year}/${city}`;
+    const API = `/api/v2/international-construction-costs/${country}/${year}/${city}`;
 
     async function getDatoActual() {
         const res = await fetch(API);
@@ -56,5 +56,5 @@ import { onMount } from 'svelte';
     <label>Ranking: <input type="number" bind:value={dato.rank} /></label><br/>
 
     <button onclick={guardarCambios}>Guardar Cambios</button>
-    <a href="/IRG"><button style="background: #ccc;">Volver al listado</button></a>
+    <a href="/international-construction-costs"><button style="background: #ccc;">Volver al listado</button></a>
 </div>

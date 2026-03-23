@@ -18,18 +18,19 @@ const pais = "Canada";
 
 
 //tengo que comprobar que sea persistente con esto
-let db = new Datastore({ filename: "./src/back/international-costs.db", autoload: true })
+let db = new Datastore({ filename: "./src/back/international-construction-costs.db", autoload: true })
 
 function loadBackendIsaac(app) {
 
 //rutas
     const versions = [
         { 
-            base: "/api/v1/international-construccion-costs", 
+         
+            base: "/api/v1/international-construction-costs", 
             docs: "https://documenter.getpostman.com/view/52380629/2sBXiesuH7" 
         },
         { 
-            base: "/api/v2/international-construccion-costs", 
+            base: "/api/v2/international-construction-costs", 
             docs: "https://documenter.getpostman.com/view/52380629/2sBXijJXME" // <--- Pon aquí el nuevo link que generes
         }
     ];
@@ -148,7 +149,7 @@ function loadBackendIsaac(app) {
             res.redirect(301, DOCS_URL);
         });
 
-        // --- TU CÓDIGO ORIGINAL TERMINA AQUÍ ---
+    
     });
 }
 

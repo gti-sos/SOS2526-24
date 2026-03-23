@@ -10,7 +10,8 @@
     },
     {
       short: 'IRG',
-      frontend: '/IRG',
+      frontend: '/international-construction-costs',
+      
       api: '/api/v1/international-construction-costs',
       docs: '/api/v1/international-construction-costs/docs',
       resource: 'international-construction-costs',
