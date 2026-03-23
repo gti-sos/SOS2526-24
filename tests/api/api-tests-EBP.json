@@ -7,6 +7,42 @@
   },
   "item": [
     {
+      "name": "DELETE /recreation-culture-expenditure",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"recreation_share\": 7.85,\r\n  \"population\": 38000000,\r\n  \"recreation_per_capita\": 2894.74\r\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "recreation-culture-expenditure"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "DELETE /recreation-culture-expenditure - 404",
       "event": [
         {
@@ -320,7 +356,6 @@
           }
         },
         "url": {
-          
           "raw": "{{base_url}}/api/v1/recreation-culture-expenditure",
           "host": [
             "{{base_url}}"
