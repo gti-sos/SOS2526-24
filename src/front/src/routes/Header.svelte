@@ -1,3 +1,32 @@
+<script>
+  const sections = [
+    {
+      short: 'MJP',
+      frontend: '/MJP',
+      api: '/api/v1/average-monthly-wages',
+      docs: '/api/v1/average-monthly-wages/docs',
+      resource: 'average-monthly-wages',
+      member: 'María Jesús Jiménez-Espada Pallarés'
+    },
+    {
+      short: 'IRG',
+      frontend: '/IRG',
+      api: '/api/v1/international-construction-costs',
+      docs: '/api/v1/international-construction-costs/docs',
+      resource: 'international-construction-costs',
+      member: 'Isaac Rodríguez Godino'
+    },
+    {
+      short: 'EBP',
+      frontend: '/recreation-culture-expenditure',
+      api: '/api/v1/recreation-culture-expenditure',
+      docs: '/api/v1/recreation-culture-expenditure/docs',
+      resource: 'recreation-culture-expenditure',
+      member: 'Elena Bejarano Periñán'
+    }
+  ];
+</script>
+
 <header class="main-header">
   <nav class="nav-container">
     <div class="brand">
@@ -5,55 +34,37 @@
     </div>
 
     <ul class="nav-menu">
-      <li><a href="/about">About</a></li>
+      {#each sections as section}
+        <li class="dropdown">
+          <button class="dropbtn" type="button">
+            {section.short} <span class="arrow">▾</span>
+          </button>
 
-      <li class="dropdown">
-        <button class="dropbtn">Isaac ▾</button>
-        <div class="dropdown-content">
-          <span class="resource-label">Recurso: <code>[tu-recurso]</code></span>
-          <hr />
-          <a href="/front/isaac">🎨 Front-end</a>
-          <a href="/api/v1/[tu-recurso]" target="_blank">🔌 API Base</a>
-          <a href="/api/v1/[tu-recurso]/docs" target="_blank">📄 Postman Docs</a>
-        </div>
-      </li>
+          <div class="dropdown-content">
+            <div class="dropdown-info">
+              <p><strong>Integrante:</strong> {section.member}</p>
+              <p><strong>Fuente de datos:</strong> <code>{section.resource}</code></p>
+            </div>
 
-      <li class="dropdown">
-        <button class="dropbtn">MJP ▾</button>
-        <div class="dropdown-content">
-          <span class="resource-label">Recurso: <code>average-monthly-wages</code></span>
-          <hr />
-          <a href="/front/mjp">🎨 Front-end</a>
-          <a href="/api/v1/average-monthly-wages" target="_blank">🔌 API Base</a>
-          <a href="/api/v1/average-monthly-wages/docs" target="_blank">📄 Postman Docs</a>
-        </div>
-      </li>
+            <hr />
 
-      <li class="dropdown">
-        <button class="dropbtn">IRG ▾</button>
-        <div class="dropdown-content">
-          <span class="resource-label">Recurso: <code>intl-construction-costs</code></span>
-          <hr />
-          <a href="/front/irg">🎨 Front-end</a>
-          <a href="/api/v1/international-construction-costs" target="_blank">🔌 API Base</a>
-          <a href="/api/v1/international-construction-costs/docs" target="_blank">📄 Postman Docs</a>
-        </div>
-      </li>
-
-      <li class="dropdown">
-        <button class="dropbtn">EBP ▾</button>
-        <div class="dropdown-content">
-          <span class="resource-label">Recurso: <code>recreation-culture</code></span>
-          <hr />
-          <a href="/front/ebp">🎨 Front-end</a>
-          <a href="/api/v1/recreation-culture-expenditure" target="_blank">🔌 API Base</a>
-          <a href="/api/v1/recreation-culture-expenditure/docs" target="_blank">📄 Postman Docs</a>
-        </div>
-      </li>
+            <a href={section.frontend}>🎨 Front-end</a>
+            <a href={section.api} target="_blank" rel="noreferrer">🔌 API Base</a>
+            <a href={section.docs} target="_blank" rel="noreferrer">📄 Postman Docs</a>
+          </div>
+        </li>
+      {/each}
     </ul>
 
-    <div class="nav-git">
-      <a href="https://github.com/gti-sos/SOS2425-24" target="_blank" class="github-link">
+    <div class="nav-actions">
+      <a href="/about" class="about-link">About</a>
+
+      <a
+        href="https://github.com/gti-sos/SOS2526-24"
+        target="_blank"
+        rel="noreferrer"
+        class="github-link"
+      >
         GitHub 📂
       </a>
     </div>
@@ -62,94 +73,199 @@
 
 <style>
   .main-header {
-    background-color: #222;
-    color: white;
-    padding: 0 2rem;
-    font-family: sans-serif;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    background: transparent;
+    padding: 1.5rem 1.5rem 0;
+    font-family: Inter, system-ui, sans-serif;
   }
 
   .nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
+    max-width: 1380px;
     margin: 0 auto;
-    height: 60px;
+    min-height: 72px;
+    padding: 0.9rem 1.4rem;
+    background: #f3eee8;
+    border-radius: 999px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
   }
 
   .brand a {
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: #ff3e00;
     text-decoration: none;
+    color: #111827;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
   }
 
   .nav-menu {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
     list-style: none;
-    gap: 1.5rem;
     margin: 0;
     padding: 0;
   }
 
-  .nav-menu a, .dropbtn {
-    color: #ccc;
+  .dropdown {
+    position: relative;
+  }
+
+  .dropbtn {
     text-decoration: none;
-    font-size: 0.95rem;
+    color: #111827;
+    font-size: 0.98rem;
+    font-weight: 500;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0.4rem 0.2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: inherit;
   }
 
-  .nav-menu a:hover, .dropbtn:hover {
-    color: white;
+  .dropbtn:hover {
+    opacity: 0.75;
   }
 
-  /* Dropdown Logic */
-  .dropdown { position: relative; display: inline-block; }
+  .arrow {
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
 
   .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #333;
-    min-width: 220px;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-    z-index: 1;
-    border-radius: 4px;
-    top: 100%;
-    padding: 0.5rem 0;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 290px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.14);
+    padding: 0.9rem;
+    z-index: 20;
+    border: 1px solid #ece7e2;
   }
 
-  .dropdown:hover .dropdown-content { display: block; }
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  .dropdown-info {
+    padding: 0.25rem 0.35rem 0.55rem;
+  }
+
+  .dropdown-info p {
+    margin: 0.35rem 0;
+    color: #374151;
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .dropdown-info code {
+    background: #f7f3ee;
+    color: #7a1837;
+    padding: 0.15rem 0.45rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid #ece7e2;
+    margin: 0.4rem 0 0.55rem;
+  }
 
   .dropdown-content a {
-    color: #ddd;
-    padding: 12px 16px;
     display: block;
-    font-size: 0.85rem;
+    text-decoration: none;
+    color: #111827;
+    font-size: 0.92rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 12px;
+    transition: background 0.2s ease, color 0.2s ease;
   }
 
-  .dropdown-content a:hover { background-color: #444; color: #ff3e00; }
-
-  .resource-label {
-    display: block;
-    padding: 5px 16px;
-    font-size: 0.75rem;
-    color: #888;
+  .dropdown-content a:hover {
+    background: #f7f3ee;
+    color: #7a1837;
   }
 
-  hr { border: 0; border-top: 1px solid #444; margin: 5px 0; }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .about-link {
+    text-decoration: none;
+    color: #111827;
+    font-size: 0.98rem;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+  }
+
+  .about-link:hover {
+    opacity: 0.75;
+  }
 
   .github-link {
-    background: #444;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
     text-decoration: none;
-    color: white;
+    background: #111827;
+    color: #ffffff;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
   }
 
-  .github-link:hover { background: #ff3e00; }
+  .github-link:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  @media (max-width: 980px) {
+    .nav-container {
+      grid-template-columns: 1fr;
+      border-radius: 28px;
+      justify-items: center;
+    }
+
+    .nav-menu {
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .nav-actions {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .main-header {
+      padding: 1rem 1rem 0;
+    }
+
+    .nav-container {
+      padding: 1rem;
+    }
+
+    .dropdown-content {
+      left: 0;
+      transform: none;
+      min-width: 260px;
+    }
+  }
 </style>

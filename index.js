@@ -1,11 +1,12 @@
 import express from "express";
+import cors from 'cors';
 import bodyParser from "body-parser";
 
 // ---- IMPORTACIÓN DE MÓDULOS (modularizados correctamente) ----
 import  {loadBackendIsaac} from "./src/back/index-IRG.js"; // MODULO ISAAC
 import {loadBackendMaria} from "./src/back/index-MJP.js"; //MODULO MARIA
 import {loadBackendElena} from "./src/back/index-EBP.js"; //MODULO ELENA
-import cors from 'cors';
+
 import {handler} from './src/front/build/handler.js';
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 loadBackendIsaac(app);
 loadBackendMaria(app);
 loadBackendElena(app);
+
 app.use(handler);
 
 app.listen(port, () => {
