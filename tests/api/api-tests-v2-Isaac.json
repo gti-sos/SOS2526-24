@@ -46,14 +46,14 @@
           "raw": "{\r\n    \"country\": \"Germany\",\r\n    \"year\": 2024,\r\n    \"city\": \"Berlin\",\r\n    \"cost_usd_per_m2\": 4200,\r\n    \"cost_change_range\": \"10%\",\r\n    \"rank\": 12\r\n}"
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "raw": "{{url}}/api/v1/international-construction-costs",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ]
         }
       },
@@ -88,14 +88,14 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs/loadInitialData",
+          "raw": "{{url}}/api/v1/international-construction-costs/loadInitialData",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs",
+            "international-construction-costs",
             "loadInitialData"
           ]
         }
@@ -129,14 +129,14 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs/loadInitialData",
+          "raw": "{{url}}/api/v1/international-construction-costs/loadInitialData",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs",
+            "international-construction-costs",
             "loadInitialData"
           ]
         }
@@ -183,14 +183,14 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "raw": "{{url}}/api/v1/international-construction-costs",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ]
         }
       },
@@ -236,14 +236,14 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs?city=Toronto",
+          "raw": "{{url}}/api/v1/international-construction-costs?city=Toronto",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ],
           "query": [
             {
@@ -295,14 +295,14 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs?city=Toronto&limit=1&offset=1",
+          "raw": "{{url}}/api/v1/international-construction-costs?city=Toronto&limit=1&offset=1",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ],
           "query": [
             {
@@ -359,14 +359,14 @@
           }
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "raw": "{{url}}/api/v1/international-construction-costs",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ]
         }
       },
@@ -411,14 +411,14 @@
           }
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "raw": "{{url}}/api/v1/international-construction-costs",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ]
         }
       },
@@ -463,14 +463,14 @@
           }
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "raw": "{{url}}/api/v1/international-construction-costs",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ]
         }
       },
@@ -519,14 +519,14 @@
           "raw": ""
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs/Canada/2024/Toronto",
+          "raw": "{{url}}/api/v1/international-construction-costs/Canada/2024/Toronto",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs",
+            "international-construction-costs",
             "Canada",
             "2024",
             "Toronto"
@@ -572,14 +572,14 @@
           "raw": ""
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs/Canada/2024/Toront",
+          "raw": "{{url}}/api/v1/international-construction-costs/Canada/2024/Toront",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs",
+            "international-construction-costs",
             "Canada",
             "2024",
             "Toront"
@@ -631,14 +631,14 @@
           }
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs/Canada/2024/Toronto",
+          "raw": "{{url}}/api/v1/international-construction-costs/Canada/2024/Toronto",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs",
+            "international-construction-costs",
             "Canada",
             "2024",
             "Toronto"
@@ -688,14 +688,14 @@
           "raw": "{\r\n    \"country\": \"Germany\",\r\n    \"year\": 2024,\r\n    \"city\": \"Berlin\",\r\n    \"cost_usd_per_m2\": 4200,\r\n    \"cost_change_range\": \"10%\",\r\n    \"rank\": 12\r\n}"
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs/xxxx/2024/xxxx",
+          "raw": "{{url}}/api/v1/international-construction-costs/xxxx/2024/xxxx",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs",
+            "international-construction-costs",
             "xxxx",
             "2024",
             "xxxx"
@@ -731,14 +731,14 @@
         "method": "POST",
         "header": [],
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs/Canada/2024/Toronto",
+          "raw": "{{url}}/api/v1/international-construction-costs/Canada/2024/Toronto",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs",
+            "international-construction-costs",
             "Canada",
             "2024",
             "Toronto"
@@ -779,14 +779,14 @@
           "raw": "{\r\n    \"country\": \"Germany\",\r\n    \"year\": 2024,\r\n    \"city\": \"Berlin\",\r\n    \"cost_usd_per_m2\": 4200,\r\n    \"cost_change_range\": \"10%\",\r\n    \"rank\": 12\r\n}"
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "raw": "{{url}}/api/v1/international-construction-costs",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ]
         }
       },
@@ -831,14 +831,14 @@
           "raw": "{\r\n    \"country\": \"Germany\",\r\n    \"year\": 2024,\r\n    \"city\": \"Berlin\",\r\n    \"cost_usd_per_m2\": 4200,\r\n    \"cost_change_range\": \"10%\",\r\n    \"rank\": 12\r\n}"
         },
         "url": {
-          "raw": "{{url}}/api/v1/international-construccion-costs",
+          "raw": "{{url}}/api/v1/international-construction-costs",
           "host": [
             "{{url}}"
           ],
           "path": [
             "api",
             "v1",
-            "international-construccion-costs"
+            "international-construction-costs"
           ]
         }
       },
