@@ -1,529 +1,318 @@
+<svelte:head>
+  <title>EBP | Recreation Culture Expenditure</title>
+  <meta
+    name="description"
+    content="Management panel for recreation and culture expenditure data."
+  />
+</svelte:head>
+
 <script>
   import { onMount } from 'svelte';
 
-  const API_BASE = '/api/v1/recreation-culture-expenditure';
-  const LOAD_INITIAL_DATA_PATH = '/loadInitialData';
-
-  const crearEstadoInicial = () => ({
-    country: '',
-    year: '',
-    recreation_value: '',
-    total_household_consumption: '',
-    recreation_share: '',
-    population: '',
-    recreation_per_capita: ''
+  const crearDatoInicial = () => ({
+    country: "",
+    year: "",
+    recreation_value: "",
+    total_household_consumption: "",
+    recreation_share: "",
+    population: "",
+    recreation_per_capita: ""
   });
 
-  let datos = crearEstadoInicial();
-  let registros = [];
-  let aviso = null;
+  let datos = $state([]);
+  let nuevoDato = $state(crearDatoInicial());
+  let mensaje = $state("");
+  let esError = $state(false);
 
-  let cargandoListado = false;
-  let cargandoIniciales = false;
-  let creando = false;
-  let borrandoTodos = false;
-  let borrandoUno = false;
+  const API = "/api/v1/recreation-culture-expenditure";
 
-  const formatoNumero = new Intl.NumberFormat('es-ES', {
-    maximumFractionDigits: 2
-  });
-
-  function mostrarAviso(tipo, texto) {
-    aviso = { tipo, texto };
-  }
-
-  function limpiarAviso() {
-    aviso = null;
-  }
-
-  function limpiarCampos(limpiarMensaje = false) {
-    datos = crearEstadoInicial();
-    if (limpiarMensaje) {
-      limpiarAviso();
-    }
-  }
-
-  function numero(valor) {
-    return valor === '' || valor === null || valor === undefined ? NaN : Number(valor);
-  }
-
-  function construirPayload() {
-    const payload = {
-      country: datos.country.trim(),
-      year: numero(datos.year),
-      recreation_value: numero(datos.recreation_value),
-      total_household_consumption: numero(datos.total_household_consumption),
-      recreation_share: numero(datos.recreation_share),
-      population: numero(datos.population),
-      recreation_per_capita: numero(datos.recreation_per_capita)
-    };
-
-    const invalidos = [
-      payload.year,
-      payload.recreation_value,
-      payload.total_household_consumption,
-      payload.recreation_share,
-      payload.population,
-      payload.recreation_per_capita
-    ].some((n) => !Number.isFinite(n));
-
-    if (!payload.country || invalidos) return null;
-    return payload;
-  }
-
-  function normalizarRegistros(data) {
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data?.data)) return data.data;
-    if (Array.isArray(data?.results)) return data.results;
-    if (Array.isArray(data?.items)) return data.items;
-
-    if (data && typeof data === 'object') {
-      const primeraLista = Object.values(data).find((valor) => Array.isArray(valor));
-      if (Array.isArray(primeraLista)) return primeraLista;
-    }
-
-    return [];
-  }
-
-  async function leerRespuesta(response) {
-    if (response.status === 204) return null;
-
-    const tipo = response.headers.get('content-type') || '';
-
-    if (tipo.includes('application/json')) {
-      return await response.json();
-    }
-
-    const texto = await response.text();
-    return texto ? { message: texto } : null;
-  }
-
-  async function llamarAPI(path = '', options = {}) {
-    const response = await fetch(`${API_BASE}${path}`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {})
-      },
-      ...options
-    });
-
-    const body = await leerRespuesta(response);
-
-    if (!response.ok) {
-      const error = new Error(body?.message || body?.error || 'Ha ocurrido un error.');
-      error.status = response.status;
-      error.body = body;
-      throw error;
-    }
-
-    return body;
-  }
-
-  function mensajeError(accion, error, contexto = {}) {
-    const status = error?.status;
-
-    if (accion === 'listar') {
-      if (status === 404) return 'No hay registros disponibles en este momento.';
-      if (status === 500) return 'Ahora mismo no se puede cargar el listado. Inténtalo de nuevo.';
-      return 'No se ha podido cargar la información.';
-    }
-
-    if (accion === 'iniciales') {
-      if (status === 409) return 'Los datos iniciales ya estaban cargados.';
-      if (status === 500) return 'Ha ocurrido un problema al cargar los datos iniciales.';
-      return 'No se han podido cargar los datos iniciales.';
-    }
-
-    if (accion === 'crear') {
-      if (status === 400) {
-        return 'No se ha podido guardar el registro porque faltan datos o alguno no tiene un formato válido.';
-      }
-      if (status === 409) {
-        return `Ya existe un registro para ${contexto.country} en ${contexto.year}.`;
-      }
-      if (status === 500) return 'Ha ocurrido un problema al guardar el registro.';
-      return 'No se ha podido crear el registro.';
-    }
-
-    if (accion === 'borrarTodos') {
-      if (status === 404) return 'No hay registros guardados para borrar.';
-      if (status === 500) return 'Ha ocurrido un problema al borrar todos los registros.';
-      return 'No se han podido borrar los registros.';
-    }
-
-    if (accion === 'borrarUno') {
-      if (status === 404) {
-        return `No existe un registro de ocio y cultura para ${contexto.country} en ${contexto.year}.`;
-      }
-      if (status === 400) {
-        return 'Para borrar un registro concreto debes indicar un país y un año válidos.';
-      }
-      if (status === 500) {
-        return 'Ha ocurrido un problema al borrar el registro seleccionado.';
-      }
-      return 'No se ha podido borrar el registro.';
-    }
-
-    return 'Ha ocurrido un error inesperado.';
-  }
-
-  async function obtenerRegistros(silencioso = false) {
-    cargandoListado = true;
-    limpiarAviso();
-
-    try {
-      const data = await llamarAPI();
-      registros = normalizarRegistros(data);
-
-      if (!silencioso) {
-        if (registros.length > 0) {
-          mostrarAviso('exito', `Listado actualizado correctamente. Hay ${registros.length} registro(s).`);
-        } else {
-          mostrarAviso('exito', 'La consulta se ha realizado correctamente, pero no hay registros guardados.');
-        }
-      }
-    } catch (error) {
-      registros = [];
-      if (!silencioso) {
-        mostrarAviso('error', mensajeError('listar', error));
-      }
-    } finally {
-      cargandoListado = false;
+  async function getDatos() {
+    const res = await fetch(API);
+    if (res.ok) {
+      datos = await res.json();
+    } else {
+      mensaje = "Error al cargar los datos.";
+      esError = true;
     }
   }
 
   async function cargarDatosIniciales() {
-    cargandoIniciales = true;
-    limpiarAviso();
+    const rutas = [
+      `${API}/loadinitialData`,
+      `${API}/loadInitialData`
+    ];
 
-    try {
-      await llamarAPI(LOAD_INITIAL_DATA_PATH, { method: 'GET' });
-      await obtenerRegistros(true);
-      mostrarAviso('exito', 'Los datos iniciales se han cargado correctamente y ya se muestran en el listado.');
-    } catch (error) {
-      if (error?.status === 409) {
-        await obtenerRegistros(true);
-        mostrarAviso('exito', 'Los datos iniciales ya estaban cargados. Se ha actualizado el listado.');
-      } else {
-        mostrarAviso('error', mensajeError('iniciales', error));
-      }
-    } finally {
-      cargandoIniciales = false;
+    let res = null;
+
+    for (const ruta of rutas) {
+      res = await fetch(ruta);
+      if (res.ok || res.status === 409) break;
+    }
+
+    if (res && res.ok) {
+      mensaje = "Datos iniciales cargados correctamente.";
+      esError = false;
+      getDatos();
+    } else if (res && res.status === 409) {
+      mensaje = "Los datos iniciales ya estaban cargados.";
+      esError = true;
+    } else {
+      mensaje = "Error al cargar los datos iniciales.";
+      esError = true;
     }
   }
 
-  async function crearRegistro() {
-    limpiarAviso();
+  async function crearDato() {
+    const res = await fetch(API, {
+      method: "POST",
+      body: JSON.stringify({
+        ...nuevoDato,
+        year: Number(nuevoDato.year),
+        recreation_value: Number(nuevoDato.recreation_value),
+        total_household_consumption: Number(nuevoDato.total_household_consumption),
+        recreation_share: Number(nuevoDato.recreation_share),
+        population: Number(nuevoDato.population),
+        recreation_per_capita: Number(nuevoDato.recreation_per_capita)
+      }),
+      headers: { "Content-Type": "application/json" }
+    });
 
-    const payload = construirPayload();
-
-    if (!payload) {
-      mostrarAviso(
-        'error',
-        'Revisa el formulario: todos los campos son obligatorios y deben tener un formato válido.'
-      );
-      return;
-    }
-
-    creando = true;
-
-    try {
-      await llamarAPI('', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-
-      await obtenerRegistros(true);
-      limpiarCampos(false);
-      mostrarAviso('exito', `Registro creado correctamente para ${payload.country} en ${payload.year}.`);
-    } catch (error) {
-      mostrarAviso(
-        'error',
-        mensajeError('crear', error, {
-          country: payload.country,
-          year: payload.year
-        })
-      );
-    } finally {
-      creando = false;
+    if (res.status === 201) {
+      mensaje = "¡Recurso creado con éxito!";
+      esError = false;
+      nuevoDato = crearDatoInicial();
+      getDatos();
+    } else if (res.status === 409) {
+      mensaje = `Error: Ya existe un dato para ${nuevoDato.country} en ${nuevoDato.year}.`;
+      esError = true;
+    } else {
+      mensaje = "Error: Asegúrate de rellenar todos los campos correctamente.";
+      esError = true;
     }
   }
 
-  async function borrarTodos() {
-    limpiarAviso();
+  async function borrarDato(country, year) {
+    if (!confirm(`¿Estás seguro de borrar el dato de ${country} (${year})?`)) return;
 
-    const confirmar = window.confirm(
-      'Se van a borrar todos los registros de ocio y cultura. ¿Deseas continuar?'
-    );
+    const res = await fetch(`${API}/${country}/${year}`, { method: "DELETE" });
 
-    if (!confirmar) return;
-
-    borrandoTodos = true;
-
-    try {
-      const data = await llamarAPI('', { method: 'DELETE' });
-
-      registros = [];
-
-      const cantidad =
-        typeof data?.deleted === 'number'
-          ? data.deleted
-          : typeof data?.count === 'number'
-            ? data.count
-            : null;
-
-      if (cantidad !== null) {
-        mostrarAviso('exito', `Se han eliminado correctamente ${cantidad} registro(s) de la base de datos.`);
-      } else {
-        mostrarAviso('exito', 'Se han eliminado todos los registros de la base de datos.');
-      }
-    } catch (error) {
-      mostrarAviso('error', mensajeError('borrarTodos', error));
-    } finally {
-      borrandoTodos = false;
+    if (res.ok) {
+      mensaje = `Se ha borrado el registro de ${country} (${year}) correctamente.`;
+      esError = false;
+      getDatos();
+    } else {
+      mensaje = "Error al borrar el registro.";
+      esError = true;
     }
   }
 
-  async function borrarRegistroConcreto() {
-    limpiarAviso();
+  async function borrarTodo() {
+    if (!confirm("¡ATENCIÓN! Vas a borrar TODOS los datos. ¿Continuar?")) return;
 
-    const country = datos.country.trim();
-    const year = numero(datos.year);
+    const res = await fetch(API, { method: "DELETE" });
 
-    if (!country || !Number.isFinite(year)) {
-      mostrarAviso(
-        'error',
-        'Para borrar un registro concreto debes indicar al menos un país y un año válidos.'
-      );
-      return;
-    }
-
-    const confirmar = window.confirm(
-      `Se va a borrar el registro de ${country} en ${year}. ¿Deseas continuar?`
-    );
-
-    if (!confirmar) return;
-
-    borrandoUno = true;
-
-    try {
-      await llamarAPI(`/${encodeURIComponent(country)}/${encodeURIComponent(year)}`, {
-        method: 'DELETE'
-      });
-
-      await obtenerRegistros(true);
-      mostrarAviso('exito', `Se ha eliminado correctamente el registro de ${country} en ${year}.`);
-    } catch (error) {
-      mostrarAviso(
-        'error',
-        mensajeError('borrarUno', error, {
-          country,
-          year
-        })
-      );
-    } finally {
-      borrandoUno = false;
+    if (res.ok) {
+      mensaje = "Se han eliminado todos los registros de la base de datos.";
+      esError = false;
+      getDatos();
+    } else {
+      mensaje = "Error al borrar todos los registros.";
+      esError = true;
     }
   }
 
-  async function borrarDesdeTarjeta(country, year) {
-    limpiarAviso();
-
-    const confirmar = window.confirm(
-      `Se va a borrar el registro de ${country} en ${year}. ¿Deseas continuar?`
-    );
-
-    if (!confirmar) return;
-
-    try {
-      borrandoUno = true;
-      await llamarAPI(`/${encodeURIComponent(country)}/${encodeURIComponent(year)}`, {
-        method: 'DELETE'
-      });
-
-      await obtenerRegistros(true);
-      mostrarAviso('exito', `Se ha eliminado correctamente el registro de ${country} en ${year}.`);
-    } catch (error) {
-      mostrarAviso(
-        'error',
-        mensajeError('borrarUno', error, {
-          country,
-          year
-        })
-      );
-    } finally {
-      borrandoUno = false;
-    }
-  }
-
-  onMount(async () => {
-    await obtenerRegistros(true);
+  onMount(() => {
+    getDatos();
   });
 </script>
 
-<svelte:head>
-  <title>EBP | recreation-culture-expenditure</title>
-  <meta
-    name="description"
-    content="Front-end Svelte para gestionar los registros de ocio y cultura."
-  />
-</svelte:head>
-
 <div class="page">
-  <section class="intro">
-    <p class="eyebrow">SOS2526-24 · EBP</p>
-    <h1>Formulario de gestión</h1>
-    <p class="intro-text">
-      Rellena los campos del registro y después usa el botón de la acción que quieras realizar.
-      Para crear un registro hacen falta todos los datos. Para borrar uno concreto basta con país y año.
-    </p>
-  </section>
+  <section class="hero-shell">
+    <div class="hero-card small-hero">
+      <div class="hero-overlay"></div>
 
-  {#if aviso}
-    <section class:success={aviso.tipo === 'exito'} class:error={aviso.tipo === 'error'} class="notice">
-      <strong>{aviso.tipo === 'exito' ? 'Operación completada' : 'Atención'}</strong>
-      <p>{aviso.texto}</p>
-    </section>
-  {/if}
+      <div class="hero-content">
+        <div class="hero-text">
+          <p class="eyebrow">EBP · Recreation & Culture</p>
+          <h1>
+            Gestión de gasto<br />
+            en ocio y cultura
+          </h1>
 
-  <section class="control-card">
-    <div class="control-inner">
-      <div class="form-grid">
-        <label>
-          <span>País</span>
-          <input type="text" bind:value={datos.country} placeholder="España" />
-        </label>
-
-        <label>
-          <span>Año</span>
-          <input type="number" bind:value={datos.year} placeholder="2024" min="1900" />
-        </label>
-
-        <label>
-          <span>Gasto en ocio y cultura</span>
-          <input type="number" bind:value={datos.recreation_value} placeholder="63671000000" step="any" min="0" />
-        </label>
-
-        <label>
-          <span>Consumo total de los hogares</span>
-          <input
-            type="number"
-            bind:value={datos.total_household_consumption}
-            placeholder="759001000000"
-            step="any"
-            min="0"
-          />
-        </label>
-
-        <label>
-          <span>Porcentaje destinado a ocio y cultura</span>
-          <input type="number" bind:value={datos.recreation_share} placeholder="8.39" step="any" min="0" />
-        </label>
-
-        <label>
-          <span>Población</span>
-          <input type="number" bind:value={datos.population} placeholder="47786102" step="1" min="0" />
-        </label>
-
-        <label class="wide">
-          <span>Gasto por persona</span>
-          <input type="number" bind:value={datos.recreation_per_capita} placeholder="1332.42" step="any" min="0" />
-        </label>
-      </div>
-
-      <div class="actions-row">
-        <button type="button" class="action-btn" on:click={() => obtenerRegistros()}>
-          {cargandoListado ? 'Cargando...' : 'Ver todos los registros'}
-        </button>
-
-        <button type="button" class="action-btn" on:click={cargarDatosIniciales}>
-          {cargandoIniciales ? 'Cargando...' : 'Cargar datos iniciales'}
-        </button>
-
-        <button type="button" class="action-btn action-primary" on:click={crearRegistro}>
-          {creando ? 'Guardando...' : 'Guardar registro'}
-        </button>
-
-        <button type="button" class="action-btn" on:click={borrarRegistroConcreto}>
-          {borrandoUno ? 'Borrando...' : 'Borrar este registro'}
-        </button>
-
-        <button type="button" class="action-btn action-danger" on:click={borrarTodos}>
-          {borrandoTodos ? 'Borrando...' : 'Borrar todos'}
-        </button>
-
-        <button type="button" class="action-btn action-light" on:click={() => limpiarCampos(true)}>
-          Limpiar campos
-        </button>
+          <p>
+            Panel de administración para consultar, añadir y eliminar registros del conjunto
+            de datos sobre gasto en ocio y cultura, consumo doméstico y gasto per cápita.
+          </p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="results-section">
-    <div class="results-header">
-      <div>
-        <p class="eyebrow dark">Listado actual</p>
-        <h2>Registros disponibles</h2>
+  <section class="cards-section">
+    {#if mensaje}
+      <div class:alert-error={esError} class:alert-success={!esError} class="alert-box">
+        {mensaje}
       </div>
-      <p class="count">
-        {#if cargandoListado}
-          Cargando información...
-        {:else}
-          {registros.length} registro(s)
-        {/if}
+    {/if}
+
+    <div class="section-heading">
+      <p class="eyebrow">Management panel</p>
+      <h2>Administración de registros</h2>
+      <p>
+        Aquí puedes cargar datos iniciales, insertar nuevos registros manualmente y gestionar
+        el contenido almacenado en la API.
       </p>
     </div>
 
-    {#if !cargandoListado && registros.length === 0}
-      <div class="empty-state">
-        No hay registros disponibles en este momento.
-      </div>
-    {:else}
-      <div class="records-grid">
-        {#each registros as registro}
-          <article class="record-card">
-            <div class="record-header">
-              <div>
-                <h3>{registro.country}</h3>
-                <p>{registro.year}</p>
-              </div>
+    <div class="cards-grid two-columns">
+      <article class="team-card form-card">
+        <div class="card-top">
+          <h3>Nuevo registro</h3>
+          <span class="badge">CREATE</span>
+        </div>
 
-              <button
-                type="button"
-                class="mini-delete"
-                on:click={() => borrarDesdeTarjeta(registro.country, registro.year)}
-              >
-                Borrar
-              </button>
-            </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>País</label>
+            <input bind:value={nuevoDato.country} placeholder="País" />
+          </div>
 
-            <dl>
-              <div>
-                <dt>Gasto en ocio y cultura</dt>
-                <dd>{formatoNumero.format(Number(registro.recreation_value))}</dd>
-              </div>
-              <div>
-                <dt>Consumo total de los hogares</dt>
-                <dd>{formatoNumero.format(Number(registro.total_household_consumption))}</dd>
-              </div>
-              <div>
-                <dt>Porcentaje destinado a ocio y cultura</dt>
-                <dd>{formatoNumero.format(Number(registro.recreation_share))}%</dd>
-              </div>
-              <div>
-                <dt>Población</dt>
-                <dd>{formatoNumero.format(Number(registro.population))}</dd>
-              </div>
-              <div>
-                <dt>Gasto por persona</dt>
-                <dd>{formatoNumero.format(Number(registro.recreation_per_capita))}</dd>
-              </div>
-            </dl>
-          </article>
-        {/each}
+          <div class="field">
+            <label>Año</label>
+            <input bind:value={nuevoDato.year} type="number" placeholder="Año" />
+          </div>
+
+          <div class="field">
+            <label>Gasto en ocio y cultura</label>
+            <input bind:value={nuevoDato.recreation_value} type="number" placeholder="Valor" />
+          </div>
+
+          <div class="field">
+            <label>Consumo total de los hogares</label>
+            <input
+              bind:value={nuevoDato.total_household_consumption}
+              type="number"
+              placeholder="Valor"
+            />
+          </div>
+
+          <div class="field">
+            <label>Porcentaje ocio/cultura</label>
+            <input
+              bind:value={nuevoDato.recreation_share}
+              type="number"
+              step="any"
+              placeholder="%"
+            />
+          </div>
+
+          <div class="field">
+            <label>Población</label>
+            <input bind:value={nuevoDato.population} type="number" placeholder="Población" />
+          </div>
+
+          <div class="field full">
+            <label>Gasto por persona</label>
+            <input
+              bind:value={nuevoDato.recreation_per_capita}
+              type="number"
+              step="any"
+              placeholder="Per cápita"
+            />
+          </div>
+        </div>
+
+        <div class="card-links buttons-row">
+          <button class="action-btn primary" onclick={crearDato}>
+            Añadir registro
+          </button>
+          <button class="action-btn secondary" onclick={cargarDatosIniciales}>
+            Carga datos
+          </button>
+        </div>
+      </article>
+
+      <article class="team-card">
+        <div class="card-top">
+          <h3>Acciones rápidas</h3>
+          <span class="badge">TOOLS</span>
+        </div>
+
+        <p>
+          Usa esta sección para recargar el dataset inicial o limpiar completamente la base
+          de datos del recurso.
+        </p>
+
+        <div class="card-links buttons-column">
+          <button class="action-btn secondary" onclick={getDatos}>
+            Recargar listado
+          </button>
+          <button class="action-btn secondary" onclick={cargarDatosIniciales}>
+            Cargar datos iniciales
+          </button>
+          <button class="action-btn danger" onclick={borrarTodo}>
+            Limpiar base de datos completa
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <div class="table-card">
+      <div class="card-top table-head">
+        <div>
+          <p class="eyebrow dark">Stored dataset</p>
+          <h3>Listado de registros</h3>
+        </div>
+        <span class="badge">{datos.length} registros</span>
       </div>
-    {/if}
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>País</th>
+              <th>Año</th>
+              <th>Gasto ocio/cultura</th>
+              <th>Consumo hogares</th>
+              <th>% ocio/cultura</th>
+              <th>Población</th>
+              <th>Gasto per cápita</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {#each datos as d}
+              <tr>
+                <td>{d.country}</td>
+                <td>{d.year}</td>
+                <td>{d.recreation_value}</td>
+                <td>{d.total_household_consumption}</td>
+                <td>{d.recreation_share}</td>
+                <td>{d.population}</td>
+                <td>{d.recreation_per_capita}</td>
+                <td>
+                  <button
+                    class="mini-btn delete"
+                    onclick={() => borrarDato(d.country, d.year)}
+                  >
+                    Borrar
+                  </button>
+                </td>
+              </tr>
+            {/each}
+
+            {#if datos.length === 0}
+              <tr>
+                <td colspan="8" class="empty-state">
+                  No hay registros cargados todavía.
+                </td>
+              </tr>
+            {/if}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 </div>
 
@@ -545,287 +334,359 @@
   }
 
   .page {
-    max-width: 1420px;
-    margin: 0 auto;
-    padding: 18px 18px 42px;
+    padding: 14px 18px 40px;
   }
 
-  .intro {
-    margin: 10px 0 18px;
-    color: #fff8f4;
+  .hero-shell,
+  .cards-section {
+    max-width: 1420px;
+    margin: 0 auto;
+  }
+
+  .hero-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    background:
+      linear-gradient(rgba(20, 16, 14, 0.28), rgba(20, 16, 14, 0.28)),
+      url('/hero-campus.jpg') center/cover no-repeat;
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+  }
+
+  .small-hero {
+    min-height: 420px;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.52) 0%,
+      rgba(0, 0, 0, 0.22) 40%,
+      rgba(0, 0, 0, 0.12) 100%
+    );
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    min-height: 420px;
+    padding: 78px 58px 48px;
+  }
+
+  .hero-text {
+    max-width: 760px;
+    color: #fffaf6;
+  }
+
+  .hero-text h1 {
+    margin: 0 0 18px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(3.4rem, 6vw, 5.6rem);
+    line-height: 0.92;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .hero-text p {
+    margin: 0;
+    font-size: 1.08rem;
+    line-height: 1.75;
+    color: rgba(255, 248, 242, 0.96);
+  }
+
+  .cards-section {
+    margin-top: 30px;
+  }
+
+  .section-heading {
+    margin-bottom: 20px;
+    color: #fff7f2;
   }
 
   .eyebrow {
     margin: 0 0 8px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
+    color: rgba(255, 247, 241, 0.88);
   }
 
   .eyebrow.dark {
     color: #7a1837;
   }
 
-  .intro h1,
-  .results-header h2 {
+  .section-heading h2 {
     margin: 0 0 10px;
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    line-height: 0.95;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
     font-weight: 600;
+    color: #fff9f5;
   }
 
-  .intro-text {
-    max-width: 850px;
+  .section-heading p {
     margin: 0;
+    max-width: 900px;
     line-height: 1.7;
-    font-size: 1.05rem;
+    color: rgba(255, 245, 238, 0.95);
   }
 
-  .notice {
-    margin: 0 0 18px;
-    padding: 16px 18px;
-    border-radius: 18px;
-    border: 1px solid transparent;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  .alert-box {
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    font-weight: 700;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
   }
 
-  .notice strong {
-    display: block;
-    margin-bottom: 6px;
-  }
-
-  .notice p {
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  .success {
-    background: rgba(236, 253, 245, 0.96);
-    border-color: #a7f3d0;
+  .alert-success {
+    background: rgba(236, 253, 245, 0.92);
     color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.35);
   }
 
-  .error {
-    background: rgba(254, 242, 242, 0.96);
-    border-color: #fecaca;
+  .alert-error {
+    background: rgba(254, 242, 242, 0.94);
     color: #991b1b;
+    border: 1px solid rgba(239, 68, 68, 0.3);
   }
 
-  .control-card {
+  .cards-grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  .two-columns {
+    grid-template-columns: 1.35fr 0.85fr;
+    margin-bottom: 24px;
+  }
+
+  .team-card,
+  .table-card {
+    background: rgba(250, 245, 239, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
+  }
+
+  .card-top {
     display: flex;
-    justify-content: center;
-    margin-top: 12px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
   }
 
-  .control-inner {
-    width: min(900px, 100%);
-    background: rgba(245, 242, 238, 0.96);
-    border: 4px solid #111827;
-    border-radius: 56px;
-    padding: 34px 30px 24px;
-    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.14);
+  .team-card h3,
+  .table-card h3 {
+    margin: 0;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: #111827;
+  }
+
+  .badge {
+    background: #efe3b1;
+    color: #111827;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .team-card p {
+    margin: 0 0 10px;
+    color: #374151;
+    line-height: 1.7;
   }
 
   .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px 18px;
+    gap: 14px;
+    margin-top: 10px;
   }
 
-  .form-grid label {
+  .field {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
-  .form-grid span {
-    font-weight: 700;
-    color: #2d3748;
-  }
-
-  .form-grid input {
-    border: 3px solid #111827;
-    border-radius: 18px;
-    background: #ffffff;
-    padding: 13px 14px;
-    font-size: 1rem;
-    font-family: inherit;
-  }
-
-  .form-grid input:focus {
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(183, 66, 99, 0.18);
-  }
-
-  .wide {
+  .field.full {
     grid-column: 1 / -1;
   }
 
-  .actions-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 14px;
-    margin-top: 24px;
-  }
-
-  .action-btn {
-    border: 3px solid #111827;
-    background: #ffffff;
-    color: #111827;
-    border-radius: 16px;
-    padding: 12px 16px;
+  .field label {
+    font-size: 0.9rem;
     font-weight: 700;
-    font-size: 0.95rem;
-    font-family: inherit;
-    cursor: pointer;
-    transition: transform 0.15s ease, background 0.15s ease;
+    color: #7a1837;
   }
 
-  .action-btn:hover {
+  .field input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(122, 24, 55, 0.14);
+    background: rgba(255, 255, 255, 0.76);
+    border-radius: 14px;
+    padding: 13px 14px;
+    font-size: 0.96rem;
+    color: #111827;
+    outline: none;
+    transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+  }
+
+  .field input:focus {
+    border-color: #b74263;
+    background: #ffffff;
     transform: translateY(-1px);
   }
 
-  .action-primary {
-    background: #efe3b1;
-  }
-
-  .action-danger {
-    background: #ffd6d6;
-  }
-
-  .action-light {
-    background: #f7f3ee;
-  }
-
-  .results-section {
-    margin-top: 30px;
-    background: rgba(250, 245, 239, 0.92);
-    border-radius: 30px;
-    padding: 24px;
-    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.1);
-  }
-
-  .results-header {
+  .card-links {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .buttons-row {
+    flex-wrap: wrap;
+  }
+
+  .buttons-column {
+    flex-direction: column;
+  }
+
+  .action-btn,
+  .mini-btn {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+  }
+
+  .action-btn:hover,
+  .mini-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .action-btn {
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+  }
+
+  .primary {
+    background: #7a1837;
+    color: #fffaf6;
+  }
+
+  .secondary {
+    background: rgba(255, 255, 255, 0.7);
+    color: #7a1837;
+  }
+
+  .danger {
+    background: #b42318;
+    color: #fff;
+  }
+
+  .table-head {
     margin-bottom: 18px;
   }
 
-  .count {
-    margin: 0;
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.52);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 15px 14px;
+    font-size: 0.88rem;
+    color: #7a1837;
+    background: rgba(247, 238, 231, 0.92);
+    border-bottom: 1px solid rgba(122, 24, 55, 0.12);
+  }
+
+  tbody td {
+    padding: 14px;
     color: #374151;
-    font-weight: 600;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    background: rgba(255, 255, 255, 0.58);
+  }
+
+  tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .mini-btn {
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 0.88rem;
+  }
+
+  .mini-btn.delete {
+    background: #fee2e2;
+    color: #991b1b;
   }
 
   .empty-state {
-    background: #ffffff;
-    border-radius: 18px;
-    padding: 26px;
     text-align: center;
-    color: #4b5563;
-  }
-
-  .records-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-  }
-
-  .record-card {
-    background: #ffffff;
-    border: 1px solid #ece3da;
-    border-radius: 22px;
-    padding: 18px;
-  }
-
-  .record-header {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: flex-start;
-    margin-bottom: 14px;
-  }
-
-  .record-card h3 {
-    margin: 0;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 2rem;
-    line-height: 0.95;
-  }
-
-  .record-card p {
-    margin: 6px 0 0;
+    font-style: italic;
     color: #6b7280;
-  }
-
-  .mini-delete {
-    border: none;
-    border-radius: 999px;
-    background: #7a1837;
-    color: #fff;
-    padding: 10px 12px;
-    font-size: 0.88rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .record-card dl {
-    display: grid;
-    gap: 10px;
-    margin: 0;
-  }
-
-  .record-card dl div {
-    background: #faf7f4;
-    border-radius: 14px;
-    padding: 12px;
-  }
-
-  .record-card dt {
-    font-size: 0.84rem;
-    color: #6b7280;
-    margin-bottom: 4px;
-  }
-
-  .record-card dd {
-    margin: 0;
-    font-weight: 700;
-    color: #111827;
+    padding: 24px;
   }
 
   @media (max-width: 1100px) {
-    .records-grid {
+    .two-columns {
+      grid-template-columns: 1fr;
+    }
+
+    .form-grid {
       grid-template-columns: 1fr;
     }
   }
 
   @media (max-width: 820px) {
     .page {
-      padding: 14px 14px 30px;
+      padding: 12px 12px 30px;
     }
 
-    .control-inner {
-      border-radius: 34px;
-      padding: 22px 18px 18px;
+    .hero-content {
+      padding: 54px 24px 30px;
+      min-height: 340px;
     }
 
-    .form-grid {
-      grid-template-columns: 1fr;
+    .hero-text h1 {
+      font-size: clamp(2.8rem, 12vw, 4.5rem);
     }
 
-    .wide {
-      grid-column: auto;
+    .hero-text p {
+      font-size: 1rem;
+      line-height: 1.65;
     }
 
-    .results-header,
-    .record-header {
-      flex-direction: column;
-      align-items: flex-start;
+    .team-card,
+    .table-card {
+      padding: 18px;
     }
   }
 </style>
