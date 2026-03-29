@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 20  # Aseguramos que use la misma versión que tú
+          node-version: 20  
 
       - name: Install root dependencies
         run: npm install
@@ -29,4 +29,18 @@ jobs:
 
       - name: Test
         run: npm test
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      # --- GUARDAR REPORTE SI FALLA ---
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
       
