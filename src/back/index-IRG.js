@@ -56,22 +56,41 @@ function loadBackendIsaac(app) {
             });
         });
 
-        app.get(IRG_API_PATH, (req, res) => {
-            let query = {};
-            if (req.query.country) query.country = req.query.country;
-            if (req.query.city) query.city = req.query.city;
-            if (req.query.year) query.year = parseInt(req.query.year);
-            if (req.query.cost_usd_per_m2) query.cost_usd_per_m2 = parseInt(req.query.cost_usd_per_m2);
-            if (req.query.cost_change_range) query.cost_change_range = req.query.cost_change_range;
-            if (req.query.rank) query.rank = parseInt(req.query.rank);
-            let offset = parseInt(req.query.offset) || 0; 
-            let limit = parseInt(req.query.limit) || 100;
-            db.find(query).skip(offset).limit(limit).exec((err, datos) => {
-                if (err) return res.status(500).json({ error: "Error en la base de datos." });
-                datos.forEach(d => { delete d._id; });
-                res.status(200).json(datos);
-            });
-        });
+    app.get(IRG_API_PATH, (req, res) => {
+    let query = {};
+
+    //Filtros
+    if (req.query.country) query.country = req.query.country;
+    if (req.query.city) query.city = req.query.city;
+    if (req.query.cost_change_range) query.cost_change_range = req.query.cost_change_range;
+
+    //Lógica de RANGO 
+    if (req.query.from || req.query.to) {
+        query.year = {}; // Creamos un objeto para los operadores de rango
+        if (req.query.from) query.year.$gte = parseInt(req.query.from);
+        if (req.query.to) query.year.$lte = parseInt(req.query.to);
+    } 
+    // Si no hay rango, pero sí un año exacto:
+    else if (req.query.year) {
+        query.year = parseInt(req.query.year);
+    }
+
+    // 3. Lógica de RANGO para Coste 
+    if (req.query.min_cost || req.query.max_cost) {
+        query.cost_usd_per_m2 = {};
+        if (req.query.min_cost) query.cost_usd_per_m2.$gte = parseInt(req.query.min_cost);
+        if (req.query.max_cost) query.cost_usd_per_m2.$lte = parseInt(req.query.max_cost);
+    }
+
+    let offset = parseInt(req.query.offset) || 0; 
+    let limit = parseInt(req.query.limit) || 100;
+
+    db.find(query).skip(offset).limit(limit).exec((err, datos) => {
+        if (err) return res.status(500).json({ error: "Error en la base de datos." });
+        datos.forEach(d => { delete d._id; });
+        res.status(200).json(datos);
+    });
+});
 
         app.post(IRG_API_PATH, (req, res) => {
             const newData = req.body;
