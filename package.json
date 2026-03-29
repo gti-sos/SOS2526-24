@@ -20,13 +20,10 @@
     "test-v2-IRG": "npx newman run tests/api/api-tests-v2-Isaac.json -e tests/api/api-test-env-local.json",
     "test-Isaac-all": "npm run test-v1-IRG && npm run test-v2-IRG",
     "test-local-Isaac-versiones": "start-server-and-test start http://localhost:3000 test-Isaac-all",
-
     "test-v1-MJP": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-local-MJP.json",
     "test-v2-MJP": "npx newman run tests/api/api-tests-MJP-v2.json -e tests/api/api-test-env-local-MJP.json",
     "test-MJP-all": "npm run test-v1-MJP && npm run test-v2-MJP",
     "test-local-MJP-versiones": "start-server-and-test start http://localhost:3000 test-MJP-all",
-
-
     "test-international-construccion-costs": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-local.json",
     "test-api-online-construccion-costs-render": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-render.json",
     "test-local-Isaac": "start-server-and-test start http://localhost:3000 test-international-construccion-costs",
@@ -41,7 +38,7 @@
     "test-online-EBP": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-EBP-render",
     "build": "cd src/front && npm run build",
     "dev-front": "cd src/front &&  npm run dev -- --open",
-    "test":"npm run test-local-Isaac-versiones && npm run test-local-MJP-versiones && npm run test-local-EBP"
+    "test": "npm run test-local-Isaac-versiones && npm run test-local-MJP-versiones && npm run test-local-EBP"
   },
   "dependencies": {
     "body-parser": "^2.2.2",
@@ -51,7 +48,9 @@
     "nedb": "^1.8.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@sveltejs/adapter-node": "^5.5.4",
+    "@types/node": "^25.5.0",
     "start-server-and-test": "^2.1.5"
   }
 }
