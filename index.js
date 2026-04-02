@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 // ---- IMPORTACIÓN DE MÓDULOS (modularizados correctamente) ----
 import  {loadBackendIsaac} from "./src/back/index-IRG.js"; // MODULO ISAAC
 import {loadBackendMaria} from "./src/back/index-MJP.js"; //MODULO MARIA
-import {loadBackendElena} from "./src/back/index-EBP.js"; //MODULO ELENA
+//import {loadBackendElena} from "./src/back/index-EBP.js"; //MODULO ELENA
 import {loadBackendElenav2} from "./src/back/index-EBP-v2.js"; //MODULO ELENA v2
 
 import {handler} from './src/front/build/handler.js';
@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 // ---- CARGA DE MODULOS ----
 loadBackendIsaac(app);
 loadBackendMaria(app);
-loadBackendElena(app);
+//loadBackendElena(app);
 loadBackendElenav2(app);
 
 app.use(handler);
