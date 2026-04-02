@@ -16,26 +16,32 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+
     "test-v1-IRG": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-local.json",
     "test-v2-IRG": "npx newman run tests/api/api-tests-v2-Isaac.json -e tests/api/api-test-env-local.json",
     "test-Isaac-all": "npm run test-v1-IRG && npm run test-v2-IRG",
     "test-local-Isaac-versiones": "start-server-and-test start http://localhost:3000 test-Isaac-all",
+
     "test-v1-MJP": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-local-MJP.json",
     "test-v2-MJP": "npx newman run tests/api/api-tests-MJP-v2.json -e tests/api/api-test-env-local-MJP.json",
     "test-MJP-all": "npm run test-v1-MJP && npm run test-v2-MJP",
     "test-local-MJP-versiones": "start-server-and-test start http://localhost:3000 test-MJP-all",
+
     "test-international-construccion-costs": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-local.json",
     "test-api-online-construccion-costs-render": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-render.json",
     "test-local-Isaac": "start-server-and-test start http://localhost:3000 test-international-construccion-costs",
     "test-online-Isaac": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-construccion-costs-render",
+
     "test-average-monthly-wages": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-local-MJP.json",
     "test-api-online-MJP-render": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-render-MJP.json",
     "test-local-MJP": "start-server-and-test start http://localhost:3000 test-average-monthly-wages",
     "test-online-MJP": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-MJP-render",
+
     "test-recreation-culture-expenditure": "npx newman run tests/api/api-tests-EBP.json -e tests/api/api-test-env-local-EBP.json",
     "test-api-online-EBP-render": "npx newman run tests/api/api-tests-EBP.json -e tests/api/api-test-env-render-EBP.json",
     "test-local-EBP": "start-server-and-test start http://localhost:3000 test-recreation-culture-expenditure",
     "test-online-EBP": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-EBP-render",
+    
     "build": "cd src/front && npm run build",
     "dev-front": "cd src/front &&  npm run dev -- --open",
     "test": "npm run test-local-Isaac-versiones && npm run test-local-MJP-versiones && npm run test-local-EBP"
