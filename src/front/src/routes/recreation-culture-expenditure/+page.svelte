@@ -2,125 +2,284 @@
   <title>EBP | Recreation Culture Expenditure</title>
   <meta
     name="description"
-    content="Management panel for recreation and culture expenditure data."
+    content="Panel de gestión de datos sobre gasto en ocio y cultura."
   />
 </svelte:head>
 
 <script>
-  import { onMount } from 'svelte';
+  import { onMount } from "svelte";
 
+  // =========================================================
+  // FUNCIÓN AUXILIAR:
+  // Crea la estructura inicial del formulario para añadir
+  // un nuevo registro.
+  // Solo incluye los campos principales.
+  // =========================================================
   const crearDatoInicial = () => ({
     country: "",
     year: "",
     recreation_value: "",
     total_household_consumption: "",
-    recreation_share: "",
-    population: "",
-    recreation_per_capita: ""
+    population: ""
   });
 
+  // =========================================================
+  // ESTADO DEL COMPONENTE
+  // =========================================================
   let datos = $state([]);
   let nuevoDato = $state(crearDatoInicial());
   let mensaje = $state("");
   let esError = $state(false);
 
-  const API = "/api/v1/recreation-culture-expenditure";
+  // =========================================================
+  // FILTROS DE BÚSQUEDA
+  // Ajusta los nombres si tu API usa otros parámetros.
+  // =========================================================
+  let filtros = $state({
+    country: "",
+    year: "",
+    from: "",
+    to: "",
+    min_recreation_value: "",
+    max_recreation_value: "",
+    min_population: "",
+    max_population: ""
+  });
 
+  // =========================================================
+  // URL BASE DE LA API
+  // =========================================================
+  const API = "/api/v2/recreation-culture-expenditure";
+
+  // =========================================================
+  // FUNCIÓN AUXILIAR:
+  // Muestra un mensaje de éxito o error.
+  // =========================================================
+  function mostrarMensaje(texto, error = false) {
+    mensaje = texto;
+    esError = error;
+
+    setTimeout(() => {
+      mensaje = "";
+    }, 3500);
+  }
+
+  // =========================================================
+  // GET /api/v2/recreation-culture-expenditure
+  // Obtiene todos los registros de la API.
+  // =========================================================
   async function getDatos() {
-    const res = await fetch(API);
-    if (res.ok) {
-      datos = await res.json();
-    } else {
-      mensaje = "Error al cargar los datos.";
-      esError = true;
+    try {
+      const res = await fetch(API);
+
+      if (res.ok) {
+        datos = await res.json();
+      } else {
+        mostrarMensaje("ERROR: No se pudieron cargar los registros.", true);
+      }
+    } catch (error) {
+      mostrarMensaje("ERROR: Se produjo un problema de conexión al cargar los datos.", true);
     }
   }
 
+  // =========================================================
+  // BÚSQUEDA / FILTRADO
+  // Construye la query string con los filtros que tengan valor.
+  // =========================================================
+  async function buscarDatos() {
+    try {
+      const queryParams = new URLSearchParams();
+
+      Object.keys(filtros).forEach((key) => {
+        if (filtros[key] !== "" && filtros[key] !== null && filtros[key] !== undefined) {
+          queryParams.append(key, filtros[key]);
+        }
+      });
+
+      const url = queryParams.toString() ? `${API}?${queryParams.toString()}` : API;
+
+      const res = await fetch(url);
+
+      if (res.ok) {
+        datos = await res.json();
+        mostrarMensaje(`Búsqueda completada: ${datos.length} resultados encontrados.`);
+      } else {
+        mostrarMensaje("ERROR: Los filtros introducidos no son válidos.", true);
+      }
+    } catch (error) {
+      mostrarMensaje("ERROR: Se produjo un problema de conexión al realizar la búsqueda.", true);
+    }
+  }
+
+  // =========================================================
+  // LIMPIAR FILTROS Y VOLVER A MOSTRAR TODO
+  // =========================================================
+  async function limpiarBusqueda() {
+    filtros = {
+      country: "",
+      year: "",
+      from: "",
+      to: "",
+      min_recreation_value: "",
+      max_recreation_value: "",
+      min_population: "",
+      max_population: ""
+    };
+
+    await getDatos();
+    mostrarMensaje("Filtros eliminados. Se muestran todos los registros.");
+  }
+
+  // =========================================================
+  // GET /loadInitialData
+  // Carga los datos iniciales si la API lo permite.
+  // Se prueban dos variantes del nombre de ruta por compatibilidad.
+  // =========================================================
   async function cargarDatosIniciales() {
-    const rutas = [
-      `${API}/loadinitialData`,
-      `${API}/loadInitialData`
-    ];
+    const rutas = [`${API}/loadInitialData`, `${API}/loadinitialData`];
 
     let res = null;
 
-    for (const ruta of rutas) {
-      res = await fetch(ruta);
-      if (res.ok || res.status === 409) break;
-    }
+    try {
+      for (const ruta of rutas) {
+        res = await fetch(ruta);
+        if (res.ok || res.status === 409) break;
+      }
 
-    if (res && res.ok) {
-      mensaje = "Datos iniciales cargados correctamente.";
-      esError = false;
-      getDatos();
-    } else if (res && res.status === 409) {
-      mensaje = "Los datos iniciales ya estaban cargados.";
-      esError = true;
-    } else {
-      mensaje = "Error al cargar los datos iniciales.";
-      esError = true;
+      if (res && res.ok) {
+        mostrarMensaje("Datos iniciales cargados correctamente.");
+        await getDatos();
+      } else if (res && res.status === 409) {
+        mostrarMensaje("ERROR: Los datos iniciales ya estaban cargados.", true);
+      } else {
+        mostrarMensaje("ERROR: No fue posible cargar los datos iniciales.", true);
+      }
+    } catch (error) {
+      mostrarMensaje(
+        "ERROR: Se produjo un problema de conexión al cargar los datos iniciales.",
+        true
+      );
     }
   }
 
+  // =========================================================
+  // VALIDACIÓN SIMPLE DEL FORMULARIO
+  // Comprueba que los campos obligatorios tengan contenido.
+  // =========================================================
+  function formularioValido() {
+    return (
+      nuevoDato.country.trim() !== "" &&
+      nuevoDato.year !== "" &&
+      nuevoDato.recreation_value !== "" &&
+      nuevoDato.total_household_consumption !== "" &&
+      nuevoDato.population !== ""
+    );
+  }
+
+  // =========================================================
+  // POST /api/v2/recreation-culture-expenditure
+  // Crea un nuevo registro.
+  // Los campos derivados NO se envían porque los calcula el backend.
+  // =========================================================
   async function crearDato() {
-    const res = await fetch(API, {
-      method: "POST",
-      body: JSON.stringify({
-        ...nuevoDato,
-        year: Number(nuevoDato.year),
-        recreation_value: Number(nuevoDato.recreation_value),
-        total_household_consumption: Number(nuevoDato.total_household_consumption),
-        recreation_share: Number(nuevoDato.recreation_share),
-        population: Number(nuevoDato.population),
-        recreation_per_capita: Number(nuevoDato.recreation_per_capita)
-      }),
-      headers: { "Content-Type": "application/json" }
-    });
+    if (!formularioValido()) {
+      mostrarMensaje(
+        "ERROR: Completa todos los campos obligatorios antes de añadir el registro.",
+        true
+      );
+      return;
+    }
 
-    if (res.status === 201) {
-      mensaje = "¡Recurso creado con éxito!";
-      esError = false;
-      nuevoDato = crearDatoInicial();
-      getDatos();
-    } else if (res.status === 409) {
-      mensaje = `Error: Ya existe un dato para ${nuevoDato.country} en ${nuevoDato.year}.`;
-      esError = true;
-    } else {
-      mensaje = "Error: Asegúrate de rellenar todos los campos correctamente.";
-      esError = true;
+    const payload = {
+      country: nuevoDato.country.trim(),
+      year: Number(nuevoDato.year),
+      recreation_value: Number(nuevoDato.recreation_value),
+      total_household_consumption: Number(nuevoDato.total_household_consumption),
+      population: Number(nuevoDato.population)
+    };
+
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.status === 201) {
+        mostrarMensaje("Registro creado correctamente.");
+        nuevoDato = crearDatoInicial();
+        await getDatos();
+      } else if (res.status === 409) {
+        mostrarMensaje(
+          `ERROR: Ya existe un registro para ${payload.country} en el año ${payload.year}.`,
+          true
+        );
+      } else if (res.status === 400) {
+        mostrarMensaje(
+          "ERROR: Los datos introducidos no son válidos. Revisa los campos obligatorios.",
+          true
+        );
+      } else {
+        mostrarMensaje("ERROR: No se pudo crear el registro.", true);
+      }
+    } catch (error) {
+      mostrarMensaje("ERROR: Se produjo un problema de conexión al crear el registro.", true);
     }
   }
 
+  // =========================================================
+  // DELETE /api/v2/recreation-culture-expenditure/:country/:year
+  // Borra un registro concreto identificado por country + year.
+  // =========================================================
   async function borrarDato(country, year) {
-    if (!confirm(`¿Estás seguro de borrar el dato de ${country} (${year})?`)) return;
+    if (!confirm(`¿Estás seguro de que quieres borrar el registro de ${country} (${year})?`)) {
+      return;
+    }
 
-    const res = await fetch(`${API}/${country}/${year}`, { method: "DELETE" });
+    try {
+      const res = await fetch(`${API}/${country}/${year}`, {
+        method: "DELETE"
+      });
 
-    if (res.ok) {
-      mensaje = `Se ha borrado el registro de ${country} (${year}) correctamente.`;
-      esError = false;
-      getDatos();
-    } else {
-      mensaje = "Error al borrar el registro.";
-      esError = true;
+      if (res.ok) {
+        mostrarMensaje(`Se ha borrado correctamente el registro de ${country} (${year}).`);
+        await getDatos();
+      } else if (res.status === 404) {
+        mostrarMensaje(`ERROR: No existe el registro de ${country} (${year}).`, true);
+      } else {
+        mostrarMensaje("ERROR: No se pudo borrar el registro.", true);
+      }
+    } catch (error) {
+      mostrarMensaje("ERROR: Se produjo un problema de conexión al borrar el registro.", true);
     }
   }
 
+  // =========================================================
+  // DELETE /api/v2/recreation-culture-expenditure
+  // Borra toda la colección.
+  // =========================================================
   async function borrarTodo() {
-    if (!confirm("¡ATENCIÓN! Vas a borrar TODOS los datos. ¿Continuar?")) return;
+    if (!confirm("Vas a eliminar todos los registros. ¿Deseas continuar?")) {
+      return;
+    }
 
-    const res = await fetch(API, { method: "DELETE" });
+    try {
+      const res = await fetch(API, { method: "DELETE" });
 
-    if (res.ok) {
-      mensaje = "Se han eliminado todos los registros de la base de datos.";
-      esError = false;
-      getDatos();
-    } else {
-      mensaje = "Error al borrar todos los registros.";
-      esError = true;
+      if (res.ok) {
+        mostrarMensaje("Se han eliminado todos los registros de la base de datos.");
+        await getDatos();
+      } else {
+        mostrarMensaje("ERROR: No se pudieron eliminar todos los registros.", true);
+      }
+    } catch (error) {
+      mostrarMensaje("ERROR: Se produjo un problema de conexión al borrar todos los registros.", true);
     }
   }
 
+  // =========================================================
+  // Carga automática de datos con onMount
+  // =========================================================
   onMount(() => {
     getDatos();
   });
@@ -128,21 +287,11 @@
 
 <div class="page">
   <section class="hero-shell">
-    <div class="hero-card small-hero">
-      <div class="hero-overlay"></div>
-
+    <div class="hero-card">
       <div class="hero-content">
         <div class="hero-text">
-          <p class="eyebrow">EBP · Recreation & Culture</p>
-          <h1>
-            Gestión de gasto<br />
-            en ocio y cultura
-          </h1>
-
-          <p>
-            Panel de administración para consultar, añadir y eliminar registros del conjunto
-            de datos sobre gasto en ocio y cultura, consumo doméstico y gasto per cápita.
-          </p>
+          <p class="eyebrow">EBP · RECREATION & CULTURE</p>
+          <h1>Gasto en ocio y cultura</h1>
         </div>
       </div>
     </div>
@@ -155,169 +304,191 @@
       </div>
     {/if}
 
-    <div class="section-heading">
-      <p class="eyebrow">Management panel</p>
-      <h2>Administración de registros</h2>
-      <p>
-        Aquí puedes cargar datos iniciales, insertar nuevos registros manualmente y gestionar
-        el contenido almacenado en la API.
-      </p>
-    </div>
-
-    <div class="cards-grid two-columns">
-      <article class="team-card form-card">
-        <div class="card-top">
-          <h3>Nuevo registro</h3>
-          <span class="badge">CREATE</span>
-        </div>
-
-        <div class="form-grid">
-          <div class="field">
-            <label>País</label>
-            <input bind:value={nuevoDato.country} placeholder="País" />
-          </div>
-
-          <div class="field">
-            <label>Año</label>
-            <input bind:value={nuevoDato.year} type="number" placeholder="Año" />
-          </div>
-
-          <div class="field">
-            <label>Gasto en ocio y cultura</label>
-            <input bind:value={nuevoDato.recreation_value} type="number" placeholder="Valor" />
-          </div>
-
-          <div class="field">
-            <label>Consumo total de los hogares</label>
-            <input
-              bind:value={nuevoDato.total_household_consumption}
-              type="number"
-              placeholder="Valor"
-            />
-          </div>
-
-          <div class="field">
-            <label>Porcentaje ocio/cultura</label>
-            <input
-              bind:value={nuevoDato.recreation_share}
-              type="number"
-              step="any"
-              placeholder="%"
-            />
-          </div>
-
-          <div class="field">
-            <label>Población</label>
-            <input bind:value={nuevoDato.population} type="number" placeholder="Población" />
-          </div>
-
-          <div class="field full">
-            <label>Gasto por persona</label>
-            <input
-              bind:value={nuevoDato.recreation_per_capita}
-              type="number"
-              step="any"
-              placeholder="Per cápita"
-            />
-          </div>
-        </div>
-
-        <div class="card-links buttons-row">
-          <button class="action-btn primary" onclick={crearDato}>
-            Añadir registro
-          </button>
-          <button class="action-btn secondary" onclick={cargarDatosIniciales}>
-            Carga datos
-          </button>
-        </div>
-      </article>
-
-      <article class="team-card">
-        <div class="card-top">
-          <h3>Acciones rápidas</h3>
-          <span class="badge">TOOLS</span>
-        </div>
-
-        <p>
-          Usa esta sección para recargar el dataset inicial o limpiar completamente la base
-          de datos del recurso.
-        </p>
-
-        <div class="card-links buttons-column">
-          <button class="action-btn secondary" onclick={getDatos}>
-            Recargar listado
-          </button>
-          <button class="action-btn secondary" onclick={cargarDatosIniciales}>
-            Cargar datos iniciales
-          </button>
-          <button class="action-btn danger" onclick={borrarTodo}>
-            Limpiar base de datos completa
-          </button>
-        </div>
-      </article>
-    </div>
-
-    <div class="table-card">
-      <div class="card-top table-head">
-        <div>
-          <p class="eyebrow dark">Stored dataset</p>
-          <h3>Listado de registros</h3>
-        </div>
-        <span class="badge">{datos.length} registros</span>
+    <!-- BARRA SUPERIOR DE BÚSQUEDA Y FILTROS -->
+    <div class="search-panel">
+      <div class="search-panel-header">
+        <h3>Búsqueda y filtros</h3>
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>País</th>
-              <th>Año</th>
-              <th>Gasto ocio/cultura</th>
-              <th>Consumo hogares</th>
-              <th>% ocio/cultura</th>
-              <th>Población</th>
-              <th>Gasto per cápita</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
+      <div class="search-grid">
+        <div class="field">
+          <label>País</label>
+          <input bind:value={filtros.country} placeholder="Ej. Canada" />
+        </div>
 
-          <tbody>
-            {#each datos as d}
-              <tr>
-                <td>{d.country}</td>
-                <td>{d.year}</td>
-                <td>{d.recreation_value}</td>
-                <td>{d.total_household_consumption}</td>
-                <td>{d.recreation_share}</td>
-                <td>{d.population}</td>
-                <td>{d.recreation_per_capita}</td>
-                <td>
-                  <button
-                    class="mini-btn delete"
-                    onclick={() => borrarDato(d.country, d.year)}
-                  >
-                    Borrar
-                  </button>
-                </td>
-              </tr>
-            {/each}
+        <div class="field">
+          <label>Año exacto</label>
+          <input bind:value={filtros.year} type="number" placeholder="Ej. 2024" />
+        </div>
 
-            {#if datos.length === 0}
-              <tr>
-                <td colspan="8" class="empty-state">
-                  No hay registros cargados todavía.
-                </td>
-              </tr>
+        <div class="field">
+          <label>Desde el año</label>
+          <input bind:value={filtros.from} type="number" placeholder="Ej. 2020" />
+        </div>
+
+        <div class="field">
+          <label>Hasta el año</label>
+          <input bind:value={filtros.to} type="number" placeholder="Ej. 2024" />
+        </div>
+
+        <div class="field">
+          <label>Gasto mínimo en ocio y cultura</label>
+          <input bind:value={filtros.min_recreation_value} type="number" placeholder="Mínimo" />
+        </div>
+
+        <div class="field">
+          <label>Gasto máximo en ocio y cultura</label>
+          <input bind:value={filtros.max_recreation_value} type="number" placeholder="Máximo" />
+        </div>
+
+        <div class="field">
+          <label>Población mínima</label>
+          <input bind:value={filtros.min_population} type="number" placeholder="Mínima" />
+        </div>
+
+        <div class="field">
+          <label>Población máxima</label>
+          <input bind:value={filtros.max_population} type="number" placeholder="Máxima" />
+        </div>
+      </div>
+
+      <div class="search-actions">
+        <button class="action-btn secondary" onclick={buscarDatos}>
+          Aplicar filtros
+        </button>
+        <button class="action-btn clear-btn" onclick={limpiarBusqueda}>
+          Limpiar filtros
+        </button>
+      </div>
+    </div>
+
+    <div class="dashboard-layout">
+      <!-- PANEL GRANDE: LISTADO + ACCIONES GLOBALES -->
+      <div class="main-column">
+        <div class="main-panel">
+          <div class="panel-header">
+            <h3>Listado de registros</h3>
+            <span class="counter-badge">{datos.length} registros</span>
+          </div>
+
+          <div class="list-area">
+            {#if datos.length > 0}
+              <div class="records-table-wrap">
+                <div class="records-table">
+                  <div class="records-head">
+                    <div>País</div>
+                    <div>Año</div>
+                    <div>Gasto ocio/cultura</div>
+                    <div>Consumo hogares</div>
+                    <div>% ocio/cultura</div>
+                    <div>Población</div>
+                    <div>Gasto por persona</div>
+                    <div>Acciones</div>
+                  </div>
+
+                  {#each datos as d}
+                    <div class="records-row">
+                      <div>{d.country}</div>
+                      <div>{d.year}</div>
+                      <div>{d.recreation_value}</div>
+                      <div>{d.total_household_consumption}</div>
+                      <div>{d.recreation_share}</div>
+                      <div>{d.population}</div>
+                      <div>{d.recreation_per_capita}</div>
+                      <div class="row-actions">
+                        <a
+                          class="mini-btn edit link-btn"
+                          href={`/recreation-culture-expenditure/${encodeURIComponent(d.country)}/${d.year}`}
+                        >
+                          Editar
+                        </a>
+                        <button
+                          class="mini-btn delete"
+                          onclick={() => borrarDato(d.country, d.year)}
+                        >
+                          Borrar
+                        </button>
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              </div>
+            {:else}
+              <div class="empty-state-box">
+                No hay registros cargados todavía.
+              </div>
             {/if}
-          </tbody>
-        </table>
+          </div>
+
+          <div class="panel-actions">
+            <button class="action-btn secondary" onclick={cargarDatosIniciales}>
+              Cargar datos iniciales
+            </button>
+
+            <button class="action-btn danger" onclick={borrarTodo}>
+              Eliminar todos los registros
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL PEQUEÑO: CREAR NUEVO REGISTRO -->
+      <div class="side-column">
+        <article class="side-panel">
+          <div class="card-top">
+            <h3>Nuevo registro</h3>
+            <span class="badge">Alta</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label>País</label>
+              <input bind:value={nuevoDato.country} placeholder="Ej. Canada" />
+            </div>
+
+            <div class="field">
+              <label>Año</label>
+              <input bind:value={nuevoDato.year} type="number" placeholder="Ej. 2024" />
+            </div>
+
+            <div class="field">
+              <label>Gasto en ocio y cultura</label>
+              <input bind:value={nuevoDato.recreation_value} type="number" placeholder="Valor" />
+            </div>
+
+            <div class="field">
+              <label>Consumo total de los hogares</label>
+              <input
+                bind:value={nuevoDato.total_household_consumption}
+                type="number"
+                placeholder="Valor"
+              />
+            </div>
+
+            <div class="field full">
+              <label>Población</label>
+              <input bind:value={nuevoDato.population} type="number" placeholder="Población" />
+            </div>
+          </div>
+
+          <p class="helper-text">
+            El porcentaje de ocio/cultura y el gasto por persona se calculan automáticamente
+            en el servidor.
+          </p>
+
+          <div class="card-links buttons-row">
+            <button class="action-btn secondary" onclick={crearDato}>
+              Añadir registro
+            </button>
+          </div>
+        </article>
       </div>
     </div>
   </section>
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap');
 
   :global(html) {
     scroll-behavior: smooth;
@@ -325,202 +496,289 @@
 
   :global(body) {
     margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    color: #111827;
-    background:
-      radial-gradient(circle at 48% 38%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.38) 18%, rgba(255, 255, 255, 0) 34%),
-      linear-gradient(90deg, #8b0f45 0%, #b74263 22%, #f4d7cf 50%, #d98a67 76%, #c96b4b 100%);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    color: #2f3a39;
+    background: linear-gradient(120deg, #485a57 0%, #6f827e 24%, #9fb0ad 58%, #d2ddd8 100%);
     min-height: 100vh;
+    letter-spacing: 0.01em;
   }
 
   .page {
-    padding: 14px 18px 40px;
+    padding: 16px 18px 22px;
   }
 
   .hero-shell,
   .cards-section {
-    max-width: 1420px;
+    max-width: 1460px;
     margin: 0 auto;
   }
 
   .hero-card {
     position: relative;
-    overflow: hidden;
     border-radius: 28px;
-    background:
-      linear-gradient(rgba(20, 16, 14, 0.28), rgba(20, 16, 14, 0.28)),
-      url('/hero-campus.jpg') center/cover no-repeat;
-    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
-  }
-
-  .small-hero {
-    min-height: 420px;
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.52) 0%,
-      rgba(0, 0, 0, 0.22) 40%,
-      rgba(0, 0, 0, 0.12) 100%
-    );
-    pointer-events: none;
+    margin-bottom: 14px;
   }
 
   .hero-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: flex-start;
-    min-height: 420px;
-    padding: 78px 58px 48px;
+    padding: 6px 4px 8px;
   }
 
   .hero-text {
     max-width: 760px;
-    color: #fffaf6;
-  }
-
-  .hero-text h1 {
-    margin: 0 0 18px;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(3.4rem, 6vw, 5.6rem);
-    line-height: 0.92;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-  }
-
-  .hero-text p {
-    margin: 0;
-    font-size: 1.08rem;
-    line-height: 1.75;
-    color: rgba(255, 248, 242, 0.96);
-  }
-
-  .cards-section {
-    margin-top: 30px;
-  }
-
-  .section-heading {
-    margin-bottom: 20px;
-    color: #fff7f2;
+    color: #f6f4ef;
   }
 
   .eyebrow {
-    margin: 0 0 8px;
+    margin: 0 0 6px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.82rem;
     font-weight: 700;
-    color: rgba(255, 247, 241, 0.88);
+    color: rgba(246, 244, 239, 0.95);
   }
 
-  .eyebrow.dark {
-    color: #7a1837;
-  }
-
-  .section-heading h2 {
-    margin: 0 0 10px;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(2.2rem, 4vw, 3.4rem);
-    font-weight: 600;
-    color: #fff9f5;
-  }
-
-  .section-heading p {
+  .hero-text h1 {
     margin: 0;
-    max-width: 900px;
-    line-height: 1.7;
-    color: rgba(255, 245, 238, 0.95);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(2.8rem, 4.6vw, 4.2rem);
+    line-height: 0.98;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: #f6f4ef;
+  }
+
+  .cards-section {
+    margin-top: 4px;
   }
 
   .alert-box {
-    margin-bottom: 18px;
-    padding: 14px 16px;
+    margin-bottom: 14px;
+    padding: 12px 14px;
     border-radius: 16px;
     font-weight: 700;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 22px rgba(47, 58, 57, 0.08);
+    font-size: 0.92rem;
   }
 
   .alert-success {
-    background: rgba(236, 253, 245, 0.92);
-    color: #065f46;
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: rgba(230, 243, 236, 0.96);
+    color: #2e5a49;
+    border: 1px solid rgba(46, 90, 73, 0.14);
   }
 
   .alert-error {
-    background: rgba(254, 242, 242, 0.94);
-    color: #991b1b;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(248, 221, 218, 0.96);
+    color: #8a3a35;
+    border: 1px solid rgba(138, 58, 53, 0.14);
   }
 
-  .cards-grid {
-    display: grid;
-    gap: 20px;
-  }
-
-  .two-columns {
-    grid-template-columns: 1.35fr 0.85fr;
-    margin-bottom: 24px;
-  }
-
-  .team-card,
-  .table-card {
-    background: rgba(250, 245, 239, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.32);
+  .search-panel {
+    background: #f7f8f6;
     border-radius: 24px;
-    padding: 22px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 14px 32px rgba(47, 58, 57, 0.08);
   }
 
-  .card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+  .search-panel-header {
     margin-bottom: 14px;
   }
 
-  .team-card h3,
-  .table-card h3 {
+  .search-panel-header h3 {
     margin: 0;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 2rem;
-    line-height: 1;
-    color: #111827;
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: #2f3a39;
   }
 
+  .search-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .search-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .clear-btn {
+    background: #e8e5df;
+    color: #2f3a39;
+  }
+
+  .dashboard-layout {
+    display: grid;
+    grid-template-columns: 1.95fr 0.72fr;
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  .main-column,
+  .side-column {
+    display: flex;
+  }
+
+  .main-panel,
+  .side-panel {
+    width: 100%;
+    background: #f7f8f6;
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 0 14px 32px rgba(47, 58, 57, 0.08);
+  }
+
+  .main-panel,
+  .side-panel {
+    min-height: 620px;
+  }
+
+  .main-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-header,
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .panel-header h3,
+  .card-top h3 {
+    margin: 0;
+    font-size: 1.18rem;
+    line-height: 1.1;
+    font-weight: 600;
+    color: #2f3a39;
+    letter-spacing: 0.01em;
+  }
+
+  .counter-badge,
   .badge {
-    background: #efe3b1;
-    color: #111827;
+    background: #e8e5df;
+    color: #2f3a39;
     border-radius: 999px;
-    padding: 7px 12px;
-    font-size: 0.8rem;
+    padding: 6px 11px;
+    font-size: 0.76rem;
     font-weight: 700;
     white-space: nowrap;
   }
 
-  .team-card p {
-    margin: 0 0 10px;
-    color: #374151;
-    line-height: 1.7;
+  .list-area {
+    flex: 1;
+    min-height: 520px;
+    height: 520px;
+    display: flex;
+  }
+
+  .records-table-wrap {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: 520px;
+    max-height: 520px;
+    overflow: auto;
+    border-radius: 16px;
+    background: #fbfbfa;
+    border: 1px solid rgba(47, 58, 57, 0.07);
+  }
+
+  .records-table {
+    width: 100%;
+    min-width: 980px;
+  }
+
+  .empty-state-box {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: 520px;
+    background: #fbfbfa;
+    border-radius: 16px;
+    padding: 22px;
+    text-align: center;
+    color: #6a7674;
+    font-style: italic;
+    border: 1px solid rgba(47, 58, 57, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .records-head,
+  .records-row {
+    display: grid;
+    grid-template-columns: 1fr 0.6fr 1.1fr 1.15fr 0.8fr 0.9fr 0.95fr 1.2fr;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+  }
+
+  .records-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #efefec;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #53615f;
+    border-bottom: 1px solid rgba(47, 58, 57, 0.08);
+  }
+
+  .records-row {
+    font-size: 0.88rem;
+    color: #3d4b49;
+    border-bottom: 1px solid rgba(47, 58, 57, 0.06);
+    background: #fbfbfa;
+  }
+
+  .records-row:last-child {
+    border-bottom: none;
+  }
+
+  .records-row:hover {
+    background: #f4f5f2;
+  }
+
+  .row-actions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .panel-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 
   .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    margin-top: 10px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 4px;
   }
 
   .field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
   }
 
   .field.full {
@@ -528,51 +786,54 @@
   }
 
   .field label {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #7a1837;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #2f3a39;
   }
 
   .field input {
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid rgba(122, 24, 55, 0.14);
-    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(47, 58, 57, 0.12);
+    background: #fbfbfa;
     border-radius: 14px;
-    padding: 13px 14px;
-    font-size: 0.96rem;
-    color: #111827;
+    padding: 12px 13px;
+    font-size: 0.92rem;
+    color: #2f3a39;
     outline: none;
-    transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
   }
 
   .field input:focus {
-    border-color: #b74263;
-    background: #ffffff;
+    border-color: #e97b6c;
     transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(233, 123, 108, 0.12);
   }
 
-  .card-links {
+  .helper-text {
+    margin-top: 12px;
+    font-size: 0.84rem;
+    color: #6a7674;
+    line-height: 1.5;
+  }
+
+  .card-links,
+  .buttons-row {
     display: flex;
     gap: 10px;
-    margin-top: 18px;
-  }
-
-  .buttons-row {
+    margin-top: 16px;
     flex-wrap: wrap;
-  }
-
-  .buttons-column {
-    flex-direction: column;
   }
 
   .action-btn,
   .mini-btn {
     border: none;
     cursor: pointer;
-    font-family: inherit;
-    font-weight: 700;
-    transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-weight: 600;
+    border-radius: 999px;
+    transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
   }
 
   .action-btn:hover,
@@ -581,112 +842,98 @@
   }
 
   .action-btn {
-    border-radius: 14px;
-    padding: 12px 16px;
-    font-size: 0.95rem;
+    padding: 11px 16px;
+    font-size: 0.9rem;
   }
 
-  .primary {
-    background: #7a1837;
-    color: #fffaf6;
-  }
-
-  .secondary {
-    background: rgba(255, 255, 255, 0.7);
-    color: #7a1837;
-  }
-
-  .danger {
-    background: #b42318;
-    color: #fff;
-  }
-
-  .table-head {
-    margin-bottom: 18px;
-  }
-
-  .table-wrap {
-    overflow-x: auto;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.52);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 980px;
-  }
-
-  thead th {
-    text-align: left;
-    padding: 15px 14px;
-    font-size: 0.88rem;
-    color: #7a1837;
-    background: rgba(247, 238, 231, 0.92);
-    border-bottom: 1px solid rgba(122, 24, 55, 0.12);
-  }
-
-  tbody td {
-    padding: 14px;
-    color: #374151;
-    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
-    background: rgba(255, 255, 255, 0.58);
-  }
-
-  tbody tr:hover td {
-    background: rgba(255, 255, 255, 0.78);
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
   }
 
   .mini-btn {
-    border-radius: 10px;
-    padding: 9px 12px;
-    font-size: 0.88rem;
+    padding: 8px 13px;
+    font-size: 0.84rem;
   }
 
+  .primary {
+    background: #e97b6c;
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(233, 123, 108, 0.18);
+  }
+
+  .secondary {
+    background: #7f9c96;
+    color: #ffffff;
+  }
+
+  .edit {
+    background: #d9e4df;
+    color: #33524c;
+  }
+
+  .danger,
   .mini-btn.delete {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .empty-state {
-    text-align: center;
-    font-style: italic;
-    color: #6b7280;
-    padding: 24px;
+    background: #e3a097;
+    color: #7a2a24;
   }
 
   @media (max-width: 1100px) {
-    .two-columns {
+    .dashboard-layout {
       grid-template-columns: 1fr;
     }
 
-    .form-grid {
-      grid-template-columns: 1fr;
+    .search-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .main-panel,
+    .side-panel {
+      min-height: auto;
+    }
+
+    .records-table-wrap {
+      width: 100%;
+      min-width: 100%;
+      max-width: 100%;
+      height: 420px;
+      max-height: 420px;
+    }
+
+    .empty-state-box {
+      width: 100%;
+      min-width: 100%;
+      max-width: 100%;
+      height: 420px;
     }
   }
 
   @media (max-width: 820px) {
     .page {
-      padding: 12px 12px 30px;
+      padding: 12px 12px 20px;
     }
 
     .hero-content {
-      padding: 54px 24px 30px;
-      min-height: 340px;
+      padding: 2px 2px 8px;
     }
 
     .hero-text h1 {
-      font-size: clamp(2.8rem, 12vw, 4.5rem);
+      font-size: clamp(2.2rem, 10vw, 3.5rem);
     }
 
-    .hero-text p {
-      font-size: 1rem;
-      line-height: 1.65;
+    .search-grid {
+      grid-template-columns: 1fr;
     }
 
-    .team-card,
-    .table-card {
-      padding: 18px;
+    .main-panel,
+    .side-panel {
+      padding: 16px;
+    }
+
+    .records-table {
+      min-width: 1080px;
     }
   }
 </style>
