@@ -9,12 +9,6 @@
 <script>
   import { onMount } from "svelte";
 
-  // =========================================================
-  // FUNCIÓN AUXILIAR:
-  // Crea la estructura inicial del formulario para añadir
-  // un nuevo registro.
-  // Solo incluye los campos principales.
-  // =========================================================
   const crearDatoInicial = () => ({
     country: "",
     year: "",
@@ -23,18 +17,13 @@
     population: ""
   });
 
-  // =========================================================
-  // ESTADO DEL COMPONENTE
-  // =========================================================
   let datos = $state([]);
   let nuevoDato = $state(crearDatoInicial());
   let mensaje = $state("");
   let esError = $state(false);
+  let mostrarPanelFiltros = $state(false);
 
-  // =========================================================
-  // FILTROS DE BÚSQUEDA
-  // Ajusta los nombres si tu API usa otros parámetros.
-  // =========================================================
+  // Estado de filtros del frontend
   let filtros = $state({
     country: "",
     year: "",
@@ -46,15 +35,8 @@
     max_population: ""
   });
 
-  // =========================================================
-  // URL BASE DE LA API
-  // =========================================================
   const API = "/api/v2/recreation-culture-expenditure";
 
-  // =========================================================
-  // FUNCIÓN AUXILIAR:
-  // Muestra un mensaje de éxito o error.
-  // =========================================================
   function mostrarMensaje(texto, error = false) {
     mensaje = texto;
     esError = error;
@@ -64,10 +46,6 @@
     }, 3500);
   }
 
-  // =========================================================
-  // GET /api/v2/recreation-culture-expenditure
-  // Obtiene todos los registros de la API.
-  // =========================================================
   async function getDatos() {
     try {
       const res = await fetch(API);
@@ -82,19 +60,61 @@
     }
   }
 
-  // =========================================================
-  // BÚSQUEDA / FILTRADO
-  // Construye la query string con los filtros que tengan valor.
-  // =========================================================
   async function buscarDatos() {
     try {
       const queryParams = new URLSearchParams();
 
-      Object.keys(filtros).forEach((key) => {
-        if (filtros[key] !== "" && filtros[key] !== null && filtros[key] !== undefined) {
-          queryParams.append(key, filtros[key]);
-        }
-      });
+      // Búsquedas exactas
+      if (filtros.country?.trim() !== "") {
+        queryParams.append("country", filtros.country.trim());
+      }
+
+      if (filtros.year !== "" && filtros.year !== null && filtros.year !== undefined) {
+        queryParams.append("year", String(filtros.year));
+      }
+
+      // Rangos de año
+      if (filtros.from !== "" && filtros.from !== null && filtros.from !== undefined) {
+        queryParams.append("year_gte", String(filtros.from));
+      }
+
+      if (filtros.to !== "" && filtros.to !== null && filtros.to !== undefined) {
+        queryParams.append("year_lte", String(filtros.to));
+      }
+
+      // Rangos de gasto en ocio y cultura
+      if (
+        filtros.min_recreation_value !== "" &&
+        filtros.min_recreation_value !== null &&
+        filtros.min_recreation_value !== undefined
+      ) {
+        queryParams.append("recreation_value_gte", String(filtros.min_recreation_value));
+      }
+
+      if (
+        filtros.max_recreation_value !== "" &&
+        filtros.max_recreation_value !== null &&
+        filtros.max_recreation_value !== undefined
+      ) {
+        queryParams.append("recreation_value_lte", String(filtros.max_recreation_value));
+      }
+
+      // Rangos de población
+      if (
+        filtros.min_population !== "" &&
+        filtros.min_population !== null &&
+        filtros.min_population !== undefined
+      ) {
+        queryParams.append("population_gte", String(filtros.min_population));
+      }
+
+      if (
+        filtros.max_population !== "" &&
+        filtros.max_population !== null &&
+        filtros.max_population !== undefined
+      ) {
+        queryParams.append("population_lte", String(filtros.max_population));
+      }
 
       const url = queryParams.toString() ? `${API}?${queryParams.toString()}` : API;
 
@@ -111,9 +131,6 @@
     }
   }
 
-  // =========================================================
-  // LIMPIAR FILTROS Y VOLVER A MOSTRAR TODO
-  // =========================================================
   async function limpiarBusqueda() {
     filtros = {
       country: "",
@@ -130,11 +147,6 @@
     mostrarMensaje("Filtros eliminados. Se muestran todos los registros.");
   }
 
-  // =========================================================
-  // GET /loadInitialData
-  // Carga los datos iniciales si la API lo permite.
-  // Se prueban dos variantes del nombre de ruta por compatibilidad.
-  // =========================================================
   async function cargarDatosIniciales() {
     const rutas = [`${API}/loadInitialData`, `${API}/loadinitialData`];
 
@@ -162,10 +174,6 @@
     }
   }
 
-  // =========================================================
-  // VALIDACIÓN SIMPLE DEL FORMULARIO
-  // Comprueba que los campos obligatorios tengan contenido.
-  // =========================================================
   function formularioValido() {
     return (
       nuevoDato.country.trim() !== "" &&
@@ -176,11 +184,6 @@
     );
   }
 
-  // =========================================================
-  // POST /api/v2/recreation-culture-expenditure
-  // Crea un nuevo registro.
-  // Los campos derivados NO se envían porque los calcula el backend.
-  // =========================================================
   async function crearDato() {
     if (!formularioValido()) {
       mostrarMensaje(
@@ -227,10 +230,6 @@
     }
   }
 
-  // =========================================================
-  // DELETE /api/v2/recreation-culture-expenditure/:country/:year
-  // Borra un registro concreto identificado por country + year.
-  // =========================================================
   async function borrarDato(country, year) {
     if (!confirm(`¿Estás seguro de que quieres borrar el registro de ${country} (${year})?`)) {
       return;
@@ -254,10 +253,6 @@
     }
   }
 
-  // =========================================================
-  // DELETE /api/v2/recreation-culture-expenditure
-  // Borra toda la colección.
-  // =========================================================
   async function borrarTodo() {
     if (!confirm("Vas a eliminar todos los registros. ¿Deseas continuar?")) {
       return;
@@ -277,9 +272,6 @@
     }
   }
 
-  // =========================================================
-  // Carga automática de datos con onMount
-  // =========================================================
   onMount(() => {
     getDatos();
   });
@@ -304,66 +296,115 @@
       </div>
     {/if}
 
-    <!-- BARRA SUPERIOR DE BÚSQUEDA Y FILTROS -->
-    <div class="search-panel">
-      <div class="search-panel-header">
-        <h3>Búsqueda y filtros</h3>
-      </div>
-
-      <div class="search-grid">
-        <div class="field">
-          <label>País</label>
-          <input bind:value={filtros.country} placeholder="Ej. Canada" />
-        </div>
-
-        <div class="field">
-          <label>Año exacto</label>
-          <input bind:value={filtros.year} type="number" placeholder="Ej. 2024" />
-        </div>
-
-        <div class="field">
-          <label>Desde el año</label>
-          <input bind:value={filtros.from} type="number" placeholder="Ej. 2020" />
-        </div>
-
-        <div class="field">
-          <label>Hasta el año</label>
-          <input bind:value={filtros.to} type="number" placeholder="Ej. 2024" />
-        </div>
-
-        <div class="field">
-          <label>Gasto mínimo en ocio y cultura</label>
-          <input bind:value={filtros.min_recreation_value} type="number" placeholder="Mínimo" />
-        </div>
-
-        <div class="field">
-          <label>Gasto máximo en ocio y cultura</label>
-          <input bind:value={filtros.max_recreation_value} type="number" placeholder="Máximo" />
-        </div>
-
-        <div class="field">
-          <label>Población mínima</label>
-          <input bind:value={filtros.min_population} type="number" placeholder="Mínima" />
-        </div>
-
-        <div class="field">
-          <label>Población máxima</label>
-          <input bind:value={filtros.max_population} type="number" placeholder="Máxima" />
-        </div>
-      </div>
-
-      <div class="search-actions">
-        <button class="action-btn secondary" onclick={buscarDatos}>
-          Aplicar filtros
-        </button>
-        <button class="action-btn clear-btn" onclick={limpiarBusqueda}>
-          Limpiar filtros
-        </button>
-      </div>
+    <div class="search-toolbar">
+      <button
+        class="filters-main-btn"
+        type="button"
+        on:click={() => (mostrarPanelFiltros = !mostrarPanelFiltros)}
+      >
+        {#if mostrarPanelFiltros}
+          Ocultar búsqueda y filtros
+        {:else}
+          Búsqueda y filtros
+        {/if}
+      </button>
     </div>
 
+    {#if mostrarPanelFiltros}
+      <div class="search-panel">
+        <div class="search-panel-header">
+          <h3>Buscar registros</h3>
+          <p class="search-subtitle">
+            Completa solo los filtros que quieras usar y pulsa en buscar.
+          </p>
+        </div>
+
+        <div class="filters-grid">
+          <div class="field">
+            <label>País</label>
+            <input
+              bind:value={filtros.country}
+              type="text"
+              placeholder="Ej. Canada"
+            />
+          </div>
+
+          <div class="field">
+            <label>Año exacto</label>
+            <input
+              bind:value={filtros.year}
+              type="number"
+              placeholder="Ej. 2024"
+            />
+          </div>
+
+          <div class="field">
+            <label>Desde el año</label>
+            <input
+              bind:value={filtros.from}
+              type="number"
+              placeholder="Ej. 2020"
+            />
+          </div>
+
+          <div class="field">
+            <label>Hasta el año</label>
+            <input
+              bind:value={filtros.to}
+              type="number"
+              placeholder="Ej. 2024"
+            />
+          </div>
+
+          <div class="field">
+            <label>Gasto mínimo en ocio y cultura</label>
+            <input
+              bind:value={filtros.min_recreation_value}
+              type="number"
+              placeholder="Mínimo"
+            />
+          </div>
+
+          <div class="field">
+            <label>Gasto máximo en ocio y cultura</label>
+            <input
+              bind:value={filtros.max_recreation_value}
+              type="number"
+              placeholder="Máximo"
+            />
+          </div>
+
+          <div class="field">
+            <label>Población mínima</label>
+            <input
+              bind:value={filtros.min_population}
+              type="number"
+              placeholder="Mínima"
+            />
+          </div>
+
+          <div class="field">
+            <label>Población máxima</label>
+            <input
+              bind:value={filtros.max_population}
+              type="number"
+              placeholder="Máxima"
+            />
+          </div>
+        </div>
+
+        <div class="search-actions">
+          <button class="action-btn secondary" on:click={buscarDatos}>
+            Buscar
+          </button>
+          <button class="action-btn clear-btn" on:click={limpiarBusqueda}>
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+    {/if}
+
     <div class="dashboard-layout">
-      <!-- PANEL GRANDE: LISTADO + ACCIONES GLOBALES -->
       <div class="main-column">
         <div class="main-panel">
           <div class="panel-header">
@@ -404,7 +445,7 @@
                         </a>
                         <button
                           class="mini-btn delete"
-                          onclick={() => borrarDato(d.country, d.year)}
+                          on:click={() => borrarDato(d.country, d.year)}
                         >
                           Borrar
                         </button>
@@ -421,18 +462,17 @@
           </div>
 
           <div class="panel-actions">
-            <button class="action-btn secondary" onclick={cargarDatosIniciales}>
+            <button class="action-btn secondary" on:click={cargarDatosIniciales}>
               Cargar datos iniciales
             </button>
 
-            <button class="action-btn danger" onclick={borrarTodo}>
+            <button class="action-btn danger" on:click={borrarTodo}>
               Eliminar todos los registros
             </button>
           </div>
         </div>
       </div>
 
-      <!-- PANEL PEQUEÑO: CREAR NUEVO REGISTRO -->
       <div class="side-column">
         <article class="side-panel">
           <div class="card-top">
@@ -477,7 +517,7 @@
           </p>
 
           <div class="card-links buttons-row">
-            <button class="action-btn secondary" onclick={crearDato}>
+            <button class="action-btn secondary" on:click={crearDato}>
               Añadir registro
             </button>
           </div>
@@ -572,6 +612,30 @@
     border: 1px solid rgba(138, 58, 53, 0.14);
   }
 
+  .search-toolbar {
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .filters-main-btn {
+    border: none;
+    background: #f7f8f6;
+    color: #2f3a39;
+    border-radius: 999px;
+    padding: 13px 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    box-shadow: 0 14px 32px rgba(47, 58, 57, 0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .filters-main-btn:hover {
+    transform: translateY(-1px);
+  }
+
   .search-panel {
     background: #f7f8f6;
     border-radius: 24px;
@@ -591,7 +655,14 @@
     color: #2f3a39;
   }
 
-  .search-grid {
+  .search-subtitle {
+    margin: 6px 0 0;
+    font-size: 0.9rem;
+    color: #6a7674;
+    line-height: 1.45;
+  }
+
+  .filters-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
@@ -885,7 +956,7 @@
       grid-template-columns: 1fr;
     }
 
-    .search-grid {
+    .filters-grid {
       grid-template-columns: repeat(2, 1fr);
     }
 
@@ -923,7 +994,7 @@
       font-size: clamp(2.2rem, 10vw, 3.5rem);
     }
 
-    .search-grid {
+    .filters-grid {
       grid-template-columns: 1fr;
     }
 

@@ -1,43 +1,47 @@
-{"year":2022,"country":"Ireland","recreation_value":8954000000,"total_household_consumption":124192688000,"population":5212836,"recreation_share":7.21,"recreation_per_capita":1717.68,"_id":"1TBQeTFzhPienlRV"}
-{"year":2024,"country":"United Kingdom","recreation_value":158522000000,"total_household_consumption":1706364000000,"population":69226000,"recreation_share":9.29,"recreation_per_capita":2289.92,"_id":"4NrmeQKbTvZBPvh0"}
-{"year":2022,"country":"Spain","recreation_value":63671000000,"total_household_consumption":759001000000,"population":47786102,"recreation_share":8.39,"recreation_per_capita":1332.42,"_id":"5VPTouRyWl05Yy8o"}
-{"year":2024,"country":"Canada","recreation_value":127727000000,"total_household_consumption":1654821000000,"population":41288599,"recreation_share":7.72,"recreation_per_capita":3093.52,"_id":"AOp11PwPmPvCE6Cx"}
-{"year":2023,"country":"Italy","recreation_value":85658000000,"total_household_consumption":1218946100000,"population":58984216,"recreation_share":7.03,"recreation_per_capita":1452.22,"_id":"Cv8P4gJTRXslYpdY"}
-{"year":2022,"country":"Germany","recreation_value":187327000000,"total_household_consumption":2017981000000,"population":83177813,"recreation_share":9.28,"recreation_per_capita":2252.13,"_id":"OXpr5ReGlh9bK3B0"}
-{"year":2022,"country":"Italy","recreation_value":79846000000,"total_household_consumption":1156909900000,"population":59013667,"recreation_share":6.9,"recreation_per_capita":1353.01,"_id":"WzbHhTBuvxSv7jYn"}
-{"year":2023,"country":"Ireland","recreation_value":9931000000,"total_household_consumption":140665460000,"population":5311538,"recreation_share":7.06,"recreation_per_capita":1869.7,"_id":"caAUl49mv8UKDL68"}
-{"year":2023,"country":"Canada","recreation_value":124522000000,"total_household_consumption":1572103000000,"population":40083484,"recreation_share":7.92,"recreation_per_capita":3106.57,"_id":"iY8I1vje69pAs711"}
-{"year":2023,"country":"Poland","recreation_value":118473000000,"total_household_consumption":1934063000000,"population":36687353,"recreation_share":6.13,"recreation_per_capita":3229.26,"_id":"iuwinzhrTYuageZW"}
-{"year":2022,"country":"Canada","recreation_value":118767000000,"total_household_consumption":1488875000000,"population":38935934,"recreation_share":7.98,"recreation_per_capita":3050.32,"_id":"ld8fuZHzo3GyQPuq"}
-{"year":2022,"country":"Poland","recreation_value":101603000000,"total_household_consumption":1772069000000,"population":36821749,"recreation_share":5.73,"recreation_per_capita":2759.32,"_id":"qQxrBu3WauKvUb0t"}
-{"year":2023,"country":"United Kingdom","recreation_value":151870000000,"total_household_consumption":1646716000000,"population":68492000,"recreation_share":9.22,"recreation_per_capita":2217.34,"_id":"viDvbScWyQyqX6sE"}
-{"year":2023,"country":"United States","recreation_value":1797911000000,"total_household_consumption":18268702000000,"population":336806231,"recreation_share":9.84,"recreation_per_capita":5338.12,"_id":"xwAncSYCrL7w0Sh7"}
-{"$$deleted":true,"_id":"1TBQeTFzhPienlRV"}
-{"$$deleted":true,"_id":"4NrmeQKbTvZBPvh0"}
-{"$$deleted":true,"_id":"5VPTouRyWl05Yy8o"}
-{"$$deleted":true,"_id":"AOp11PwPmPvCE6Cx"}
-{"$$deleted":true,"_id":"Cv8P4gJTRXslYpdY"}
-{"$$deleted":true,"_id":"OXpr5ReGlh9bK3B0"}
-{"$$deleted":true,"_id":"WzbHhTBuvxSv7jYn"}
-{"$$deleted":true,"_id":"caAUl49mv8UKDL68"}
-{"$$deleted":true,"_id":"iY8I1vje69pAs711"}
-{"$$deleted":true,"_id":"iuwinzhrTYuageZW"}
-{"$$deleted":true,"_id":"ld8fuZHzo3GyQPuq"}
-{"$$deleted":true,"_id":"qQxrBu3WauKvUb0t"}
-{"$$deleted":true,"_id":"viDvbScWyQyqX6sE"}
-{"$$deleted":true,"_id":"xwAncSYCrL7w0Sh7"}
-{"year":2024,"country":"Canada","recreation_value":127727000000,"total_household_consumption":1654821000000,"population":41288599,"recreation_share":7.72,"recreation_per_capita":3093.52,"_id":"tyLBvLRlbpwFQL91"}
-{"year":2023,"country":"Canada","recreation_value":124522000000,"total_household_consumption":1572103000000,"population":40083484,"recreation_share":7.92,"recreation_per_capita":3106.57,"_id":"jAHqChKs97DtaDR4"}
-{"year":2022,"country":"Canada","recreation_value":118767000000,"total_household_consumption":1488875000000,"population":38935934,"recreation_share":7.98,"recreation_per_capita":3050.32,"_id":"edIbp5EEMk4KoYp8"}
-{"year":2022,"country":"Germany","recreation_value":187327000000,"total_household_consumption":2017981000000,"population":83177813,"recreation_share":9.28,"recreation_per_capita":2252.13,"_id":"c9Mmf9dPuNvflphc"}
-{"year":2023,"country":"Ireland","recreation_value":9931000000,"total_household_consumption":140665460000,"population":5311538,"recreation_share":7.06,"recreation_per_capita":1869.7,"_id":"CevK9hHlVadeVtZe"}
-{"year":2022,"country":"Ireland","recreation_value":8954000000,"total_household_consumption":124192688000,"population":5212836,"recreation_share":7.21,"recreation_per_capita":1717.68,"_id":"uYv2cVRda5fxRTbq"}
-{"year":2023,"country":"Italy","recreation_value":85658000000,"total_household_consumption":1218946100000,"population":58984216,"recreation_share":7.03,"recreation_per_capita":1452.22,"_id":"KECfp02LxUIQOluH"}
-{"year":2022,"country":"Italy","recreation_value":79846000000,"total_household_consumption":1156909900000,"population":59013667,"recreation_share":6.9,"recreation_per_capita":1353.01,"_id":"JXWDx8XUciYPFX90"}
-{"year":2023,"country":"Poland","recreation_value":118473000000,"total_household_consumption":1934063000000,"population":36687353,"recreation_share":6.13,"recreation_per_capita":3229.26,"_id":"LTGjfWcYBhscUlM1"}
-{"year":2022,"country":"Poland","recreation_value":101603000000,"total_household_consumption":1772069000000,"population":36821749,"recreation_share":5.73,"recreation_per_capita":2759.32,"_id":"6ZN38RjeEn9RMp0F"}
-{"year":2022,"country":"Spain","recreation_value":63671000000,"total_household_consumption":759001000000,"population":47786102,"recreation_share":8.39,"recreation_per_capita":1332.42,"_id":"IxHGOSTw7t94FIDy"}
-{"year":2024,"country":"United Kingdom","recreation_value":158522000000,"total_household_consumption":1706364000000,"population":69226000,"recreation_share":9.29,"recreation_per_capita":2289.92,"_id":"Q38h7gMFAEU223lj"}
-{"year":2023,"country":"United Kingdom","recreation_value":151870000000,"total_household_consumption":1646716000000,"population":68492000,"recreation_share":9.22,"recreation_per_capita":2217.34,"_id":"Sj610mM58Fr2tX4d"}
-{"year":2022,"country":"United Kingdom","recreation_value":149789000000,"total_household_consumption":1534744000000,"population":67604000,"recreation_share":9.76,"recreation_per_capita":2215.68,"_id":"28U9DMhpFvqpMns3"}
-{"year":2023,"country":"United States","recreation_value":1797911000000,"total_household_consumption":18268702000000,"population":336806231,"recreation_share":9.84,"recreation_per_capita":5338.12,"_id":"4Aq5dmkA6Y7CcMC7"}
+{"year":2023,"country":"Canada","recreation_value":124522000000,"total_household_consumption":1572103000000,"population":40083484,"recreation_share":7.92,"recreation_per_capita":3106.57,"_id":"4vz5RAbQzSVMvQFx"}
+{"year":2023,"country":"Ireland","recreation_value":9931000000,"total_household_consumption":140665460000,"population":5311538,"recreation_share":7.06,"recreation_per_capita":1869.7,"_id":"BI5A4KVrrMFYDkTb"}
+{"year":2024,"country":"Canada","recreation_value":127727000000,"total_household_consumption":1654821000000,"population":41288599,"recreation_share":7.72,"recreation_per_capita":3093.52,"_id":"YakC32zEDaz3eJXG"}
+{"year":2022,"country":"Italy","recreation_value":79846000000,"total_household_consumption":1156909900000,"population":59013667,"recreation_share":6.9,"recreation_per_capita":1353.01,"_id":"ZVKIXk7GRgcrli6p"}
+{"year":2022,"country":"Canada","recreation_value":118767000000,"total_household_consumption":1488875000000,"population":38935934,"recreation_share":7.98,"recreation_per_capita":3050.32,"_id":"ZiQHkZM550q3xybg"}
+{"year":2023,"country":"Italy","recreation_value":85658000000,"total_household_consumption":1218946100000,"population":58984216,"recreation_share":7.03,"recreation_per_capita":1452.22,"_id":"f7rvMvCYiWdcWZrV"}
+{"year":2022,"country":"Ireland","recreation_value":8954000000,"total_household_consumption":124192688000,"population":5212836,"recreation_share":7.21,"recreation_per_capita":1717.68,"_id":"gE2uQQFfXeY3RRWs"}
+{"year":2022,"country":"Poland","recreation_value":101603000000,"total_household_consumption":1772069000000,"population":36821749,"recreation_share":5.73,"recreation_per_capita":2759.32,"_id":"iQeZwEuq1b67y0dk"}
+{"year":2023,"country":"United States","recreation_value":1797911000000,"total_household_consumption":18268702000000,"population":336806231,"recreation_share":9.84,"recreation_per_capita":5338.12,"_id":"j4s4ImzND5Z6TI6I"}
+{"year":2022,"country":"Spain","recreation_value":63671000000,"total_household_consumption":759001000000,"population":47786102,"recreation_share":8.39,"recreation_per_capita":1332.42,"_id":"jqmFVtlvLi95GKEe"}
+{"year":2022,"country":"United Kingdom","recreation_value":149789000000,"total_household_consumption":1534744000000,"population":67604000,"recreation_share":9.76,"recreation_per_capita":2215.68,"_id":"k4yYgZALWUIHyFXQ"}
+{"year":2024,"country":"United Kingdom","recreation_value":158522000000,"total_household_consumption":1706364000000,"population":69226000,"recreation_share":9.29,"recreation_per_capita":2289.92,"_id":"lWQzdNLLnDSJ1rCb"}
+{"year":2023,"country":"Poland","recreation_value":118473000000,"total_household_consumption":1934063000000,"population":36687353,"recreation_share":6.13,"recreation_per_capita":3229.26,"_id":"r0gHNVFaz0sPe9Hh"}
+{"year":2023,"country":"United Kingdom","recreation_value":151870000000,"total_household_consumption":1646716000000,"population":68492000,"recreation_share":9.22,"recreation_per_capita":2217.34,"_id":"rS1YqJsUion3mZRJ"}
+{"year":2022,"country":"Germany","recreation_value":187327000000,"total_household_consumption":2017981000000,"population":83177813,"recreation_share":9.28,"recreation_per_capita":2252.13,"_id":"xj3owR7ZOVvGMlBe"}
+{"$$deleted":true,"_id":"4vz5RAbQzSVMvQFx"}
+{"$$deleted":true,"_id":"BI5A4KVrrMFYDkTb"}
+{"$$deleted":true,"_id":"YakC32zEDaz3eJXG"}
+{"$$deleted":true,"_id":"ZVKIXk7GRgcrli6p"}
+{"$$deleted":true,"_id":"ZiQHkZM550q3xybg"}
+{"$$deleted":true,"_id":"f7rvMvCYiWdcWZrV"}
+{"$$deleted":true,"_id":"gE2uQQFfXeY3RRWs"}
+{"$$deleted":true,"_id":"iQeZwEuq1b67y0dk"}
+{"$$deleted":true,"_id":"j4s4ImzND5Z6TI6I"}
+{"$$deleted":true,"_id":"jqmFVtlvLi95GKEe"}
+{"$$deleted":true,"_id":"k4yYgZALWUIHyFXQ"}
+{"$$deleted":true,"_id":"lWQzdNLLnDSJ1rCb"}
+{"$$deleted":true,"_id":"r0gHNVFaz0sPe9Hh"}
+{"$$deleted":true,"_id":"rS1YqJsUion3mZRJ"}
+{"$$deleted":true,"_id":"xj3owR7ZOVvGMlBe"}
+{"year":2024,"country":"Canada","recreation_value":127727000000,"total_household_consumption":1654821000000,"population":41288599,"recreation_share":7.72,"recreation_per_capita":3093.52,"_id":"hGrQmy0m4ABfzR2V"}
+{"year":2023,"country":"Canada","recreation_value":124522000000,"total_household_consumption":1572103000000,"population":40083484,"recreation_share":7.92,"recreation_per_capita":3106.57,"_id":"GEwCFBVuOse1XLnS"}
+{"year":2022,"country":"Canada","recreation_value":118767000000,"total_household_consumption":1488875000000,"population":38935934,"recreation_share":7.98,"recreation_per_capita":3050.32,"_id":"ZgVApUsmbfpDqW88"}
+{"year":2022,"country":"Germany","recreation_value":187327000000,"total_household_consumption":2017981000000,"population":83177813,"recreation_share":9.28,"recreation_per_capita":2252.13,"_id":"CV383vE1tC9PHsDt"}
+{"year":2023,"country":"Ireland","recreation_value":9931000000,"total_household_consumption":140665460000,"population":5311538,"recreation_share":7.06,"recreation_per_capita":1869.7,"_id":"N86J0jdmSvbOkH9k"}
+{"year":2022,"country":"Ireland","recreation_value":8954000000,"total_household_consumption":124192688000,"population":5212836,"recreation_share":7.21,"recreation_per_capita":1717.68,"_id":"CfYaKsKovsL29SR2"}
+{"year":2023,"country":"Italy","recreation_value":85658000000,"total_household_consumption":1218946100000,"population":58984216,"recreation_share":7.03,"recreation_per_capita":1452.22,"_id":"G7nB57uiX4WtFmjk"}
+{"year":2022,"country":"Italy","recreation_value":79846000000,"total_household_consumption":1156909900000,"population":59013667,"recreation_share":6.9,"recreation_per_capita":1353.01,"_id":"hbp5mcSfI9jqkcq5"}
+{"year":2023,"country":"Poland","recreation_value":118473000000,"total_household_consumption":1934063000000,"population":36687353,"recreation_share":6.13,"recreation_per_capita":3229.26,"_id":"RnPJszDJOqwg5dWy"}
+{"year":2022,"country":"Poland","recreation_value":101603000000,"total_household_consumption":1772069000000,"population":36821749,"recreation_share":5.73,"recreation_per_capita":2759.32,"_id":"kLBwokXRVKsVdP9L"}
+{"year":2022,"country":"Spain","recreation_value":63671000000,"total_household_consumption":759001000000,"population":47786102,"recreation_share":8.39,"recreation_per_capita":1332.42,"_id":"HTswzwC73AP39eHq"}
+{"year":2024,"country":"United Kingdom","recreation_value":158522000000,"total_household_consumption":1706364000000,"population":69226000,"recreation_share":9.29,"recreation_per_capita":2289.92,"_id":"I6SqSbKY928zRF27"}
+{"year":2023,"country":"United Kingdom","recreation_value":151870000000,"total_household_consumption":1646716000000,"population":68492000,"recreation_share":9.22,"recreation_per_capita":2217.34,"_id":"yUsHp8Qtf5xsFCCL"}
+{"year":2022,"country":"United Kingdom","recreation_value":149789000000,"total_household_consumption":1534744000000,"population":67604000,"recreation_share":9.76,"recreation_per_capita":2215.68,"_id":"aC7yiMFnj1kKelzp"}
+{"year":2023,"country":"United States","recreation_value":1797911000000,"total_household_consumption":18268702000000,"population":336806231,"recreation_share":9.84,"recreation_per_capita":5338.12,"_id":"6fOAPTovHKXP45a6"}
+{"year":2021,"country":"Canada","recreation_value":85658000000,"total_household_consumption":1218946100000,"population":40083484,"recreation_share":7.03,"recreation_per_capita":2136.99,"_id":"BnvooGdANri5gBPp"}
+{"year":2021,"country":"Canada","recreation_value":85658000000,"total_household_consumption":1218946100000,"population":40083482,"recreation_share":7.03,"recreation_per_capita":2136.99,"_id":"BnvooGdANri5gBPp"}
