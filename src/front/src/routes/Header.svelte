@@ -1,272 +1,213 @@
 <script>
-  const sections = [
-    {
-      short: 'MJP',
-      frontend: '/MJP',
-      api: '/api/v1/average-monthly-wages',
-      docs: '/api/v1/average-monthly-wages/docs',
-      resource: 'average-monthly-wages',
-      member: 'María Jesús Jiménez-Espada Pallarés'
-    },
-    {
-      short: 'IRG',
-      frontend: '/international-construction-costs',
-      
-      api: '/api/v1/international-construction-costs',
-      docs: '/api/v1/international-construction-costs/docs',
-      resource: 'international-construction-costs',
-      member: 'Isaac Rodríguez Godino'
-    },
-    {
-      short: 'EBP',
-      frontend: '/recreation-culture-expenditure',
-      api: '/api/v1/recreation-culture-expenditure',
-      docs: '/api/v1/recreation-culture-expenditure/docs',
-      resource: 'recreation-culture-expenditure',
-      member: 'Elena Bejarano Periñán'
-    }
-  ];
+  let { sections = [], repoUrl = "#" } = $props();
 </script>
 
-<header class="main-header">
-  <nav class="nav-container">
-    <div class="brand">
-      <a href="/">SOS2526-24</a>
-    </div>
+<header class="site-header">
+  <div class="brand">
+    <a href="/" aria-label="Ir a la página principal">
+      <span class="brand-emoji">🌿</span>
+      <span class="brand-text">SOS2526-24</span>
+    </a>
+  </div>
 
-    <ul class="nav-menu">
-      {#each sections as section}
-        <li class="dropdown">
-          <button class="dropbtn" type="button">
-            {section.short} <span class="arrow">▾</span>
-          </button>
-
-          <div class="dropdown-content">
-            <div class="dropdown-info">
-              <p><strong>Integrante:</strong> {section.member}</p>
-              <p><strong>Fuente de datos:</strong> <code>{section.resource}</code></p>
-            </div>
-
-            <hr />
-
-            <a href={section.frontend}>🎨 Front-end</a>
-            <a href={section.api} target="_blank" rel="noreferrer">🔌 API Base</a>
-            <a href={section.docs} target="_blank" rel="noreferrer">📄 Postman Docs</a>
-          </div>
-        </li>
-      {/each}
-    </ul>
-
-    <div class="nav-actions">
-      <a href="/about" class="about-link">About</a>
-
-      <a
-        href="https://github.com/gti-sos/SOS2526-24"
-        target="_blank"
-        rel="noreferrer"
-        class="github-link"
-      >
-        GitHub 📂
-      </a>
-    </div>
+  <nav class="desktop-nav" aria-label="Navegación principal">
+    <a href="#inicio">Inicio</a>
+    <a href="#integrantes">Integrantes</a>
+    <a href="#enlaces">Enlaces</a>
+    <a href="#footer-info">Información</a>
   </nav>
+
+  <div class="dataset-dropdowns" aria-label="Bases de datos del proyecto">
+    {#each sections as section}
+      <details class="dropdown">
+        <summary>{section.resource}</summary>
+        <div class="dropdown-menu">
+          <p class="dropdown-member">
+            <strong>{section.short}</strong> · {section.member}
+          </p>
+          <a href={section.frontend}>Abrir front-end</a>
+          <a href={section.apiBase}>Abrir API</a>
+          <a href={section.docs}>Ver documentación</a>
+        </div>
+      </details>
+    {/each}
+  </div>
+
+  <a class="repo-button" href={repoUrl} target="_blank" rel="noreferrer">
+    GitHub ↗
+  </a>
 </header>
 
 <style>
-  .main-header {
-    background: transparent;
-    padding: 1.5rem 1.5rem 0;
-    font-family: Inter, system-ui, sans-serif;
-  }
-
-  .nav-container {
-    max-width: 1380px;
-    margin: 0 auto;
-    min-height: 72px;
-    padding: 0.9rem 1.4rem;
-    background: #f3eee8;
-    border-radius: 999px;
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    width: min(1200px, calc(100% - 2rem));
+    margin: 1.2rem auto 0;
+    padding: 0.9rem 1.2rem;
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 1rem;
     align-items: center;
-    gap: 1.5rem;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(37, 53, 49, 0.08);
+    border-radius: 24px;
+    background:
+      linear-gradient(180deg, rgba(223, 238, 232, 0.82), rgba(223, 238, 232, 0.72));
+    backdrop-filter: blur(10px);
+    box-shadow: 0 14px 40px rgba(55, 79, 72, 0.08);
   }
 
   .brand a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: #16302c;
     text-decoration: none;
-    color: #111827;
-    font-weight: 800;
-    font-size: 1.15rem;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
   }
 
-  .nav-menu {
+  .brand-emoji {
+    font-size: 1rem;
+  }
+
+  .brand-text {
+    font-size: 0.95rem;
+  }
+
+  .desktop-nav {
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 2rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .desktop-nav a {
+    color: #24423d;
+    text-decoration: none;
+    font-size: 0.92rem;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .desktop-nav a:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+  }
+
+  .dataset-dropdowns {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .dropdown {
     position: relative;
   }
 
-  .dropbtn {
-    text-decoration: none;
-    color: #111827;
-    font-size: 0.98rem;
-    font-weight: 500;
-    background: none;
-    border: none;
+  .dropdown summary {
+    list-style: none;
     cursor: pointer;
-    padding: 0.4rem 0.2rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-family: inherit;
+    padding: 0.65rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(37, 53, 49, 0.08);
+    color: #1f3a35;
+    font-size: 0.82rem;
+    white-space: nowrap;
   }
 
-  .dropbtn:hover {
-    opacity: 0.75;
-  }
-
-  .arrow {
-    font-size: 0.8rem;
-    color: #6b7280;
-  }
-
-  .dropdown-content {
+  .dropdown summary::-webkit-details-marker {
     display: none;
+  }
+
+  .dropdown[open] summary {
+    background: rgba(245, 141, 134, 0.14);
+    border-color: rgba(240, 115, 105, 0.3);
+  }
+
+  .dropdown-menu {
     position: absolute;
-    top: calc(100% + 12px);
-    left: 50%;
-    transform: translateX(-50%);
-    min-width: 290px;
-    background: #ffffff;
-    border-radius: 18px;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.14);
+    right: 0;
+    top: calc(100% + 0.55rem);
+    min-width: 250px;
     padding: 0.9rem;
-    z-index: 20;
-    border: 1px solid #ece7e2;
+    display: grid;
+    gap: 0.55rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(37, 53, 49, 0.08);
+    box-shadow: 0 18px 40px rgba(40, 60, 54, 0.12);
   }
 
-  .dropdown:hover .dropdown-content {
-    display: block;
-  }
-
-  .dropdown-info {
-    padding: 0.25rem 0.35rem 0.55rem;
-  }
-
-  .dropdown-info p {
-    margin: 0.35rem 0;
-    color: #374151;
-    font-size: 0.9rem;
+  .dropdown-member {
+    margin: 0 0 0.35rem;
+    color: #294741;
+    font-size: 0.84rem;
     line-height: 1.45;
   }
 
-  .dropdown-info code {
-    background: #f7f3ee;
-    color: #7a1837;
-    padding: 0.15rem 0.45rem;
-    border-radius: 8px;
-    font-size: 0.82rem;
-  }
-
-  hr {
-    border: 0;
-    border-top: 1px solid #ece7e2;
-    margin: 0.4rem 0 0.55rem;
-  }
-
-  .dropdown-content a {
-    display: block;
+  .dropdown-menu a {
+    color: #26413c;
     text-decoration: none;
-    color: #111827;
-    font-size: 0.92rem;
-    padding: 0.75rem 0.85rem;
-    border-radius: 12px;
-    transition: background 0.2s ease, color 0.2s ease;
+    font-size: 0.84rem;
   }
 
-  .dropdown-content a:hover {
-    background: #f7f3ee;
-    color: #7a1837;
+  .dropdown-menu a:hover {
+    color: #e86f66;
   }
 
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .about-link {
-    text-decoration: none;
-    color: #111827;
-    font-size: 0.98rem;
-    font-weight: 500;
-    transition: opacity 0.2s ease;
-  }
-
-  .about-link:hover {
-    opacity: 0.75;
-  }
-
-  .github-link {
+  .repo-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
-    text-decoration: none;
-    background: #111827;
-    color: #ffffff;
-    padding: 0.7rem 1rem;
+    padding: 0.8rem 1.15rem;
     border-radius: 999px;
-    font-size: 0.92rem;
-    font-weight: 600;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    text-decoration: none;
+    color: #fffaf7;
+    background: linear-gradient(135deg, #ec7a70, #f28d84);
+    box-shadow: 0 12px 24px rgba(236, 122, 112, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: 0.9rem;
   }
 
-  .github-link:hover {
+  .repo-button:hover {
     transform: translateY(-1px);
-    opacity: 0.9;
+    box-shadow: 0 16px 30px rgba(236, 122, 112, 0.28);
   }
 
-  @media (max-width: 980px) {
-    .nav-container {
+  @media (max-width: 1100px) {
+    .site-header {
       grid-template-columns: 1fr;
-      border-radius: 28px;
       justify-items: center;
     }
 
-    .nav-menu {
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .nav-actions {
-      flex-wrap: wrap;
+    .desktop-nav,
+    .dataset-dropdowns {
       justify-content: center;
     }
   }
 
-  @media (max-width: 640px) {
-    .main-header {
-      padding: 1rem 1rem 0;
-    }
-
-    .nav-container {
+  @media (max-width: 700px) {
+    .site-header {
+      width: min(100% - 1rem, 1200px);
       padding: 1rem;
     }
 
-    .dropdown-content {
-      left: 0;
-      transform: none;
-      min-width: 260px;
+    .desktop-nav {
+      gap: 0.8rem;
+    }
+
+    .dropdown-menu {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      width: min(85vw, 280px);
+    }
+
+    .repo-button {
+      width: 100%;
     }
   }
 </style>

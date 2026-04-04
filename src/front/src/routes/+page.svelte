@@ -1,317 +1,284 @@
-<svelte:head>
-  <title>SOS2526-24</title>
-  <meta
-    name="description"
-    content="Global analysis of construction costs, wages and leisure expenditure."
-  />
-</svelte:head>
-
 <script>
   const teamSections = [
     {
-      short: 'MJP',
-      member: 'María Jesús Jiménez-Espada Pallarés',
-      resource: 'average-monthly-wages',
-      frontend: '/MJP',
-      api: '/api/v2/average-monthly-wages',
-      docs: '/api/v2/average-monthly-wages/docs'
+      title: "Ocio y cultura",
+      emoji: "🎭",
+      developer: "Elena Bejarano Periñán",
+      resource: "recreation-culture-expenditure",
+      frontend: "/recreation-culture-expenditure",
+      apiBase: "/api/v2/recreation-culture-expenditure",
+      docs: "/api/v2/recreation-culture-expenditure/docs"
     },
     {
-      short: 'IRG',
-      member: 'Isaac Rodríguez Godino',
-     
-      resource: 'international-construction-costs',
-      frontend: '/international-construction-costs',
-      
-      api: '/api/v2/international-construction-costs',
-      docs: '/api/v2/international-construction-costs/docs'
+      title: "Sueldos",
+      emoji: "💶",
+      developer: "María Jesús Jiménez-Espada Pallarés",
+      resource: "average-monthly-wages",
+      frontend: "/MJP",
+      apiBase: "/api/v1/average-monthly-wages",
+      docs: "/api/v1/average-monthly-wages/docs"
     },
     {
-      short: 'EBP',
-      member: 'Elena Bejarano Periñán',
-      resource: 'recreation-culture-expenditure',
-      frontend: '/recreation-culture-expenditure',
-      api: '/api/v1/recreation-culture-expenditure',
-      docs: '/api/v1/recreation-culture-expenditure/docs'
+      title: "Construcción",
+      emoji: "🏗️",
+      developer: "Isaac Rodríguez Godino",
+      resource: "international-construction-costs",
+      frontend: "/international-construction-costs",
+      apiBase: "/api/v1/international-construccion-costs",
+      docs: "/api/v1/international-construccion-costs/docs"
     }
   ];
+
+  const repoUrl = "https://github.com/gti-sos/SOS2526-24";
 </script>
 
-<div class="page">
-  <section class="hero-shell">
-    <div class="hero-card">
-      <div class="hero-overlay"></div>
+<svelte:head>
+  <title>SOS2526-24 | Página Principal</title>
+  <meta
+    name="description"
+    content="Portada del proyecto SOS2526-24 con acceso a los frontends, APIs y documentación del equipo."
+  />
+</svelte:head>
 
-      <div class="hero-content" id="about">
-        <div class="hero-text">
-          <h1>
-            Welcome to <br />
-            SOS2526-24
-          </h1>
-
-          <p>
-            Our project integrates global datasets on construction costs, household
-            spending on leisure and culture, and average monthly wages. We analyze the
-            economic impact of rising construction prices between 2020/21 and 2024,
-            exploring the correlation between cost increases, purchasing power, and
-            shifts in leisure expenditure to identify global trends and cross-country
-            comparisons.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cards-section" id="cards">
-    <div class="section-heading">
-      <p class="eyebrow">Main project links</p>
-      <h2>Team resources</h2>
-      <p>
-        Aquí se proporcionan los enlaces: front-end, URL base de la API,
-        documentación de Postman; e información de cada integrante.
+<section class="landing-shell">
+  <div class="landing-card">
+    <div class="hero-copy">
+      <p class="eyebrow">API REST · JAVASCRIPT · SOS</p>
+      <h1>Grupo SOS2526-24</h1>
+      <p class="hero-text">
+        Este proyecto expone datos de ámbito mundial relacionados con el gasto en ocio,
+        los salarios y los costes de construcción, permitiendo su análisis y comparación
+        a lo largo de los últimos cuatro años.
       </p>
     </div>
 
-    <div class="cards-grid">
+    <div class="hero-features">
       {#each teamSections as section}
-        <article class="team-card">
-          <div class="card-top">
-            <h3>{section.short}</h3>
-            <span class="badge">{section.short}</span>
+        <article class="feature-card">
+          <span class="feature-icon">{section.emoji}</span>
+          <h2>{section.title}</h2>
+          <p class="feature-description">{section.description}</p>
+
+          <div class="feature-meta">
+            <p><strong>Desarrollador:</strong> {section.developer}</p>
+            <p><strong>Fuente de datos:</strong> {section.resource}</p>
           </div>
 
-          <p><strong>Integrante:</strong> {section.member}</p>
-          <p><strong>Fuente de datos:</strong> <code>{section.resource}</code></p>
-
           <div class="card-links">
-            <a href={section.frontend}>🎨 Front-end</a>
-            <a href={section.api} target="_blank" rel="noreferrer">🔌 API Base</a>
-            <a href={section.docs} target="_blank" rel="noreferrer">📄 Postman Docs</a>
+            <a href={section.frontend}>Front-end</a>
+            <a href={section.apiBase}>API</a>
+            <a href={section.docs}>Documentación</a>
           </div>
         </article>
       {/each}
     </div>
-  </section>
-</div>
+
+    <div class="hero-actions">
+      <a class="primary-btn" href={repoUrl} target="_blank" rel="noreferrer">GitHub</a>
+      <a class="secondary-btn" href="/about">About</a>
+    </div>
+  </div>
+</section>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap');
-
   :global(html) {
     scroll-behavior: smooth;
   }
 
   :global(body) {
     margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    color: #111827;
-    background:
-      radial-gradient(circle at 48% 38%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.38) 18%, rgba(255, 255, 255, 0) 34%),
-      linear-gradient(90deg, #8b0f45 0%, #b74263 22%, #f4d7cf 50%, #d98a67 76%, #c96b4b 100%);
+    font-family:
+      "Cascadia Code",
+      "Cascadia Mono",
+      "Consolas",
+      "Lucida Console",
+      monospace;
+    background: radial-gradient(circle at top, #edf3ef 0%, #ddebe4 38%, #cfe2d8 100%);
+    color: #16302c;
+  }
+
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  .landing-shell {
     min-height: 100vh;
+    padding: 1rem 1rem 2rem;
   }
 
-  .page {
-    padding: 14px 18px 40px;
-  }
-
-  .hero-shell {
-    max-width: 1420px;
+  .landing-card {
+    width: min(1500px, 100%);
     margin: 0 auto;
-  }
-
-  .hero-card {
-    position: relative;
-    min-height: 760px;
-    overflow: hidden;
+    padding: 3rem 2rem 3rem;
     border-radius: 28px;
-    background:
-      linear-gradient(rgba(20, 16, 14, 0.28), rgba(20, 16, 14, 0.28)),
-      url('/hero-campus.jpg') center/cover no-repeat;
-    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+    background: linear-gradient(180deg, rgba(206, 226, 220, 0.94), rgba(198, 220, 214, 0.92));
+    box-shadow: 0 25px 60px rgba(61, 93, 84, 0.14);
+    border: 1px solid rgba(37, 53, 49, 0.07);
   }
 
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.52) 0%,
-      rgba(0, 0, 0, 0.22) 40%,
-      rgba(0, 0, 0, 0.12) 100%
-    );
-    pointer-events: none;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: flex-start;
-    min-height: 760px;
-    padding: 110px 58px 58px;
-  }
-
-  .hero-text {
-    max-width: 700px;
-    color: #fffaf6;
-  }
-
-  .hero-text h1 {
-    margin: 0 0 18px;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(4.2rem, 8vw, 7rem);
-    line-height: 0.88;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-  }
-
-  .hero-text p {
-    margin: 0;
-    max-width: 860px;
-    font-size: 1.12rem;
-    line-height: 1.75;
-    color: rgba(255, 248, 242, 0.96);
-  }
-
-  .cards-section {
-    max-width: 1420px;
-    margin: 30px auto 0;
-  }
-
-  .section-heading {
-    margin-bottom: 20px;
-    color: #fff7f2;
+  .hero-copy {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
   }
 
   .eyebrow {
-    margin: 0 0 8px;
+    margin: 0 0 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: rgba(255, 247, 241, 0.88);
+    letter-spacing: 0.16em;
+    font-size: 0.95rem;
+    color: #5b746e;
   }
 
-  .section-heading h2 {
-    margin: 0 0 10px;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(2.2rem, 4vw, 3.4rem);
-    font-weight: 600;
-    color: #fff9f5;
-  }
-
-  .section-heading p {
+  h1 {
     margin: 0;
-    max-width: 900px;
-    line-height: 1.7;
-    color: rgba(255, 245, 238, 0.95);
+    font-size: clamp(3rem, 7vw, 5.8rem);
+    line-height: 1.05;
+    color: #0f2d29;
   }
 
-  .cards-grid {
+  .hero-text {
+    max-width: 900px;
+    margin: 1.5rem auto 0;
+    font-size: 1rem;
+    line-height: 2;
+    color: #385650;
+  }
+
+  .hero-features {
+    margin: 3.5rem auto 0;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
+    gap: 1.3rem;
+    max-width: 1180px;
   }
 
-  .team-card {
-    background: rgba(250, 245, 239, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.32);
+  .feature-card {
+    padding: 1.8rem 1.4rem;
+    text-align: center;
     border-radius: 24px;
-    padding: 22px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.32);
+    border: 1px solid rgba(37, 53, 49, 0.06);
+    backdrop-filter: blur(6px);
   }
 
-  .card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+  .feature-icon {
+    display: inline-flex;
+    font-size: 1.6rem;
+    margin-bottom: 0.8rem;
   }
 
-  .team-card h3 {
+  .feature-card h2 {
+    margin: 0 0 0.8rem;
+    font-size: 1.1rem;
+    color: #193733;
+  }
+
+  .feature-description {
     margin: 0;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 2rem;
-    line-height: 1;
-    color: #111827;
+    color: #45615b;
+    font-size: 0.95rem;
+    line-height: 1.8;
   }
 
-  .badge {
-    background: #efe3b1;
-    color: #111827;
-    border-radius: 999px;
-    padding: 7px 12px;
-    font-size: 0.8rem;
-    font-weight: 700;
+  .feature-meta {
+    margin-top: 1rem;
+    text-align: left;
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(37, 53, 49, 0.06);
   }
 
-  .team-card p {
-    margin: 0 0 10px;
-    color: #374151;
+  .feature-meta p {
+    margin: 0.4rem 0;
+    color: #2a4641;
+    font-size: 0.88rem;
     line-height: 1.6;
-  }
-
-  .team-card code {
-    background: #f7eee7;
-    color: #7a1837;
-    padding: 0.14rem 0.42rem;
-    border-radius: 8px;
-    font-size: 0.84rem;
+    word-break: break-word;
   }
 
   .card-links {
+    margin-top: 1.2rem;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
   }
 
   .card-links a {
-    display: block;
     text-decoration: none;
-    color: #7a1837;
-    font-weight: 700;
-    padding: 11px 12px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.62);
-    transition: transform 0.15s ease, background 0.15s ease;
+    padding: 0.65rem 0.95rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: #1f3d38;
+    border: 1px solid rgba(37, 53, 49, 0.08);
+    font-size: 0.84rem;
+    transition: transform 0.2s ease, background 0.2s ease;
   }
 
   .card-links a:hover {
-    transform: translateY(-1px);
-    background: #ffffff;
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.9);
   }
 
-  @media (max-width: 1100px) {
-    .hero-card {
-      min-height: 680px;
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2.6rem;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    padding: 0.92rem 1.45rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, #ec7a70, #f29a90);
+    color: #fffaf7;
+    box-shadow: 0 14px 28px rgba(236, 122, 112, 0.25);
+  }
+
+  .secondary-btn {
+    background: rgba(255, 255, 255, 0.55);
+    color: #21403b;
+    border: 1px solid rgba(37, 53, 49, 0.08);
+  }
+
+  .primary-btn:hover,
+  .secondary-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 960px) {
+    .hero-features {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .landing-card {
+      padding: 2.2rem 1rem 2.2rem;
+      border-radius: 22px;
     }
 
-    .cards-grid {
-      grid-template-columns: 1fr;
+    h1 {
+      font-size: 2.4rem;
     }
 
     .hero-text {
-      max-width: 100%;
-    }
-  }
-
-  @media (max-width: 820px) {
-    .hero-content {
-      padding: 70px 24px 28px;
-      min-height: 560px;
+      font-size: 0.95rem;
+      line-height: 1.8;
     }
 
-    .hero-text h1 {
-      font-size: clamp(3.2rem, 12vw, 5rem);
-    }
-
-    .hero-text p {
-      font-size: 1rem;
-      line-height: 1.65;
+    .feature-meta {
+      text-align: left;
     }
   }
 </style>
