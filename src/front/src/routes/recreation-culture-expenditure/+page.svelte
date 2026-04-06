@@ -27,12 +27,29 @@
   let filtros = $state({
     country: "",
     year: "",
+    recreation_value: "",
+    total_household_consumption: "",
+    recreation_share: "",
+    population: "",
+    recreation_per_capita: "",
+
     from: "",
     to: "",
+
     min_recreation_value: "",
     max_recreation_value: "",
+
+    min_total_household_consumption: "",
+    max_total_household_consumption: "",
+
+    min_recreation_share: "",
+    max_recreation_share: "",
+
     min_population: "",
-    max_population: ""
+    max_population: "",
+
+    min_recreation_per_capita: "",
+    max_recreation_per_capita: ""
   });
 
   const API = "/api/v2/recreation-culture-expenditure";
@@ -64,56 +81,134 @@
     try {
       const queryParams = new URLSearchParams();
 
+      const tieneValor = (valor) =>
+        valor !== "" && valor !== null && valor !== undefined;
+
+      // =========================
       // Búsquedas exactas
+      // =========================
       if (filtros.country?.trim() !== "") {
         queryParams.append("country", filtros.country.trim());
       }
 
-      if (filtros.year !== "" && filtros.year !== null && filtros.year !== undefined) {
+      if (tieneValor(filtros.year)) {
         queryParams.append("year", String(filtros.year));
       }
 
+      if (tieneValor(filtros.recreation_value)) {
+        queryParams.append("recreation_value", String(filtros.recreation_value));
+      }
+
+      if (tieneValor(filtros.total_household_consumption)) {
+        queryParams.append(
+          "total_household_consumption",
+          String(filtros.total_household_consumption)
+        );
+      }
+
+      if (tieneValor(filtros.recreation_share)) {
+        queryParams.append("recreation_share", String(filtros.recreation_share));
+      }
+
+      if (tieneValor(filtros.population)) {
+        queryParams.append("population", String(filtros.population));
+      }
+
+      if (tieneValor(filtros.recreation_per_capita)) {
+        queryParams.append(
+          "recreation_per_capita",
+          String(filtros.recreation_per_capita)
+        );
+      }
+
+      // =========================
       // Rangos de año
-      if (filtros.from !== "" && filtros.from !== null && filtros.from !== undefined) {
+      // =========================
+      if (tieneValor(filtros.from)) {
         queryParams.append("year_gte", String(filtros.from));
       }
 
-      if (filtros.to !== "" && filtros.to !== null && filtros.to !== undefined) {
+      if (tieneValor(filtros.to)) {
         queryParams.append("year_lte", String(filtros.to));
       }
 
-      // Rangos de gasto en ocio y cultura
-      if (
-        filtros.min_recreation_value !== "" &&
-        filtros.min_recreation_value !== null &&
-        filtros.min_recreation_value !== undefined
-      ) {
-        queryParams.append("recreation_value_gte", String(filtros.min_recreation_value));
+      // =========================
+      // Rangos de recreation_value
+      // =========================
+      if (tieneValor(filtros.min_recreation_value)) {
+        queryParams.append(
+          "recreation_value_gte",
+          String(filtros.min_recreation_value)
+        );
       }
 
-      if (
-        filtros.max_recreation_value !== "" &&
-        filtros.max_recreation_value !== null &&
-        filtros.max_recreation_value !== undefined
-      ) {
-        queryParams.append("recreation_value_lte", String(filtros.max_recreation_value));
+      if (tieneValor(filtros.max_recreation_value)) {
+        queryParams.append(
+          "recreation_value_lte",
+          String(filtros.max_recreation_value)
+        );
       }
 
-      // Rangos de población
-      if (
-        filtros.min_population !== "" &&
-        filtros.min_population !== null &&
-        filtros.min_population !== undefined
-      ) {
+      // =========================
+      // Rangos de total_household_consumption
+      // =========================
+      if (tieneValor(filtros.min_total_household_consumption)) {
+        queryParams.append(
+          "total_household_consumption_gte",
+          String(filtros.min_total_household_consumption)
+        );
+      }
+
+      if (tieneValor(filtros.max_total_household_consumption)) {
+        queryParams.append(
+          "total_household_consumption_lte",
+          String(filtros.max_total_household_consumption)
+        );
+      }
+
+      // =========================
+      // Rangos de recreation_share
+      // =========================
+      if (tieneValor(filtros.min_recreation_share)) {
+        queryParams.append(
+          "recreation_share_gte",
+          String(filtros.min_recreation_share)
+        );
+      }
+
+      if (tieneValor(filtros.max_recreation_share)) {
+        queryParams.append(
+          "recreation_share_lte",
+          String(filtros.max_recreation_share)
+        );
+      }
+
+      // =========================
+      // Rangos de population
+      // =========================
+      if (tieneValor(filtros.min_population)) {
         queryParams.append("population_gte", String(filtros.min_population));
       }
 
-      if (
-        filtros.max_population !== "" &&
-        filtros.max_population !== null &&
-        filtros.max_population !== undefined
-      ) {
+      if (tieneValor(filtros.max_population)) {
         queryParams.append("population_lte", String(filtros.max_population));
+      }
+
+      // =========================
+      // Rangos de recreation_per_capita
+      // =========================
+      if (tieneValor(filtros.min_recreation_per_capita)) {
+        queryParams.append(
+          "recreation_per_capita_gte",
+          String(filtros.min_recreation_per_capita)
+        );
+      }
+
+      if (tieneValor(filtros.max_recreation_per_capita)) {
+        queryParams.append(
+          "recreation_per_capita_lte",
+          String(filtros.max_recreation_per_capita)
+        );
       }
 
       const url = queryParams.toString() ? `${API}?${queryParams.toString()}` : API;
@@ -135,12 +230,29 @@
     filtros = {
       country: "",
       year: "",
+      recreation_value: "",
+      total_household_consumption: "",
+      recreation_share: "",
+      population: "",
+      recreation_per_capita: "",
+
       from: "",
       to: "",
+
       min_recreation_value: "",
       max_recreation_value: "",
+
+      min_total_household_consumption: "",
+      max_total_household_consumption: "",
+
+      min_recreation_share: "",
+      max_recreation_share: "",
+
       min_population: "",
-      max_population: ""
+      max_population: "",
+
+      min_recreation_per_capita: "",
+      max_recreation_per_capita: ""
     };
 
     await getDatos();
@@ -341,6 +453,60 @@
           </div>
 
           <div class="field">
+            <label for="filtro-recreation-value">Gasto exacto en ocio y cultura</label>
+            <input
+              id="filtro-recreation-value"
+              bind:value={filtros.recreation_value}
+              type="number"
+              placeholder="Valor exacto"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-total-household-consumption">
+              Consumo total exacto de los hogares
+            </label>
+            <input
+              id="filtro-total-household-consumption"
+              bind:value={filtros.total_household_consumption}
+              type="number"
+              placeholder="Valor exacto"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-recreation-share">% exacto de ocio y cultura</label>
+            <input
+              id="filtro-recreation-share"
+              bind:value={filtros.recreation_share}
+              type="number"
+              step="0.01"
+              placeholder="Valor exacto"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-population">Población exacta</label>
+            <input
+              id="filtro-population"
+              bind:value={filtros.population}
+              type="number"
+              placeholder="Valor exacto"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-recreation-per-capita">Gasto exacto por persona</label>
+            <input
+              id="filtro-recreation-per-capita"
+              bind:value={filtros.recreation_per_capita}
+              type="number"
+              step="0.01"
+              placeholder="Valor exacto"
+            />
+          </div>
+
+          <div class="field">
             <label for="filtro-from">Desde el año</label>
             <input
               id="filtro-from"
@@ -381,6 +547,52 @@
           </div>
 
           <div class="field">
+            <label for="filtro-min-total-household-consumption">
+              Consumo total mínimo de los hogares
+            </label>
+            <input
+              id="filtro-min-total-household-consumption"
+              bind:value={filtros.min_total_household_consumption}
+              type="number"
+              placeholder="Mínimo"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-max-total-household-consumption">
+              Consumo total máximo de los hogares
+            </label>
+            <input
+              id="filtro-max-total-household-consumption"
+              bind:value={filtros.max_total_household_consumption}
+              type="number"
+              placeholder="Máximo"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-min-recreation-share">% mínimo de ocio y cultura</label>
+            <input
+              id="filtro-min-recreation-share"
+              bind:value={filtros.min_recreation_share}
+              type="number"
+              step="0.01"
+              placeholder="Mínimo"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-max-recreation-share">% máximo de ocio y cultura</label>
+            <input
+              id="filtro-max-recreation-share"
+              bind:value={filtros.max_recreation_share}
+              type="number"
+              step="0.01"
+              placeholder="Máximo"
+            />
+          </div>
+
+          <div class="field">
             <label for="filtro-min-population">Población mínima</label>
             <input
               id="filtro-min-population"
@@ -397,6 +609,28 @@
               bind:value={filtros.max_population}
               type="number"
               placeholder="Máxima"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-min-recreation-per-capita">Gasto mínimo por persona</label>
+            <input
+              id="filtro-min-recreation-per-capita"
+              bind:value={filtros.min_recreation_per_capita}
+              type="number"
+              step="0.01"
+              placeholder="Mínimo"
+            />
+          </div>
+
+          <div class="field">
+            <label for="filtro-max-recreation-per-capita">Gasto máximo por persona</label>
+            <input
+              id="filtro-max-recreation-per-capita"
+              bind:value={filtros.max_recreation_per_capita}
+              type="number"
+              step="0.01"
+              placeholder="Máximo"
             />
           </div>
         </div>
