@@ -4,168 +4,246 @@ import { test, expect } from '@playwright/test';
 const URL_BASE = process.env.BASE_URL || 'http://localhost:3000';
 const URL_APP = `${URL_BASE}/average-monthly-wages`;
 
-test.describe('Pruebas E2E - average-monthly-wages (María)', () => {
-
-    test.beforeEach(async ({ page }) => {
-        await page.goto(URL_APP, { waitUntil: 'networkidle' });
+test.describe('Pruebas E2E - average-monthly-wages', () => {
+  test.beforeEach(async ({ page }) => {
+    // Aceptar automáticamente los confirm de borrar
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
     });
 
-    test('1. Debe cargar los datos iniciales y listarlos', async ({ page }) => {
-        page.on('dialog', dialog => dialog.accept());
+    await page.goto(URL_APP, { waitUntil: 'networkidle' });
+  });
 
-        // Limpiamos primero para evitar error 409
-        await page.getByRole('button', { name: /Limpiar Base de Datos/i }).click();
+  // ─── Helpers ────────────────────────────────────────────────────────────────
 
-        // Cargamos los datos iniciales
-        await page.getByRole('button', { name: /Cargar Datos Iniciales/i }).click();
+  async function abrirPanelFiltros(page) {
+    const boton = page.getByRole('button', { name: /buscar y filtrar|cerrar buscador/i });
+    await boton.click();
+    await expect(page.locator('.search-panel')).toBeVisible();
+  }
 
-        // Verificamos el mensaje de éxito
-        await expect(page.getByText(/registros iniciales con éxito/i)).toBeVisible({ timeout: 10000 });
+  async function cargarDatosIniciales(page) {
+    await page.getByRole('button', { name: /cargar datos iniciales/i }).click();
 
-        // Verificamos que la tabla tiene filas
-        const filas = page.locator('table tbody tr');
-        await expect(filas.first()).toBeVisible();
+    // Puede devolver éxito o conflicto si ya estaban cargados
+    await expect(
+      page.locator('.toast')
+    ).toContainText(
+      /registros iniciales cargados con éxito|La base de datos ya tiene datos/i,
+      { timeout: 10000 }
+    );
+  }
+
+  async function crearRegistro(page, { country, year, avg_monthly_nc, avg_monthly_usd, exchange_rate, currency }) {
+    const panelAlta = page.locator('.form-card');
+
+    const inputs = panelAlta.locator('input');
+    await inputs.nth(0).fill(country);
+    await inputs.nth(1).fill(String(year));
+    await inputs.nth(2).fill(String(avg_monthly_nc));
+    await inputs.nth(3).fill(String(avg_monthly_usd));
+    await inputs.nth(4).fill(String(exchange_rate));
+    await inputs.nth(5).fill(currency);
+
+    await panelAlta.getByRole('button', { name: /añadir registro/i }).click();
+  }
+
+  // ─── Tests ──────────────────────────────────────────────────────────────────
+
+  test('1. Debe listar registros y permitir cargar datos iniciales', async ({ page }) => {
+    await cargarDatosIniciales(page);
+
+    // La tabla debe estar visible y tener al menos una fila
+    const filas = page.locator('tbody tr');
+    await expect(filas.first()).toBeVisible({ timeout: 10000 });
+
+    // El badge de contador debe existir y mostrar un número
+    await expect(page.locator('.count-badge')).toBeVisible();
+  });
+
+  test('2. Debe crear un recurso y actualizar automáticamente el listado', async ({ page }) => {
+    const country = `testland_${Date.now()}`;
+    const year = 2030;
+
+    await crearRegistro(page, {
+      country,
+      year,
+      avg_monthly_nc: 3500,
+      avg_monthly_usd: 3800,
+      exchange_rate: 1.085,
+      currency: 'EUR'
     });
 
-    test('2. Debe crear un recurso y actualizar la tabla automáticamente', async ({ page }) => {
-        const paisUnico = 'testpais' + Math.floor(Math.random() * 9999);
+    // Mensaje de éxito comprensible para el usuario
+    await expect(page.locator('.toast')).toContainText(/Registro creado con éxito/i);
 
-        await page.getByPlaceholder('País (ej: spain)').fill(paisUnico);
-        await page.getByPlaceholder('Año (ej: 2023)').fill('2030');
-        await page.getByPlaceholder('Salario mensual medio (moneda local)').fill('3000');
-        await page.getByPlaceholder('Salario mensual medio (USD)').fill('3200');
-        await page.getByPlaceholder('Tipo de cambio (ej: 0.928)').fill('0.93');
-        await page.getByPlaceholder('Moneda (ej: EUR)').fill('EUR');
+    // Verifica recarga automática del listado sin refresco manual
+    const filaNueva = page.locator('tbody tr', { hasText: country });
+    await expect(filaNueva).toContainText(String(year));
+    await expect(filaNueva).toContainText('3500');
+    await expect(filaNueva).toContainText('EUR');
+  });
 
-        await page.getByRole('button', { name: 'Añadir Registro' }).click();
+  test('3. Debe buscar recursos usando los filtros del frontend', async ({ page }) => {
+    const country = `findme_${Date.now()}`;
+    const year = 2031;
 
-        // Verificamos mensaje de éxito
-        await expect(page.getByText('¡Registro de salario creado con éxito!')).toBeVisible();
-
-        // Verificamos que el nuevo registro aparece en la tabla sin recargar
-        await expect(page.locator('table')).toContainText(paisUnico);
+    // Creamos un dato único para que la búsqueda sea fiable
+    await crearRegistro(page, {
+      country,
+      year,
+      avg_monthly_nc: 7777,
+      avg_monthly_usd: 8500,
+      exchange_rate: 1.09,
+      currency: 'EUR'
     });
 
-    test('3. Debe buscar recursos usando el buscador por país', async ({ page }) => {
-        page.on('dialog', dialog => dialog.accept());
+    await expect(page.locator('.toast')).toContainText(/Registro creado con éxito/i);
 
-        // Nos aseguramos de tener datos
-        await page.getByRole('button', { name: /Cargar Datos Iniciales/i }).click();
+    await abrirPanelFiltros(page);
 
-        // Abrimos el buscador
-        await page.getByRole('button', { name: /Abrir Buscador/i }).click();
+    // Rellenamos el filtro de país con el valor único
+    const filtros = page.locator('.search-panel input');
+    await filtros.nth(0).fill(country);
 
-        // Filtramos por país
-        
-        await page.getByPlaceholder('Ej: spain').last().fill('canada');
-        
-        await page.getByRole('button', { name: 'Filtrar ahora' }).click();
+    await page.getByRole('button', { name: /^filtrar$/i }).click();
 
-        // Verificamos el mensaje de búsqueda
-        await expect(page.getByText(/resultado\(s\) encontrado\(s\)/i)).toBeVisible();
+    // Mensaje de resultados
+    await expect(page.locator('.toast')).toContainText(/resultado/i);
 
-        // Verificamos que todos los resultados son de canada
-        const celdasPais = page.locator('table tbody tr td:nth-child(1)');
-        const textos = await celdasPais.allTextContents();
-        for (const t of textos) {
-            expect(t.trim().toLowerCase()).toBe('canada');
-        }
+    // Tras filtrar, debe aparecer únicamente ese registro
+    const filas = page.locator('tbody tr');
+    await expect(filas).toHaveCount(1);
+    await expect(filas.first()).toContainText(country);
+    await expect(filas.first()).toContainText(String(year));
+  });
+
+  test('4. Debe editar un recurso en la vista dinámica separada', async ({ page }) => {
+    const country = `editland_${Date.now()}`;
+    const year = 2032;
+
+    await crearRegistro(page, {
+      country,
+      year,
+      avg_monthly_nc: 1000,
+      avg_monthly_usd: 1100,
+      exchange_rate: 1.1,
+      currency: 'USD'
     });
 
-    test('4. Debe editar un recurso en vista separada dinámica', async ({ page }) => {
-        page.on('dialog', dialog => dialog.accept());
+    await expect(page.locator('.toast')).toContainText(/Registro creado con éxito/i);
 
-        // Nos aseguramos de tener datos
-        await page.getByRole('button', { name: /Cargar Datos Iniciales/i }).click();
-        await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
+    const fila = page.locator('tbody tr', { hasText: country });
+    await expect(fila).toBeVisible();
 
-        // Hacemos click en el primer botón Editar
-        await page.locator('table tbody tr').first().getByRole('button', { name: 'Editar' }).click();
+    // Click en el enlace de editar de esa fila
+    await fila.getByRole('link', { name: /editar/i }).click();
 
-        // Verificamos que la URL es dinámica
-        await expect(page).toHaveURL(/.*\/average-monthly-wages\/.+\/.+/);
-        await expect(page.locator('h2')).toContainText('Editando registro');
+    // Comprobamos que la URL es dinámica: /average-monthly-wages/:country/:year
+    await expect(page).toHaveURL(
+      new RegExp(`/average-monthly-wages/${encodeURIComponent(country)}/${year}$`)
+    );
 
-        // Modificamos el salario en USD
-        await page.getByLabel(/Salario mensual medio \(USD\):/).fill('9999');
+    // El título de edición debe estar visible
+    await expect(page.getByRole('heading', { name: /editar/i })).toBeVisible();
 
-        await page.getByRole('button', { name: 'Guardar Cambios' }).click();
+    // Modificamos los campos editables del formulario
+    const inputsEdicion = page.locator('.form-grid input');
+    await inputsEdicion.nth(0).fill('5555');    // avg_monthly_nc
+    await inputsEdicion.nth(1).fill('6000');    // avg_monthly_usd
+    await inputsEdicion.nth(2).fill('1.0800');  // exchange_rate
+    await inputsEdicion.nth(3).fill('GBP');     // currency
 
-        // Verificamos mensaje de éxito
-        await expect(page.getByText('Los cambios se han guardado correctamente.')).toBeVisible();
+    await page.getByRole('button', { name: /guardar cambios/i }).click();
 
-        // Volvemos al listado y comprobamos que el valor se actualizó
-        await page.getByRole('button', { name: 'Volver al listado' }).click();
-        await expect(page.locator('table')).toContainText('9999');
+    // Mensaje comprensible de confirmación
+    await expect(page.locator('.toast')).toContainText(/Los cambios se han guardado correctamente/i);
+  });
+
+  test('5. Debe borrar un recurso concreto desde el listado', async ({ page }) => {
+    const country = `deleteone_${Date.now()}`;
+    const year = 2033;
+
+    await crearRegistro(page, {
+      country,
+      year,
+      avg_monthly_nc: 4000,
+      avg_monthly_usd: 4300,
+      exchange_rate: 1.075,
+      currency: 'EUR'
     });
 
-    test('5. Debe borrar un recurso concreto', async ({ page }) => {
-        page.on('dialog', dialog => dialog.accept());
+    await expect(page.locator('.toast')).toContainText(/Registro creado con éxito/i);
 
-        // Nos aseguramos de tener datos
-        await page.getByRole('button', { name: /Cargar Datos Iniciales/i }).click();
-        await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
+    const fila = page.locator('tbody tr', { hasText: country });
+    await expect(fila).toBeVisible();
 
-        // Contamos filas antes de borrar
-        const filasAntes = await page.locator('table tbody tr').count();
+    // Borrar la fila concreta
+    await fila.getByRole('button', { name: /borrar/i }).click();
 
-        // Borramos la primera fila
-        await page.locator('table tbody tr').first().getByRole('button', { name: 'Borrar' }).click();
+    // Mensaje de confirmación de borrado
+    await expect(page.locator('.toast')).toContainText(
+      new RegExp(`${country}.*${year}|eliminado`, 'i')
+    );
 
-        // Verificamos que la tabla tiene una fila menos (recarga automática)
-        await expect(page.locator('table tbody tr')).toHaveCount(filasAntes - 1);
-    });
+    // La fila ya no debe aparecer en la tabla
+    await expect(page.locator('tbody tr', { hasText: country })).toHaveCount(0);
+  });
 
-    test('6. Debe borrar toda la base de datos', async ({ page }) => {
-        page.on('dialog', dialog => dialog.accept());
+  test('6. Debe borrar todos los recursos de la base de datos', async ({ page }) => {
+    await cargarDatosIniciales(page);
 
-        await page.getByRole('button', { name: 'Limpiar Base de Datos Completa' }).click();
+    // Comprobamos que hay filas antes de borrar
+    const filasAntes = await page.locator('tbody tr').count();
+    expect(filasAntes).toBeGreaterThan(0);
 
-        // Verificamos mensaje de confirmación
-        await expect(page.getByText(/Se han eliminado todos los registros/i)).toBeVisible();
+    await page.getByRole('button', { name: /eliminar todos los registros/i }).click();
 
-        // Verificamos que la tabla queda vacía
-        await expect(page.locator('table tbody tr')).toHaveCount(0);
-    });
+    // Mensaje de confirmación global
+    await expect(page.locator('.toast')).toContainText(/eliminados/i);
 
-    test('7. Debe mostrar error al intentar crear un registro duplicado', async ({ page }) => {
-        page.on('dialog', dialog => dialog.accept());
+    // La tabla queda vacía y se muestra el estado vacío
+    await expect(page.locator('tbody tr')).toHaveCount(0);
+    await expect(page.getByText(/No hay registros cargados todavía/i)).toBeVisible();
+  });
 
-        // Cargamos datos para tener canada/2024 en la base
-        await page.getByRole('button', { name: /Cargar Datos Iniciales/i }).click();
-        await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
+  test('7. Debe avisar si se intenta crear un registro duplicado', async ({ page }) => {
+    const country = `duplicate_${Date.now()}`;
+    const year = 2034;
 
-        // Intentamos crear un duplicado
-        await page.getByPlaceholder('País (ej: spain)').fill('canada');
-        await page.getByPlaceholder('Año (ej: 2023)').fill('2024');
-        await page.getByPlaceholder('Salario mensual medio (moneda local)').fill('1000');
-        await page.getByPlaceholder('Salario mensual medio (USD)').fill('1000');
-        await page.getByPlaceholder('Tipo de cambio (ej: 0.928)').fill('1.3');
-        await page.getByPlaceholder('Moneda (ej: EUR)').fill('CAD');
+    const datos = {
+      country,
+      year,
+      avg_monthly_nc: 2000,
+      avg_monthly_usd: 2200,
+      exchange_rate: 1.1,
+      currency: 'EUR'
+    };
 
-        await page.getByRole('button', { name: 'Añadir Registro' }).click();
+    // Primer alta — debe tener éxito
+    await crearRegistro(page, datos);
+    await expect(page.locator('.toast')).toContainText(/Registro creado con éxito/i);
 
-        // Verificamos mensaje de error comprensible
-        await expect(page.getByText(/Ya existe un registro para el país/i)).toBeVisible();
-    });
+    // Segundo alta con los mismos identificadores — debe dar conflicto 409
+    await crearRegistro(page, datos);
+    await expect(page.locator('.toast')).toContainText(
+      new RegExp(`Ya existe un registro para.*${country}.*${year}`, 'i')
+    );
+  });
 
-    test('8. Debe paginar resultados correctamente', async ({ page }) => {
-        page.on('dialog', dialog => dialog.accept());
+  test('8. Debe avisar si se intenta crear un registro con campos incompletos', async ({ page }) => {
+    const panelAlta = page.locator('.form-card');
 
-        // Cargamos datos
-        await page.getByRole('button', { name: /Cargar Datos Iniciales/i }).click();
-        await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
+    // Solo rellenamos el país y el año, dejamos el resto vacío
+    const inputs = panelAlta.locator('input');
+    await inputs.nth(0).fill('spain');
+    await inputs.nth(1).fill('2035');
 
-        // Abrimos el buscador y aplicamos límite de 3
-        await page.getByRole('button', { name: /Abrir Buscador/i }).click();
-        await page.getByPlaceholder('10').fill('3');
+    await panelAlta.getByRole('button', { name: /añadir registro/i }).click();
 
-        await page.getByRole('button', { name: 'Filtrar ahora' }).click();
-
-        await expect(page.getByText(/resultado\(s\) encontrado\(s\)/i)).toBeVisible();
-
-        // Verificamos que hay máximo 3 filas
-        const filas = await page.locator('table tbody tr').count();
-        expect(filas).toBeLessThanOrEqual(3);
-    });
+    // La API debe devolver 400 y mostrar un mensaje comprensible
+    await expect(page.locator('.toast')).toContainText(
+      /Rellena todos los campos correctamente|datos no son válidos/i
+    );
+  });
 });

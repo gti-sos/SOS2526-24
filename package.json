@@ -43,6 +43,7 @@
     "test-online-EBP": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-EBP-render",
 
     "test-e2e-EBP": "playwright test tests/e2e/recreation-culture-expenditure.spec.js",
+    "test-e2e-MJP": "playwright test tests/e2e/average-monthly-wages.spec.js",
 
     "start:e2e": "npm run build && npm run start",
     "build": "cd src/front && npm run build",
