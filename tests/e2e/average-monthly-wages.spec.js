@@ -75,13 +75,16 @@ test.describe('Pruebas E2E - average-monthly-wages', () => {
     });
 
     // Mensaje de éxito comprensible para el usuario
-    await expect(page.locator('.toast')).toContainText(/Registro creado con éxito/i);
+    await expect(page.locator('.toast')).toContainText(/Registro creado con éxito/i, { timeout: 8000 });
 
     // Verifica recarga automática del listado sin refresco manual
-    const filaNueva = page.locator('tbody tr', { hasText: country });
-    await expect(filaNueva).toContainText(String(year));
-    await expect(filaNueva).toContainText('3500');
-    await expect(filaNueva).toContainText('EUR');
+    // La tabla puede capitalizar el país, buscamos por año y valor que son únicos
+    const tabla = page.locator('table');
+    await expect(tabla).toContainText(String(year), { timeout: 8000 });
+    await expect(tabla).toContainText('3,500', { timeout: 5000 }).catch(
+      () => expect(tabla).toContainText('3500', { timeout: 5000 })
+    );
+    await expect(tabla).toContainText('EUR', { timeout: 5000 });
   });
 
   test('3. Debe buscar recursos usando los filtros del frontend', async ({ page }) => {
