@@ -56,8 +56,9 @@ test.describe('Pruebas E2E - average-monthly-wages (María)', () => {
         await page.getByRole('button', { name: /Abrir Buscador/i }).click();
 
         // Filtramos por país
-        await page.getByPlaceholder('Ej: spain').fill('canada');
-
+        
+        await page.getByPlaceholder('Ej: spain').last().fill('canada');
+        
         await page.getByRole('button', { name: 'Filtrar ahora' }).click();
 
         // Verificamos el mensaje de búsqueda
