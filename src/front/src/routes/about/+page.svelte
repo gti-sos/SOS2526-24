@@ -1,271 +1,248 @@
 <svelte:head>
-  <title>About | SOS2526-24</title>
+  <title>Información | SOS2526-24</title>
   <meta
     name="description"
-    content="Project information, team members, repository, live URL and APIs for SOS2526-24."
+    content="Información del proyecto SOS2526-24"
   />
 </svelte:head>
 
 <script>
+  const repoUrl = 'https://github.com/gti-sos/SOS2526-24';
+  const renderUrl = 'https://sos2526-24.onrender.com/';
+
   const teamMembers = [
     {
       name: 'Isaac Rodríguez Godino',
       githubUser: '@IsaacRg25',
-      githubUrl: 'https://github.com/IsaacRg25'
+      githubUrl: 'https://github.com/IsaacRg25',
+      apiUrl: 'https://sos2526-24.onrender.com/api/v1/international-construccion-costs',
+      docs: [
+        {
+          label: 'Documentación v1',
+          url: 'https://sos2526-24.onrender.com/api/v1/international-construccion-costs/docs'
+        }
+      ]
     },
     {
       name: 'Elena Bejarano Periñán',
       githubUser: '@elenabejper',
-      githubUrl: 'https://github.com/elenabejper'
+      githubUrl: 'https://github.com/elenabejper',
+      apiUrl: 'https://sos2526-24.onrender.com/api/v1/recreation-culture-expenditure',
+      docs: [
+        {
+          label: 'Documentación v1',
+          url: 'https://sos2526-24.onrender.com/api/v1/recreation-culture-expenditure/docs'
+        },
+        {
+          label: 'Documentación v2',
+          url: 'https://sos2526-24.onrender.com/api/v2/recreation-culture-expenditure/docs'
+        }
+      ]
     },
     {
       name: 'María Jesús Jiménez-Espada Pallarés',
       githubUser: '@mariaajesuus',
-      githubUrl: 'https://github.com/mariaajesuus'
-    }
-  ];
-
-  const apiSections = [
-    {
-      member: 'María Jesús Jiménez-Espada Pallarés',
-      url: 'https://sos2526-24.onrender.com/api/v1/average-monthly-wages'
-    },
-    {
-      member: 'Isaac Rodríguez Godino',
-      url: 'https://sos2526-24.onrender.com/api/v1/international-construccion-costs'
-    },
-    {
-      member: 'Elena Bejarano Periñán',
-      url: 'https://sos2526-24.onrender.com/api/v1/recreation-culture-expenditure'
+      githubUrl: 'https://github.com/mariaajesuus',
+      apiUrl: 'https://sos2526-24.onrender.com/api/v1/average-monthly-wages',
+      docs: [
+        {
+          label: 'Documentación v1',
+          url: 'https://sos2526-24.onrender.com/api/v1/average-monthly-wages/docs'
+        }
+      ]
     }
   ];
 </script>
 
 <div class="page">
-  <section class="hero-shell">
-    <div class="hero-card small-hero">
-      <div class="hero-overlay"></div>
+  <section class="intro-section">
+    <p class="eyebrow">Información del proyecto</p>
+    <h1>Información</h1>
 
-      <div class="hero-content">
-        <div class="hero-text">
-          <p class="eyebrow">Project overview</p>
-          <h1>
-            About<br />
-            SOS2526-24
-          </h1>
+    <p class="intro-text">
+      En esta página se recoge la información principal del proyecto:
+      repositorio, despliegue, integrantes del equipo, APIs y documentación.
+    </p>
 
-          <p>
-            This page gathers the main information about our project: team members,
-            project scope, repository, deployment, and API endpoints.
-          </p>
-        </div>
-      </div>
+    <div class="main-links">
+      <a href={repoUrl} target="_blank" rel="noreferrer">
+        Repositorio en GitHub
+      </a>
+
+      <a href={renderUrl} target="_blank" rel="noreferrer">
+        Despliegue en Render
+      </a>
     </div>
   </section>
 
   <section class="cards-section">
     <div class="section-heading">
-      <p class="eyebrow">Project information</p>
-      <h2>General overview</h2>
+      <p class="eyebrow">Equipo y recursos</p>
+      <h2>Integrantes del equipo</h2>
       <p>
-        Our project integrates global datasets on construction costs, household spending
-        on leisure and culture, and average monthly wages. We analyze the economic
-        impact of rising construction prices between 2020/21 and 2024, exploring the
-        correlation between cost increases, purchasing power, and shifts in leisure
-        expenditure to identify global trends and cross-country comparisons.
+        Nuestro proyecto integra datasets mundiales sobre costes de construcción,
+        gasto de los hogares en ocio y cultura y salarios medios mensuales, con
+        el objetivo de analizar tendencias y relaciones entre estas variables.
       </p>
     </div>
 
     <div class="cards-grid">
-      <article class="team-card">
-        <div class="card-top">
-          <h3>Team</h3>
-          <span class="badge">3 members</span>
-        </div>
+      {#each teamMembers as member}
+        <article class="team-card">
+          <div class="card-top">
+            <h3>{member.name}</h3>
+            <span class="badge">Miembro</span>
+          </div>
 
-        <div class="info-list">
-          {#each teamMembers as member}
+          <div class="info-list">
             <div class="info-item">
-              <p class="item-title">{member.name}</p>
+              <p class="item-title">Perfil de GitHub</p>
               <a href={member.githubUrl} target="_blank" rel="noreferrer">
                 {member.githubUser}
               </a>
             </div>
-          {/each}
-        </div>
-      </article>
 
-      <article class="team-card">
-        <div class="card-top">
-          <h3>Repository</h3>
-          <span class="badge">GitHub</span>
-        </div>
+            <div class="info-item">
+              <p class="item-title">API</p>
+              <a href={member.apiUrl} target="_blank" rel="noreferrer">
+                {member.apiUrl}
+              </a>
+            </div>
 
-        <p>
-          Main source code repository for the SOS2526-24 project.
-        </p>
-
-        <div class="card-links">
-          <a href="https://github.com/gti-sos/SOS2526-24" target="_blank" rel="noreferrer">
-            gti-sos/SOS2526-24
-          </a>
-        </div>
-      </article>
-
-      <article class="team-card">
-        <div class="card-top">
-          <h3>Live URL</h3>
-          <span class="badge">Deploy</span>
-        </div>
-
-        <p>
-          Public deployment of the application.
-        </p>
-
-        <div class="card-links">
-          <a href="https://sos2526-24.onrender.com/" target="_blank" rel="noreferrer">
-            sos2526-24.onrender.com
-          </a>
-        </div>
-      </article>
-    </div>
-
-    <div class="api-card">
-      <div class="card-top">
-        <h3>APIs</h3>
-        <span class="badge">Endpoints</span>
-      </div>
-
-      <div class="api-grid">
-        {#each apiSections as api}
-          <article class="api-item">
-            <p class="item-title">{api.member}</p>
-            <a href={api.url} target="_blank" rel="noreferrer">
-              {api.url}
-            </a>
-          </article>
-        {/each}
-      </div>
+            <div class="info-item">
+              <p class="item-title">Documentación</p>
+              <div class="docs-list">
+                {#each member.docs as doc}
+                  <a href={doc.url} target="_blank" rel="noreferrer">
+                    {doc.label}
+                  </a>
+                {/each}
+              </div>
+            </div>
+          </div>
+        </article>
+      {/each}
     </div>
   </section>
 </div>
 
 <style>
-
-  .page {
-    padding: 14px 18px 40px;
+  :global(body) {
+    font-family:
+      Inter,
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      "Liberation Mono",
+      "Courier New",
+      monospace;
+    color: #2f3e3a;
   }
 
-  .hero-shell,
-  .cards-section {
+  .page {
+    padding: 32px 20px 40px;
     max-width: 1420px;
     margin: 0 auto;
   }
 
-  .hero-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 28px;
-    background:
-      linear-gradient(rgba(20, 16, 14, 0.28), rgba(20, 16, 14, 0.28)),
-      url('/hero-campus.jpg') center/cover no-repeat;
-    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
-  }
-
-  .small-hero {
-    min-height: 420px;
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.52) 0%,
-      rgba(0, 0, 0, 0.22) 40%,
-      rgba(0, 0, 0, 0.12) 100%
-    );
-    pointer-events: none;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: flex-start;
-    min-height: 420px;
-    padding: 78px 58px 48px;
-  }
-
-  .hero-text {
-    max-width: 760px;
-    color: #fffaf6;
-  }
-
-  .hero-text h1 {
-    margin: 0 0 18px;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(3.4rem, 6vw, 5.6rem);
-    line-height: 0.92;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-  }
-
-  .hero-text p {
-    margin: 0;
-    font-size: 1.08rem;
-    line-height: 1.75;
-    color: rgba(255, 248, 242, 0.96);
-  }
-
-  .cards-section {
-    margin-top: 30px;
-  }
-
-  .section-heading {
-    margin-bottom: 20px;
-    color: #fff7f2;
+  .intro-section {
+    text-align: center;
+    margin-bottom: 42px;
+    padding: 24px 0 8px;
   }
 
   .eyebrow {
-    margin: 0 0 8px;
+    margin: 0 0 10px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.82rem;
     font-weight: 700;
-    color: rgba(255, 247, 241, 0.88);
+    color: #4f645e;
+  }
+
+  .intro-section h1 {
+    margin: 0 0 18px;
+    font-size: clamp(2.8rem, 6vw, 4.2rem);
+    line-height: 1.05;
+    font-weight: 800;
+    color: #2f3e3a;
+  }
+
+  .intro-text {
+    margin: 0 auto;
+    max-width: 820px;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #41514c;
+  }
+
+  .main-links {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .main-links a {
+    display: inline-block;
+    text-decoration: none;
+    color: #2f3e3a;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(47, 62, 58, 0.12);
+    transition:
+      transform 0.15s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .main-links a:hover {
+    transform: translateY(-1px);
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .cards-section {
+    margin-top: 18px;
+  }
+
+  .section-heading {
+    text-align: center;
+    margin-bottom: 22px;
   }
 
   .section-heading h2 {
-    margin: 0 0 10px;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(2.2rem, 4vw, 3.4rem);
-    font-weight: 600;
-    color: #fff9f5;
+    margin: 0 0 12px;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: #2f3e3a;
   }
 
   .section-heading p {
-    margin: 0;
+    margin: 0 auto;
     max-width: 950px;
-    line-height: 1.7;
-    color: rgba(255, 245, 238, 0.95);
+    line-height: 1.8;
+    color: #41514c;
   }
 
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
-    margin-bottom: 24px;
   }
 
-  .team-card,
-  .api-card {
-    background: rgba(250, 245, 239, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.32);
-    border-radius: 24px;
+  .team-card {
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid rgba(47, 62, 58, 0.1);
+    border-radius: 20px;
     padding: 22px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(6px);
   }
 
   .card-top {
@@ -276,77 +253,68 @@
     margin-bottom: 14px;
   }
 
-  .team-card h3,
-  .api-card h3 {
+  .team-card h3 {
     margin: 0;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 2rem;
-    line-height: 1;
-    color: #111827;
+    font-size: 1.2rem;
+    line-height: 1.35;
+    font-weight: 800;
+    color: #2f3e3a;
   }
 
   .badge {
-    background: #efe3b1;
-    color: #111827;
+    background: #dfe8e4;
+    color: #2f3e3a;
     border-radius: 999px;
     padding: 7px 12px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
     white-space: nowrap;
   }
 
-  .team-card p,
-  .api-card p {
-    margin: 0 0 10px;
-    color: #374151;
-    line-height: 1.7;
-  }
-
-  .info-list,
-  .api-grid {
+  .info-list {
     display: grid;
     gap: 14px;
   }
 
-  .info-item,
-  .api-item {
-    background: rgba(255, 255, 255, 0.58);
-    border-radius: 16px;
+  .info-item {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(47, 62, 58, 0.08);
+    border-radius: 14px;
     padding: 14px;
   }
 
   .item-title {
     font-weight: 700;
-    color: #111827;
-    margin-bottom: 8px;
+    color: #2f3e3a;
+    margin: 0 0 8px;
   }
 
-  .card-links {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 18px;
-  }
-
-  .card-links a,
-  .info-item a,
-  .api-item a {
+  .info-item a {
     display: inline-block;
     text-decoration: none;
-    color: #7a1837;
+    color: #384844;
     font-weight: 700;
-    padding: 11px 12px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.62);
-    transition: transform 0.15s ease, background 0.15s ease;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f8fbfa;
+    border: 1px solid rgba(47, 62, 58, 0.08);
+    transition:
+      transform 0.15s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
     word-break: break-word;
+    margin-top: 6px;
   }
 
-  .card-links a:hover,
-  .info-item a:hover,
-  .api-item a:hover {
+  .info-item a:hover {
     transform: translateY(-1px);
     background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  }
+
+  .docs-list {
+    display: grid;
+    gap: 10px;
   }
 
   @media (max-width: 1100px) {
@@ -357,25 +325,20 @@
 
   @media (max-width: 820px) {
     .page {
-      padding: 12px 12px 30px;
+      padding: 20px 12px 30px;
     }
 
-    .hero-content {
-      padding: 54px 24px 30px;
-      min-height: 340px;
+    .main-links {
+      flex-direction: column;
+      width: 100%;
     }
 
-    .hero-text h1 {
-      font-size: clamp(2.8rem, 12vw, 4.5rem);
+    .main-links a {
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    .hero-text p {
-      font-size: 1rem;
-      line-height: 1.65;
-    }
-
-    .team-card,
-    .api-card {
+    .team-card {
       padding: 18px;
     }
   }

@@ -1,0 +1,75 @@
+{"year":2024,"country":"USA","city":"New York","cost_usd_per_m2":5723,"cost_change_range":"5%","rank":1,"_id":"54ULDQLGAZvCAlgU"}
+{"year":2024,"country":"Canada","city":"Toronto","cost_usd_per_m2":2973,"cost_change_range":"5.01%","rank":24,"_id":"ecRDySRAl35FinwT"}
+{"year":2024,"country":"uk","city":"London","cost_usd_per_m2":4473,"cost_change_range":"15%","rank":5,"_id":"T5QiBllNIdjklqFU"}
+{"year":2024,"country":"Spain","city":"Madrid","cost_usd_per_m2":2205,"cost_change_range":"2.13%","rank":48,"_id":"BQ0ojMvUrdrf9QGr"}
+{"year":2023,"country":"Canada","city":"Vancouver","cost_usd_per_m2":2870,"cost_change_range":"7%","rank":30,"_id":"FBHNhpjWiy17VS6T"}
+{"year":2023,"country":"Italy","city":"Milan","cost_usd_per_m2":2689,"cost_change_range":"-9.31%","rank":46,"_id":"on9L17OfZUAnwQ5A"}
+{"year":2023,"country":"Ireland","city":"Dublin","cost_usd_per_m2":3708,"cost_change_range":"-1.75%","rank":19,"_id":"AcASTmMq4b0FOvMu"}
+{"year":2023,"country":"Germany","city":"Munich","cost_usd_per_m2":3787,"cost_change_range":"17.65%","rank":17,"_id":"51UtEmbhGaaDJLHG"}
+{"year":2022,"country":"Poland","city":"Wasaw","cost_usd_per_m2":1667,"cost_change_range":"30.16%","rank":59,"_id":"bwcHNM0GDgEYHkg2"}
+{"year":2023,"country":"USA","city":"New York","cost_usd_per_m2":5451,"cost_change_range":"5%","rank":4,"_id":"cY52UxvgQr62cwQd"}
+{"year":2023,"country":"Canada","city":"Toronto","cost_usd_per_m2":2834,"cost_change_range":"5%","rank":26,"_id":"4fL8Kz5Mr9m36y94"}
+{"country":"España","year":2026,"city":"TestCity_9706","cost_usd_per_m2":1200,"cost_change_range":"2%","rank":5,"_id":"xQ3tZOrgO7XpbFN8"}
+{"year":2023,"country":"Canada","city":"Toronto","cost_usd_per_m2":9999,"cost_change_range":"5%","rank":1,"_id":"4fL8Kz5Mr9m36y94"}
+{"$$deleted":true,"_id":"4fL8Kz5Mr9m36y94"}
+{"$$deleted":true,"_id":"51UtEmbhGaaDJLHG"}
+{"$$deleted":true,"_id":"54ULDQLGAZvCAlgU"}
+{"$$deleted":true,"_id":"AcASTmMq4b0FOvMu"}
+{"$$deleted":true,"_id":"BQ0ojMvUrdrf9QGr"}
+{"$$deleted":true,"_id":"FBHNhpjWiy17VS6T"}
+{"$$deleted":true,"_id":"T5QiBllNIdjklqFU"}
+{"$$deleted":true,"_id":"bwcHNM0GDgEYHkg2"}
+{"$$deleted":true,"_id":"cY52UxvgQr62cwQd"}
+{"$$deleted":true,"_id":"ecRDySRAl35FinwT"}
+{"$$deleted":true,"_id":"on9L17OfZUAnwQ5A"}
+{"$$deleted":true,"_id":"xQ3tZOrgO7XpbFN8"}
+{"year":2024,"country":"USA","city":"New York","cost_usd_per_m2":5723,"cost_change_range":"5%","rank":1,"_id":"KR4OLAIMJwDXX7Wq"}
+{"year":2024,"country":"Canada","city":"Toronto","cost_usd_per_m2":2973,"cost_change_range":"5.01%","rank":24,"_id":"kOXaD161mrLj81W6"}
+{"year":2024,"country":"uk","city":"London","cost_usd_per_m2":4473,"cost_change_range":"15%","rank":5,"_id":"WtDNSIqjhWOqpWku"}
+{"year":2024,"country":"Spain","city":"Madrid","cost_usd_per_m2":2205,"cost_change_range":"2.13%","rank":48,"_id":"kDydhFRvH9J2hKdm"}
+{"year":2023,"country":"Canada","city":"Vancouver","cost_usd_per_m2":2870,"cost_change_range":"7%","rank":30,"_id":"7bkXaSXHzB7gJWiW"}
+{"year":2023,"country":"Italy","city":"Milan","cost_usd_per_m2":2689,"cost_change_range":"-9.31%","rank":46,"_id":"53PiQsQAvfPpAXPF"}
+{"year":2023,"country":"Ireland","city":"Dublin","cost_usd_per_m2":3708,"cost_change_range":"-1.75%","rank":19,"_id":"e2ffOE5Yc9dX8OJv"}
+{"year":2023,"country":"Germany","city":"Munich","cost_usd_per_m2":3787,"cost_change_range":"17.65%","rank":17,"_id":"AwW0GIQavMl6iHMN"}
+{"year":2022,"country":"Poland","city":"Wasaw","cost_usd_per_m2":1667,"cost_change_range":"30.16%","rank":59,"_id":"TXgVeEbeVJTvrbkt"}
+{"year":2023,"country":"USA","city":"New York","cost_usd_per_m2":5451,"cost_change_range":"5%","rank":4,"_id":"Jx325yaWxMwhU80q"}
+{"year":2023,"country":"Canada","city":"Toronto","cost_usd_per_m2":2834,"cost_change_range":"5%","rank":26,"_id":"SCKvlt6ewfNCvGWt"}
+{"country":"España","year":2026,"city":"TestCity_349","cost_usd_per_m2":1200,"cost_change_range":"2%","rank":5,"_id":"cpAerEPRAO3R8OJz"}
+{"year":2023,"country":"Italy","city":"Milan","cost_usd_per_m2":9999,"cost_change_range":"-9.31%","rank":1,"_id":"53PiQsQAvfPpAXPF"}
+{"$$deleted":true,"_id":"53PiQsQAvfPpAXPF"}
+{"$$deleted":true,"_id":"7bkXaSXHzB7gJWiW"}
+{"$$deleted":true,"_id":"AwW0GIQavMl6iHMN"}
+{"$$deleted":true,"_id":"Jx325yaWxMwhU80q"}
+{"$$deleted":true,"_id":"KR4OLAIMJwDXX7Wq"}
+{"$$deleted":true,"_id":"SCKvlt6ewfNCvGWt"}
+{"$$deleted":true,"_id":"TXgVeEbeVJTvrbkt"}
+{"$$deleted":true,"_id":"WtDNSIqjhWOqpWku"}
+{"$$deleted":true,"_id":"cpAerEPRAO3R8OJz"}
+{"$$deleted":true,"_id":"e2ffOE5Yc9dX8OJv"}
+{"$$deleted":true,"_id":"kDydhFRvH9J2hKdm"}
+{"$$deleted":true,"_id":"kOXaD161mrLj81W6"}
+{"year":2024,"country":"USA","city":"New York","cost_usd_per_m2":5723,"cost_change_range":"5%","rank":1,"_id":"uDU1T3G6n7mj5jE8"}
+{"year":2024,"country":"Canada","city":"Toronto","cost_usd_per_m2":2973,"cost_change_range":"5.01%","rank":24,"_id":"a9Bo50GV6f1gKEg4"}
+{"year":2024,"country":"uk","city":"London","cost_usd_per_m2":4473,"cost_change_range":"15%","rank":5,"_id":"H4ohEz6CFqbGxjLd"}
+{"year":2024,"country":"Spain","city":"Madrid","cost_usd_per_m2":2205,"cost_change_range":"2.13%","rank":48,"_id":"Xgc03BdWyNGeEkuc"}
+{"year":2023,"country":"Canada","city":"Vancouver","cost_usd_per_m2":2870,"cost_change_range":"7%","rank":30,"_id":"1P9d86CROW2ZC4sC"}
+{"year":2023,"country":"Italy","city":"Milan","cost_usd_per_m2":2689,"cost_change_range":"-9.31%","rank":46,"_id":"h7TDEZROg5qvr8Xh"}
+{"year":2023,"country":"Ireland","city":"Dublin","cost_usd_per_m2":3708,"cost_change_range":"-1.75%","rank":19,"_id":"4pBcMjLBBidFimNj"}
+{"year":2023,"country":"Germany","city":"Munich","cost_usd_per_m2":3787,"cost_change_range":"17.65%","rank":17,"_id":"vvACRh6hz8ZSgjkL"}
+{"year":2022,"country":"Poland","city":"Wasaw","cost_usd_per_m2":1667,"cost_change_range":"30.16%","rank":59,"_id":"7peQxrvXMGMUbSvZ"}
+{"year":2023,"country":"USA","city":"New York","cost_usd_per_m2":5451,"cost_change_range":"5%","rank":4,"_id":"gxxvgfelFZDC9ix3"}
+{"year":2023,"country":"Canada","city":"Toronto","cost_usd_per_m2":2834,"cost_change_range":"5%","rank":26,"_id":"rvPLn0IzMgUYUmwW"}
+{"country":"España","year":2026,"city":"TestCity_5373","cost_usd_per_m2":1200,"cost_change_range":"2%","rank":5,"_id":"dhWwPHfALTqVML6Y"}
+{"year":2023,"country":"Canada","city":"Vancouver","cost_usd_per_m2":9999,"cost_change_range":"7%","rank":1,"_id":"1P9d86CROW2ZC4sC"}
+{"$$deleted":true,"_id":"1P9d86CROW2ZC4sC"}
+{"$$deleted":true,"_id":"4pBcMjLBBidFimNj"}
+{"$$deleted":true,"_id":"7peQxrvXMGMUbSvZ"}
+{"$$deleted":true,"_id":"H4ohEz6CFqbGxjLd"}
+{"$$deleted":true,"_id":"Xgc03BdWyNGeEkuc"}
+{"$$deleted":true,"_id":"a9Bo50GV6f1gKEg4"}
+{"$$deleted":true,"_id":"dhWwPHfALTqVML6Y"}
+{"$$deleted":true,"_id":"gxxvgfelFZDC9ix3"}
+{"$$deleted":true,"_id":"h7TDEZROg5qvr8Xh"}
+{"$$deleted":true,"_id":"rvPLn0IzMgUYUmwW"}
+{"$$deleted":true,"_id":"uDU1T3G6n7mj5jE8"}
+{"$$deleted":true,"_id":"vvACRh6hz8ZSgjkL"}

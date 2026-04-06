@@ -2,11 +2,14 @@
 import dataStore from "nedb";
 
 // Constantes de rutas
+let BASE_URL_API_v1 = "/api/v1";
 const BASE_URL_API = "/api/v2";
 const EBP_API_PATH = BASE_URL_API + "/recreation-culture-expenditure";
+const EBP_API_PATH_v1 = BASE_URL_API_v1 + "/recreation-culture-expenditure";
 
 // Ruta /docs
 const DOCS_URL = "https://documenter.getpostman.com/view/52412956/2sBXinGqPr";
+const DOCS_URL_v1= "https://documenter.getpostman.com/view/52412956/2sBXigMtQf";
 
 // Base de datos
 let db = new dataStore({
@@ -446,9 +449,14 @@ function loadBackendElenav2(app) {
     });
   });
 
-  // Ruta de documentación
+  // Ruta de documentación v2
   app.get(EBP_API_PATH + "/docs", (req, res) => {
     return res.redirect(301, DOCS_URL);
+  });
+
+  // Ruta de documentación v1
+  app.get(EBP_API_PATH_v1 + "/docs", (req, res) => {
+    return res.redirect(301, DOCS_URL_v1);
   });
 }
 
