@@ -17,8 +17,8 @@
       short: "MJP",
       member: "María Jesús Jiménez-Espada Pallarés",
       frontend: "/average-monthly-wages",
-      apiBase: "/api/v2/average-monthly-wages",
-      docs: "/api/v2/average-monthly-wages/docs"
+      apiBase: "/api/v1/average-monthly-wages",
+      docs: "/api/v1/average-monthly-wages/docs"
     },
     {
       key: "construccion",
