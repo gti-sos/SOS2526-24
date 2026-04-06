@@ -23,9 +23,9 @@
       emoji: "💶",
       member: "María Jesús Jiménez-Espada Pallarés",
       resource: "average-monthly-wages",
-      frontend: "/MJP",
-      apiBase: "/api/v1/average-monthly-wages",
-      docs: "/api/v1/average-monthly-wages/docs",
+      frontend: "/average-monthly-wages",
+      apiBase: "/api/v2/average-monthly-wages",
+      docs: "/api/v2/average-monthly-wages/docs",
       label: "Sueldos"
     },
     {
