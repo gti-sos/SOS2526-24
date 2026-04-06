@@ -1,84 +1,98 @@
-<footer class="site-footer" id="footer-info">
-  <div class="footer-grid">
-    <section>
-      <h3>Proyecto</h3>
-      <p>Grupo SOS2526-24</p>
-      <p>Curso 2025/2026</p>
-    </section>
+<footer class="site-footer">
+  <div class="footer-panel">
+    <div class="footer-grid">
+      <section class="footer-block">
+        <h3>Proyecto</h3>
+        <p>Grupo SOS2526-24</p>
+        <p>Curso 2025/2026</p>
+      </section>
 
-    <section>
-      <h3>Fuentes de datos</h3>
-      <p>Ocio y cultura · Sueldos medios mensuales · Costes internacionales de construcción</p>
-    </section>
+      <section class="footer-block">
+        <h3>Fuentes de datos</h3>
+        <p>Ocio y cultura</p>
+        <p>Sueldos medios mensuales</p>
+        <p>Costes internacionales de construcción</p>
+      </section>
 
-    <section>
-      <h3>Tecnologías</h3>
-      <p>Svelte · Node.js · Express · APIs REST · Postman · Render</p>
-    </section>
-  </div>
+      <section class="footer-block">
+        <h3>Tecnologías</h3>
+        <p>Svelte · Node.js · Express</p>
+        <p>APIs REST · Postman · Render</p>
+      </section>
+    </div>
 
-  <div class="footer-bottom">
-    <p>Universidad de Sevilla · Sistemas Orientados a Servicios (SOS)</p>
+    <div class="footer-bottom">
+      Universidad de Sevilla · Sistemas Orientados a Servicios (SOS)
+    </div>
   </div>
 </footer>
 
 <style>
   .site-footer {
-    width: min(1200px, calc(100% - 2rem));
-    margin: 0 auto 1.5rem;
-    padding: 1.4rem 1.4rem 1rem;
+    width: 100%;
+    padding: 2.2rem 0 2.8rem;
+  }
+
+  .footer-panel {
+    width: min(1380px, calc(100% - 2.2rem));
+    margin: 0 auto;
+    padding: 1.8rem 2rem 1.2rem;
     border-radius: 28px;
-    border: 1px solid rgba(37, 53, 49, 0.08);
-    background:
-      linear-gradient(180deg, rgba(240, 246, 242, 0.9), rgba(223, 238, 232, 0.78));
-    box-shadow: 0 16px 36px rgba(55, 79, 72, 0.08);
+    background: rgba(235, 244, 240, 0.84);
+    box-shadow: 0 14px 34px rgba(58, 81, 76, 0.08);
+    backdrop-filter: blur(4px);
+    color: #2d4d48;
+    font-family:
+       "Inter", sans-serif;
+    font-weight: 350;
   }
 
   .footer-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .site-footer h3 {
-    margin: 0 0 0.65rem;
-    font-size: 0.95rem;
-    color: #1d3732;
-  }
-
-  .site-footer p {
-    margin: 0.18rem 0;
-    color: #39554f;
-    font-size: 0.88rem;
-    line-height: 1.5;
-  }
-
-  .footer-bottom {
-    margin-top: 1rem;
-    padding-top: 0.9rem;
-    border-top: 1px solid rgba(37, 53, 49, 0.08);
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 2rem;
+    align-items: start;
     text-align: center;
   }
 
-  .footer-bottom p {
-    margin: 0;
-    color: #47635d;
-    font-size: 0.84rem;
+  .footer-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .footer-block h3 {
+    margin: 0 0 0.9rem;
+    font-size: 1.15rem;
+    color: #102f2c;
+  }
+
+  .footer-block p {
+    margin: 0.22rem 0;
+    line-height: 1.65;
+    font-size: 1rem;
+    max-width: 320px;
+  }
+
+  .footer-bottom {
+    margin-top: 1.6rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(56, 86, 79, 0.16);
+    text-align: center;
+    font-size: 0.98rem;
+    color: #52706a;
   }
 
   @media (max-width: 900px) {
-    .footer-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .site-footer {
-      width: min(100% - 1rem, 1200px);
+    .footer-panel {
+      width: min(100% - 1rem, 1380px);
+      padding: 1.5rem 1.2rem 1rem;
     }
 
     .footer-grid {
       grid-template-columns: 1fr;
+      gap: 1.35rem;
     }
   }
 </style>

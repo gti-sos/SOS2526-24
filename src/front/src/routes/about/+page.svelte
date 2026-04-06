@@ -151,21 +151,6 @@
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap');
-
-  :global(html) {
-    scroll-behavior: smooth;
-  }
-
-  :global(body) {
-    margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    color: #111827;
-    background:
-      radial-gradient(circle at 48% 38%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.38) 18%, rgba(255, 255, 255, 0) 34%),
-      linear-gradient(90deg, #8b0f45 0%, #b74263 22%, #f4d7cf 50%, #d98a67 76%, #c96b4b 100%);
-    min-height: 100vh;
-  }
 
   .page {
     padding: 14px 18px 40px;

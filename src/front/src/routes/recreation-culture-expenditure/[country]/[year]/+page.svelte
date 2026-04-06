@@ -173,7 +173,7 @@
           <p class="eyebrow">EBP · RECREATION & CULTURE</p>
           <h1>Editar registro</h1>
           <p class="hero-subtitle">
-            Modifica los datos principales del registro seleccionado sin salir de la vista de edición.
+            Modificando los datos principales del registro seleccionado.
           </p>
         </div>
       </div>
@@ -192,7 +192,7 @@
         <div>
           <h3>Edición del registro</h3>
           <p class="panel-description">
-            País y año identifican el recurso, por eso aquí se muestran bloqueados.
+            País y año identifican el recurso, no se pueden modificar.
           </p>
         </div>
         <span class="badge">Editar</span>
@@ -248,7 +248,7 @@
         </div>
 
         <p class="helper-text">
-          El porcentaje destinado a ocio/cultura y el gasto por persona se calculan automáticamente en el servidor al guardar.
+          El porcentaje destinado a ocio/cultura y el gasto por persona se calculan automáticamente.
         </p>
 
         <div class="buttons-row">
@@ -270,20 +270,6 @@
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap');
-
-  :global(html) {
-    scroll-behavior: smooth;
-  }
-
-  :global(body) {
-    margin: 0;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
-    color: #2f3a39;
-    background: linear-gradient(120deg, #485a57 0%, #6f827e 24%, #9fb0ad 58%, #d2ddd8 100%);
-    min-height: 100vh;
-    letter-spacing: 0.01em;
-  }
 
   .page {
     padding: 16px 18px 22px;
