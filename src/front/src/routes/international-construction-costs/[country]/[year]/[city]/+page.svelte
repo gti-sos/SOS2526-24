@@ -1,22 +1,44 @@
 <script>
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
+  import { onMount } from "svelte";
+  import { page } from "$app/state";
+  import { goto } from "$app/navigation";
 
-  let { country, year, city } = $page.params;
+  let country = $derived(decodeURIComponent(page.params.country ?? ""));
+  let year = $derived(page.params.year ?? "");
+  let city = $derived(decodeURIComponent(page.params.city ?? ""));
 
-  let dato = $state({ country, year, city, cost_usd_per_m2: 0, cost_change_range: "", rank: 0 });
+  let dato = $state({
+    country: "",
+    year: "",
+    city: "",
+    cost_usd_per_m2: 0,
+    cost_change_range: "",
+    rank: 0
+  });
+
   let mensaje = $state("");
   let esError = $state(false);
 
-  const API = `/api/v2/international-construction-costs/${country}/${year}/${city}`;
+  const API = $derived(
+    `/api/v2/international-construction-costs/${encodeURIComponent(country)}/${year}/${encodeURIComponent(city)}`
+  );
+
+  function mostrarMensaje(texto, error = false) {
+    mensaje = texto;
+    esError = error;
+  }
 
   async function getDatoActual() {
-    const res = await fetch(API);
-    if (res.ok) {
-      dato = await res.json();
-    } else {
-      mensaje = `No se ha encontrado el registro para ${city} en ${year}.`;
-      esError = true;
+    try {
+      const res = await fetch(API);
+
+      if (res.ok) {
+        dato = await res.json();
+      } else {
+        mostrarMensaje(`No se ha encontrado el registro para ${city} en ${year}.`, true);
+      }
+    } catch {
+      mostrarMensaje("Se produjo un problema de conexión al cargar el registro.", true);
     }
   }
 
@@ -28,15 +50,20 @@
     });
 
     if (res.ok) {
-      mensaje = "Los cambios se han guardado correctamente.";
+      mostrarMensaje("Los cambios se han guardado correctamente.");
       esError = false;
     } else if (res.status === 400) {
-      mensaje = "Error: Los datos enviados no son correctos o los identificadores no coinciden.";
-      esError = true;
+      mostrarMensaje(
+        "Los datos enviados no son correctos o los identificadores no coinciden.",
+        true
+      );
     } else {
-      mensaje = "Ha ocurrido un error inesperado al intentar actualizar.";
-      esError = true;
+      mostrarMensaje("Ha ocurrido un error inesperado al intentar actualizar.", true);
     }
+  }
+
+  function volverAlListado() {
+    goto("/international-construction-costs");
   }
 
   onMount(() => {
@@ -52,50 +79,59 @@
   </div>
 
   {#if mensaje}
-    <p style="color: {esError ? 'red' : 'green'}; padding: 10px; border: 1px solid;">{mensaje}</p>
+    <div class="message" class:error={esError} class:success={!esError}>
+      {mensaje}
+    </div>
   {/if}
 
   <section class="editor-card">
     <div class="readonly-grid">
       <p>País: <strong>{dato.country}</strong> <span>(No editable)</span></p>
       <p>Año: <strong>{dato.year}</strong> <span>(No editable)</span></p>
+      <p>Ciudad: <strong>{dato.city}</strong> <span>(No editable)</span></p>
     </div>
 
     <div class="form-grid">
-      <label>
-        Coste USD por m²:
-        <input type="number" bind:value={dato.cost_usd_per_m2} />
-      </label>
+      <div class="field">
+        <label for="edit-cost">Coste USD por m²</label>
+        <input id="edit-cost" type="number" bind:value={dato.cost_usd_per_m2} />
+      </div>
 
-      <label>
-        Rango de cambio:
-        <input bind:value={dato.cost_change_range} />
-      </label>
+      <div class="field">
+        <label for="edit-range">Rango de cambio</label>
+        <input id="edit-range" bind:value={dato.cost_change_range} />
+      </div>
 
-      <label>
-        Ranking:
-        <input type="number" bind:value={dato.rank} />
-      </label>
+      <div class="field">
+        <label for="edit-rank">Ranking</label>
+        <input id="edit-rank" type="number" bind:value={dato.rank} />
+      </div>
     </div>
 
-    <div class="actions">
-      <button onclick={guardarCambios}>Guardar cambios</button>
-      <a href="/international-construction-costs">
-        <button class="secondary-button">Volver al listado</button>
-      </a>
+    <div class="button-row">
+      <button class="action-btn primary-btn" type="button" onclick={guardarCambios}>
+        Guardar cambios
+      </button>
+
+      <button class="action-btn neutral-btn" type="button" onclick={volverAlListado}>
+        Volver al listado
+      </button>
     </div>
   </section>
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap');
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap");
 
   :global(*) {
     box-sizing: border-box;
   }
 
   :global(body) {
+    margin: 0;
     color: #2f3a39;
+    font-family: "Inter", system-ui, sans-serif;
+    background: linear-gradient(120deg, #485a57 0%, #6f827e 24%, #9fb0ad 58%, #d2ddd8 100%);
   }
 
   .page {
@@ -110,7 +146,6 @@
 
   .eyebrow {
     margin: 0 0 0.55rem;
-    font-family: "Inter", sans-serif;
     font-size: 1rem;
     font-weight: 800;
     letter-spacing: 0.12em;
@@ -121,149 +156,124 @@
   h1 {
     margin: 0;
     font-family: "Cormorant Garamond", serif;
-    font-size: clamp(3rem, 5.8vw, 4.5rem);
-    line-height: 1.02;
-    font-weight: 700;
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    line-height: 1;
     color: #f4efe9;
-    letter-spacing: -0.02em;
   }
 
   .hero-subtitle {
-    margin: 0.45rem 0 0;
-    font-family: "Inter", sans-serif;
-    font-size: 1.08rem;
-    font-weight: 500;
-    color: rgba(244, 239, 233, 0.92);
+    margin-top: 0.55rem;
+    color: #f4efe9;
+    opacity: 0.9;
   }
 
   .editor-card {
-    background: rgba(247, 245, 243, 0.93);
-    border-radius: 28px;
-    padding: 1.6rem 1.45rem;
-    border: 1px solid rgba(56, 74, 70, 0.06);
+    background: rgba(247, 245, 243, 0.92);
+    border: 1px solid rgba(47, 58, 57, 0.08);
+    border-radius: 24px;
     box-shadow: 0 14px 34px rgba(44, 61, 57, 0.08);
-    backdrop-filter: blur(4px);
+    padding: 1rem;
+  }
+
+  .message {
+    margin: 0 0 1.2rem;
+    padding: 0.9rem 1rem;
+    border-radius: 18px;
+    box-shadow: 0 10px 24px rgba(44, 61, 57, 0.07);
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+  }
+
+  .message.success {
+    background: #edf8ee;
+    color: #3f8f52;
+    border: 1px solid #9fd4a8;
+  }
+
+  .message.error {
+    background: #fff0ef;
+    color: #c6756d;
+    border: 1px solid #efb3ad;
   }
 
   .readonly-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-    padding: 0.25rem 0 0.95rem;
-    border-bottom: 1px solid rgba(68, 87, 84, 0.08);
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
   }
 
   .readonly-grid p {
     margin: 0;
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    color: #38514d;
-    line-height: 1.6;
-  }
-
-  .readonly-grid strong {
-    color: #183632;
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    background: #fbfbfa;
+    border: 1px solid rgba(47, 58, 57, 0.07);
   }
 
   .readonly-grid span {
-    color: #6c7f7b;
-    font-size: 0.96rem;
+    color: #667673;
+    font-size: 0.9rem;
   }
 
   .form-grid {
     display: grid;
-    gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
   }
 
   label {
-    display: block;
-    font-family: "Inter", sans-serif;
-    font-size: 0.98rem;
     font-weight: 600;
-    color: #415653;
-    line-height: 1.5;
+    color: #38514d;
   }
 
   input {
     width: 100%;
-    margin-top: 0.42rem;
-    padding: 0.9rem 1rem;
-    border-radius: 16px;
-    border: 1px solid rgba(63, 83, 78, 0.12);
-    background: rgba(255, 255, 255, 0.68);
-    color: #304744;
-    font-family: "Inter", sans-serif;
-    font-size: 0.98rem;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    border: 1px solid rgba(47, 58, 57, 0.12);
+    border-radius: 14px;
+    padding: 0.8rem 0.9rem;
+    background: #fbfbfa;
+    color: #2f3a39;
   }
 
-  input::placeholder {
-    color: #7e8d89;
-  }
-
-  input:focus {
-    border-color: rgba(120, 154, 145, 0.72);
-    box-shadow: 0 0 0 4px rgba(168, 193, 186, 0.18);
-    background: rgba(255, 255, 255, 0.84);
-  }
-
-  .actions {
+  .button-row {
     display: flex;
-    gap: 0.8rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
-    margin-top: 1.35rem;
+    margin-top: 1rem;
   }
 
-  button {
+  .action-btn {
     border: none;
     border-radius: 999px;
-    padding: 0.82rem 1.2rem;
+    cursor: pointer;
     font-family: "Inter", sans-serif;
     font-size: 0.95rem;
     font-weight: 700;
-    cursor: pointer;
+    padding: 0.82rem 1.2rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     box-shadow: 0 8px 18px rgba(58, 77, 72, 0.08);
-    background: #89a8a0;
-    color: #f8faf9;
   }
 
-  button:hover {
+  .action-btn:hover {
     transform: translateY(-1px);
     opacity: 0.96;
   }
 
-  .secondary-button {
+  .primary-btn {
+    background: #89a8a0;
+    color: #f8faf9;
+  }
+
+  .neutral-btn {
     background: #d8d5d1;
     color: #425652;
-  }
-
-  a {
-    text-decoration: none;
-  }
-
-  p[style*="color: green"] {
-    margin: 0 0 1.2rem;
-    border-radius: 18px;
-    background: #edf8ee !important;
-    color: #3f8f52 !important;
-    border: 1px solid #9fd4a8 !important;
-    box-shadow: 0 10px 24px rgba(44, 61, 57, 0.07);
-    font-family: "Inter", sans-serif;
-    font-weight: 700;
-  }
-
-  p[style*="color: red"] {
-    margin: 0 0 1.2rem;
-    border-radius: 18px;
-    background: #fff0ef !important;
-    color: #c6756d !important;
-    border: 1px solid #efb3ad !important;
-    box-shadow: 0 10px 24px rgba(44, 61, 57, 0.07);
-    font-family: "Inter", sans-serif;
-    font-weight: 700;
   }
 
   @media (max-width: 780px) {
@@ -271,9 +281,9 @@
       padding: 0.9rem 0.8rem 2rem;
     }
 
-    .readonly-grid {
+    .readonly-grid,
+    .form-grid {
       grid-template-columns: 1fr;
-      gap: 0.55rem;
     }
 
     h1 {

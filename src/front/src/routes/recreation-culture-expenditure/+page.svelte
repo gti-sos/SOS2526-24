@@ -300,7 +300,7 @@
       <button
         class="filters-main-btn"
         type="button"
-        on:click={() => (mostrarPanelFiltros = !mostrarPanelFiltros)}
+        onclick={() => (mostrarPanelFiltros = !mostrarPanelFiltros)}
       >
         {#if mostrarPanelFiltros}
           Ocultar búsqueda y filtros
@@ -321,8 +321,9 @@
 
         <div class="filters-grid">
           <div class="field">
-            <label>País</label>
+            <label for="filtro-country">País</label>
             <input
+              id="filtro-country"
               bind:value={filtros.country}
               type="text"
               placeholder="Ej. Canada"
@@ -330,8 +331,9 @@
           </div>
 
           <div class="field">
-            <label>Año exacto</label>
+            <label for="filtro-year">Año exacto</label>
             <input
+              id="filtro-year"
               bind:value={filtros.year}
               type="number"
               placeholder="Ej. 2024"
@@ -339,8 +341,9 @@
           </div>
 
           <div class="field">
-            <label>Desde el año</label>
+            <label for="filtro-from">Desde el año</label>
             <input
+              id="filtro-from"
               bind:value={filtros.from}
               type="number"
               placeholder="Ej. 2020"
@@ -348,8 +351,9 @@
           </div>
 
           <div class="field">
-            <label>Hasta el año</label>
+            <label for="filtro-to">Hasta el año</label>
             <input
+              id="filtro-to"
               bind:value={filtros.to}
               type="number"
               placeholder="Ej. 2024"
@@ -357,8 +361,9 @@
           </div>
 
           <div class="field">
-            <label>Gasto mínimo en ocio y cultura</label>
+            <label for="filtro-min-recreation">Gasto mínimo en ocio y cultura</label>
             <input
+              id="filtro-min-recreation"
               bind:value={filtros.min_recreation_value}
               type="number"
               placeholder="Mínimo"
@@ -366,8 +371,9 @@
           </div>
 
           <div class="field">
-            <label>Gasto máximo en ocio y cultura</label>
+            <label for="filtro-max-recreation">Gasto máximo en ocio y cultura</label>
             <input
+              id="filtro-max-recreation"
               bind:value={filtros.max_recreation_value}
               type="number"
               placeholder="Máximo"
@@ -375,8 +381,9 @@
           </div>
 
           <div class="field">
-            <label>Población mínima</label>
+            <label for="filtro-min-population">Población mínima</label>
             <input
+              id="filtro-min-population"
               bind:value={filtros.min_population}
               type="number"
               placeholder="Mínima"
@@ -384,8 +391,9 @@
           </div>
 
           <div class="field">
-            <label>Población máxima</label>
+            <label for="filtro-max-population">Población máxima</label>
             <input
+              id="filtro-max-population"
               bind:value={filtros.max_population}
               type="number"
               placeholder="Máxima"
@@ -394,10 +402,10 @@
         </div>
 
         <div class="search-actions">
-          <button class="action-btn secondary" on:click={buscarDatos}>
+          <button class="action-btn secondary" type="button" onclick={buscarDatos}>
             Buscar
           </button>
-          <button class="action-btn clear-btn" on:click={limpiarBusqueda}>
+          <button class="action-btn clear-btn" type="button" onclick={limpiarBusqueda}>
             Limpiar filtros
           </button>
         </div>
@@ -445,7 +453,8 @@
                         </a>
                         <button
                           class="mini-btn delete"
-                          on:click={() => borrarDato(d.country, d.year)}
+                          type="button"
+                          onclick={() => borrarDato(d.country, d.year)}
                         >
                           Borrar
                         </button>
@@ -462,11 +471,11 @@
           </div>
 
           <div class="panel-actions">
-            <button class="action-btn secondary" on:click={cargarDatosIniciales}>
+            <button class="action-btn secondary" type="button" onclick={cargarDatosIniciales}>
               Cargar datos iniciales
             </button>
 
-            <button class="action-btn danger" on:click={borrarTodo}>
+            <button class="action-btn danger" type="button" onclick={borrarTodo}>
               Eliminar todos los registros
             </button>
           </div>
@@ -482,23 +491,34 @@
 
           <div class="form-grid">
             <div class="field">
-              <label>País</label>
-              <input bind:value={nuevoDato.country} placeholder="Ej. Canada" />
+              <label for="nuevo-country">País</label>
+              <input id="nuevo-country" bind:value={nuevoDato.country} placeholder="Ej. Canada" />
             </div>
 
             <div class="field">
-              <label>Año</label>
-              <input bind:value={nuevoDato.year} type="number" placeholder="Ej. 2024" />
-            </div>
-
-            <div class="field">
-              <label>Gasto en ocio y cultura</label>
-              <input bind:value={nuevoDato.recreation_value} type="number" placeholder="Valor" />
-            </div>
-
-            <div class="field">
-              <label>Consumo total de los hogares</label>
+              <label for="nuevo-year">Año</label>
               <input
+                id="nuevo-year"
+                bind:value={nuevoDato.year}
+                type="number"
+                placeholder="Ej. 2024"
+              />
+            </div>
+
+            <div class="field">
+              <label for="nuevo-recreation-value">Gasto en ocio y cultura</label>
+              <input
+                id="nuevo-recreation-value"
+                bind:value={nuevoDato.recreation_value}
+                type="number"
+                placeholder="Valor"
+              />
+            </div>
+
+            <div class="field">
+              <label for="nuevo-total-household-consumption">Consumo total de los hogares</label>
+              <input
+                id="nuevo-total-household-consumption"
                 bind:value={nuevoDato.total_household_consumption}
                 type="number"
                 placeholder="Valor"
@@ -506,8 +526,13 @@
             </div>
 
             <div class="field full">
-              <label>Población</label>
-              <input bind:value={nuevoDato.population} type="number" placeholder="Población" />
+              <label for="nuevo-population">Población</label>
+              <input
+                id="nuevo-population"
+                bind:value={nuevoDato.population}
+                type="number"
+                placeholder="Población"
+              />
             </div>
           </div>
 
@@ -517,7 +542,7 @@
           </p>
 
           <div class="card-links buttons-row">
-            <button class="action-btn secondary" on:click={crearDato}>
+            <button class="action-btn secondary" type="button" onclick={crearDato}>
               Añadir registro
             </button>
           </div>
@@ -528,7 +553,6 @@
 </div>
 
 <style>
-
   .page {
     padding: 16px 18px 22px;
   }
@@ -913,12 +937,6 @@
   .mini-btn {
     padding: 8px 13px;
     font-size: 0.84rem;
-  }
-
-  .primary {
-    background: #e97b6c;
-    color: #ffffff;
-    box-shadow: 0 6px 14px rgba(233, 123, 108, 0.18);
   }
 
   .secondary {
