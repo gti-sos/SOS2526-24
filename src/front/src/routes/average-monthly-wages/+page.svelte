@@ -225,8 +225,7 @@
                       <td>{d.exchange_rate}</td>
                       <td><span class="currency-tag">{d.currency}</span></td>
                       <td class="td-actions">
-                          <a href="/MJP/{d.country}/{d.year}" class="btn-edit">Editar</a>
-                        <button class="btn-delete" onclick={() => borrarDato(d.country, d.year)}>Borrar</button>
+                        <a href="/average-monthly-wages/{d.country}/{d.year}" class="btn-edit">Editar</a>                        <button class="btn-delete" onclick={() => borrarDato(d.country, d.year)}>Borrar</button>
                       </td>
                     </tr>
                   {/each}
