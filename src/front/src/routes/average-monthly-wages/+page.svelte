@@ -15,7 +15,16 @@
   let mensaje = $state("");
   let esError = $state(false);
   let mostrarFiltros = $state(false);
-  let filtros = $state({ country: "", offset: "", limit: "" });
+  let filtros = $state({
+    country: "",
+    year: "",
+    currency: "",
+    avg_monthly_nc: "",
+    avg_monthly_usd: "",
+    exchange_rate: "",
+    offset: "",
+    limit: ""
+  });
 
   const API = "/api/v2/average-monthly-wages";
 
@@ -110,7 +119,7 @@
   }
 
   function limpiarBusqueda() {
-    filtros = { country: "", offset: "", limit: "" };
+    filtros = { country: "", year: "", currency: "", avg_monthly_nc: "", avg_monthly_usd: "", exchange_rate: "", offset: "", limit: "" };
     getDatos();
   }
 
@@ -154,7 +163,27 @@
             <div class="filter-grid">
               <label class="field-wrap">
                 <span>País</span>
-                <input bind:value={filtros.country} placeholder="Ej: spain" />
+                <input bind:value={filtros.country} placeholder="Ej: canada" />
+              </label>
+              <label class="field-wrap">
+                <span>Año</span>
+                <input type="number" bind:value={filtros.year} placeholder="Ej: 2023" />
+              </label>
+              <label class="field-wrap">
+                <span>Moneda</span>
+                <input bind:value={filtros.currency} placeholder="Ej: EUR" />
+              </label>
+              <label class="field-wrap">
+                <span>Salario (moneda local)</span>
+                <input type="number" bind:value={filtros.avg_monthly_nc} placeholder="Ej: 2500" />
+              </label>
+              <label class="field-wrap">
+                <span>Salario (USD)</span>
+                <input type="number" bind:value={filtros.avg_monthly_usd} placeholder="Ej: 2700" />
+              </label>
+              <label class="field-wrap">
+                <span>Tipo de cambio</span>
+                <input type="number" step="0.0001" bind:value={filtros.exchange_rate} placeholder="Ej: 0.928" />
               </label>
               <label class="field-wrap">
                 <span>Desde el registro nº</span>
@@ -196,7 +225,7 @@
                       <td>{d.exchange_rate}</td>
                       <td><span class="currency-tag">{d.currency}</span></td>
                       <td class="td-actions">
-                        <a href="/average-monthly-wages/{d.country}/{d.year}" class="btn-edit">Editar</a>
+                          <a href="/MJP/{d.country}/{d.year}" class="btn-edit">Editar</a>
                         <button class="btn-delete" onclick={() => borrarDato(d.country, d.year)}>Borrar</button>
                       </td>
                     </tr>
@@ -288,7 +317,7 @@
 
   .search-panel { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem; border: 1px solid var(--border); box-shadow: var(--shadow); }
   .panel-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--ink); margin-bottom: 1rem; }
-  .filter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1rem; }
+  .filter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1rem; }
   .filter-actions { display: flex; gap: 10px; }
 
   .table-wrap { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
