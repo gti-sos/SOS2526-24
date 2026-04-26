@@ -16,35 +16,28 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-
     "test-v1-IRG": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-local.json",
     "test-v2-IRG": "npx newman run tests/api/api-tests-v2-Isaac.json -e tests/api/api-test-env-local.json",
     "test-Isaac-all": "npm run test-v1-IRG && npm run test-v2-IRG",
     "test-local-Isaac-versiones": "start-server-and-test start http://localhost:3000 test-Isaac-all",
-    
     "test-v1-MJP": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-local-MJP.json",
     "test-v2-MJP": "npx newman run tests/api/api-tests-MJP-v2.json -e tests/api/api-test-env-local-MJP.json",
     "test-MJP-all": "npm run test-v1-MJP && npm run test-v2-MJP",
     "test-local-MJP-versiones": "start-server-and-test start http://localhost:3000 test-MJP-all",
-    
     "test-international-construccion-costs": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-local.json",
     "test-api-online-construccion-costs-render": "npx newman run tests/api/api-tests-Isaac.json -e tests/api/api-test-env-render.json",
     "test-local-Isaac": "start-server-and-test start http://localhost:3000 test-international-construccion-costs",
     "test-online-Isaac": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-construccion-costs-render",
-    
     "test-average-monthly-wages": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-local-MJP.json",
     "test-api-online-MJP-render": "npx newman run tests/api/api-tests-MJP.json -e tests/api/api-test-env-render-MJP.json",
     "test-local-MJP": "start-server-and-test start http://localhost:3000 test-average-monthly-wages",
     "test-online-MJP": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-MJP-render",
-    
     "test-recreation-culture-expenditure": "npx newman run tests/api/api-tests-v2-EBP.json -e tests/api/api-test-env-local-EBP.json",
     "test-api-online-EBP-render": "npx newman run tests/api/api-tests-v2-EBP.json -e tests/api/api-test-env-render-EBP.json",
     "test-local-EBP": "start-server-and-test start http://localhost:3000 test-recreation-culture-expenditure",
     "test-online-EBP": "start-server-and-test start https://sos2526-24.onrender.com test-api-online-EBP-render",
-
     "test-e2e-EBP": "playwright test tests/e2e/recreation-culture-expenditure.spec.js",
     "test-e2e-MJP": "playwright test tests/e2e/average-monthly-wages.spec.js",
-
     "start:e2e": "npm run build && npm run start",
     "build": "cd src/front && npm run build",
     "dev-front": "cd src/front &&  npm run dev -- --open",
@@ -55,6 +48,7 @@
     "cool-ascii-faces": "^1.3.4",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "highcharts": "^12.6.0",
     "nedb": "^1.8.0"
   },
   "devDependencies": {
