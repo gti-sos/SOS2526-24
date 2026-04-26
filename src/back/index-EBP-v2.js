@@ -19,21 +19,55 @@ let db = new dataStore({
 
 // Datos base iniciales de v2
 const initialBaseData = [
+  // Canada
   { year: 2024, country: "Canada", recreation_value: 127727000000, total_household_consumption: 1654821000000, population: 41288599 },
   { year: 2023, country: "Canada", recreation_value: 124522000000, total_household_consumption: 1572103000000, population: 40083484 },
   { year: 2022, country: "Canada", recreation_value: 118767000000, total_household_consumption: 1488875000000, population: 38935934 },
+  { year: 2021, country: "Canada", recreation_value: 105213000000, total_household_consumption: 1711067038000, population: 38246108 },
+
+  // Germany
   { year: 2022, country: "Germany", recreation_value: 187327000000, total_household_consumption: 2017981000000, population: 83177813 },
+  { year: 2021, country: "Germany", recreation_value: 162014000000, total_household_consumption: 2359979000000, population: 83196078 },
+
+  // Ireland
   { year: 2023, country: "Ireland", recreation_value: 9931000000, total_household_consumption: 140665460000, population: 5311538 },
   { year: 2022, country: "Ireland", recreation_value: 8954000000, total_household_consumption: 124192688000, population: 5212836 },
+
+  // Italy
   { year: 2023, country: "Italy", recreation_value: 85658000000, total_household_consumption: 1218946100000, population: 58984216 },
   { year: 2022, country: "Italy", recreation_value: 79846000000, total_household_consumption: 1156909900000, population: 59013667 },
+  { year: 2021, country: "Italy", recreation_value: 65829000000, total_household_consumption: 1250832900000, population: 59236213 },
+
+  // Poland
   { year: 2023, country: "Poland", recreation_value: 118473000000, total_household_consumption: 1934063000000, population: 36687353 },
   { year: 2022, country: "Poland", recreation_value: 101603000000, total_household_consumption: 1772069000000, population: 36821749 },
+  { year: 2021, country: "Poland", recreation_value: 88745000000, total_household_consumption: 1781160000000, population: 37747124 },
+
+  // Spain
   { year: 2022, country: "Spain", recreation_value: 63671000000, total_household_consumption: 759001000000, population: 47786102 },
+  { year: 2021, country: "Spain", recreation_value: 45402000000, total_household_consumption: 850832000000, population: 47415794 },
+
+  // United Kingdom
   { year: 2024, country: "United Kingdom", recreation_value: 158522000000, total_household_consumption: 1706364000000, population: 69226000 },
   { year: 2023, country: "United Kingdom", recreation_value: 151870000000, total_household_consumption: 1646716000000, population: 68492000 },
   { year: 2022, country: "United Kingdom", recreation_value: 149789000000, total_household_consumption: 1534744000000, population: 67604000 },
-  { year: 2023, country: "United States", recreation_value: 1797911000000, total_household_consumption: 18268702000000, population: 336806231 }
+  { year: 2021, country: "United Kingdom", recreation_value: 131914000000, total_household_consumption: 1708191000000, population: 67026000 },
+
+  // United States
+  { year: 2023, country: "United States", recreation_value: 1797911000000, total_household_consumption: 18268702000000, population: 336806231 },
+  { year: 2022, country: "United States", recreation_value: 1682059000000, total_household_consumption: 19263207000000, population: 333287557 },
+  { year: 2021, country: "United States", recreation_value: 1535268000000, total_household_consumption: 17574449000000, population: 332031554 },
+
+  // Finland - país añadido
+  { year: 2024, country: "Finland", recreation_value: 11898000000, total_household_consumption: 193316000000, population: 5617310 },
+  { year: 2023, country: "Finland", recreation_value: 11942000000, total_household_consumption: 191132000000, population: 5584264 },
+  { year: 2022, country: "Finland", recreation_value: 11808000000, total_household_consumption: 178373000000, population: 5563970 },
+  { year: 2021, country: "Finland", recreation_value: 11067000000, total_household_consumption: 167408000000, population: 5541017 },
+
+  // Mexico - país añadido
+  { year: 2023, country: "Mexico", recreation_value: 1062997000000, total_household_consumption: 24088174271000, population: 128455567 },
+  { year: 2022, country: "Mexico", recreation_value: 1054829000000, total_household_consumption: 22562974793000, population: 127504125 },
+  { year: 2021, country: "Mexico", recreation_value: 846841000000, total_household_consumption: 19839203150000, population: 126705138 }
 ];
 
 // Campos base exactos permitidos en v2
