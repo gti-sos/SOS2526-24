@@ -44,19 +44,12 @@
     {
       name: "Coste de construcción",
       endpoints: [
-        "/api/v1/international-construccion-costs",
-        "/api/v2/international-construccion-costs"
+        "/api/v1/international-construction-costs",
+        "/api/v2/international-construction-costs"
       ],
       preferredFields: [
-        "construction_cost",
-        "construction_costs",
-        "international_construccion_cost",
-        "international_construccion_costs",
-        "construction_price_index",
-        "construction_cost_index",
-        "cost",
-        "building_cost",
-        "value"
+        "cost_usd_per_m2",
+        "construction_cost"
       ]
     }
   ];
