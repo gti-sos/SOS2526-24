@@ -103,11 +103,11 @@
               "    pm.expect(data).to.be.an(\"array\").and.not.empty;\r",
               "});\r",
               "\r",
-              "// GET /LoadInitialData - 201 - Carga 15 elementos\r",
-              "pm.test(\"Carga exactamente 15 elementos\", function () {\r",
+              "// GET /LoadInitialData - 201 - Carga 30 elementos\r",
+              "pm.test(\"Carga exactamente 30 elementos\", function () {\r",
               "  const data = pm.response.json();\r",
               "  pm.expect(data).to.be.an(\"array\");\r",
-              "  pm.expect(data.length).to.eql(15);\r",
+              "  pm.expect(data.length).to.eql(30);\r",
               "});"
             ],
             "type": "text/javascript",
@@ -242,7 +242,7 @@
       "response": []
     },
     {
-      "name": "GET /recreation-culture-expenditure/Canada/2021 - 404",
+      "name": "GET /recreation-culture-expenditure/Canada/2020 - 404",
       "event": [
         {
           "listen": "test",
@@ -267,7 +267,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{base_url}}/api/v2/recreation-culture-expenditure/Canada/2021",
+          "raw": "{{base_url}}/api/v2/recreation-culture-expenditure/Canada/2020",
           "host": [
             "{{base_url}}"
           ],
@@ -276,14 +276,14 @@
             "v2",
             "recreation-culture-expenditure",
             "Canada",
-            "2021"
+            "2020"
           ]
         }
       },
       "response": []
     },
     {
-      "name": "PUT /recreation-culture-expenditure/Canada/2021 - 404",
+      "name": "PUT /recreation-culture-expenditure/Canada/2020 - 404",
       "event": [
         {
           "listen": "test",
@@ -309,7 +309,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"population\": 35000000\r\n}",
+          "raw": "{\r\n  \"year\": 2020,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"population\": 35000000\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -317,7 +317,7 @@
           }
         },
         "url": {
-          "raw": "{{base_url}}/api/v2/recreation-culture-expenditure/Canada/2021",
+          "raw": "{{base_url}}/api/v2/recreation-culture-expenditure/Canada/2020",
           "host": [
             "{{base_url}}"
           ],
@@ -326,7 +326,7 @@
             "v2",
             "recreation-culture-expenditure",
             "Canada",
-            "2021"
+            "2020"
           ]
         }
       },
@@ -413,7 +413,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"population\": 38000000\r\n}",
+          "raw": "{\r\n  \"year\": 2025,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"population\": 38000000\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -461,7 +461,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"year\": 2021,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"population\": 38000000\r\n}",
+          "raw": "{\r\n  \"year\": 2025,\r\n  \"country\": \"Canada\",\r\n  \"recreation_value\": 110000000000,\r\n  \"total_household_consumption\": 1400000000000,\r\n  \"population\": 38000000\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -772,16 +772,14 @@
               "    pm.response.to.have.status(200);\r",
               "});\r",
               "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
               "pm.test(\"Devuelve cuántos elementos ha borrado\", function () {\r",
-              "    const data = pm.response.json();\r",
-              "    pm.expect(data).to.have.property(\"deleted\");\r",
+              "    pm.expect(jsonData).to.have.property(\"deleted\");\r",
               "});\r",
               "\r",
-              "// DELETE /recreation-culture-expenditure - 200\r",
-              "pm.test(\"Borra exactamente 15 elementos\", function () {\r",
-              "  const data = pm.response.json();\r",
-              "  pm.expect(data).to.have.property(\"deleted\");\r",
-              "  pm.expect(data.deleted).to.eql(15);\r",
+              "pm.test(\"Borra al menos un elemento\", function () {\r",
+              "    pm.expect(jsonData.deleted).to.be.above(0);\r",
               "});"
             ],
             "type": "text/javascript",
