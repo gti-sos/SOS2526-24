@@ -21,88 +21,80 @@
   }
 
   function prepararDatosParaGrafica(datos) {
-    // Obtener países únicos ordenados
-    const paises = [...new Set(datos.map(d => d.country))].sort();
+    // Agrupar por país y calcular la media de avg_monthly_usd
+    const porPais = {};
+    datos.forEach(d => {
+      if (!porPais[d.country]) porPais[d.country] = [];
+      porPais[d.country].push(Number(d.avg_monthly_usd));
+    });
 
-    // Obtener años únicos ordenados
-    const anios = [...new Set(datos.map(d => d.year))].sort((a, b) => a - b);
+    const slices = Object.entries(porPais).map(([pais, valores]) => {
+      const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+      return {
+        name: pais.charAt(0).toUpperCase() + pais.slice(1),
+        y: Number(media.toFixed(2))
+      };
+    });
 
-    // Crear una serie por cada año
-    const series = anios.map(anio => ({
-      name: `Año ${anio}`,
-      data: paises.map(pais => {
-        const registro = datos.find(d => d.country === pais && d.year === anio);
-        return registro ? Number(registro.avg_monthly_usd) : null;
-      })
-    }));
+    // Ordenar de mayor a menor
+    slices.sort((a, b) => b.y - a.y);
 
-    return { paises, series };
+    return slices;
   }
 
-  function pintarGrafica(paises, series) {
+  function pintarGrafica(slices) {
     if (!chartContainer) return;
     if (chart) { chart.destroy(); chart = null; }
 
     chart = Highcharts.chart(chartContainer, {
       chart: {
-        type: "column"
+        type: "pie"
       },
 
       title: {
-        text: "Salario Mensual Medio por País (USD)"
+        text: "Distribución del Salario Mensual Medio por País (USD)"
       },
 
       subtitle: {
-        text: "Fuente: API average-monthly-wages (MJP) — datos en dólares estadounidenses"
-      },
-
-      xAxis: {
-        categories: paises,
-        crosshair: true,
-        title: { text: "País" },
-        labels: {
-          style: { fontSize: "12px" },
-          rotation: -30
-        }
-      },
-
-      yAxis: {
-        min: 0,
-        title: { text: "Salario mensual medio (USD)" },
-        labels: { format: "${value:,.0f}" }
+        text: "Media de todos los años disponibles — Fuente: API average-monthly-wages (MJP)"
       },
 
       tooltip: {
-        shared: true,
-        valuePrefix: "$",
-        valueDecimals: 2,
-        pointFormat:
-          '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>${point.y:,.2f}</b><br/>'
+        pointFormat: "<b>{point.name}</b>: <b>${point.y:,.2f}</b> USD/mes ({point.percentage:.1f}%)"
+      },
+
+      accessibility: {
+        enabled: true,
+        description: "Gráfico circular que muestra la distribución del salario mensual medio en USD por país."
       },
 
       plotOptions: {
-        column: {
-          pointPadding: 0.2,
-          borderWidth: 0,
+        pie: {
+          allowPointSelect: true,
+          cursor: "pointer",
           dataLabels: {
-            enabled: false
-          }
+            enabled: true,
+            format: "<b>{point.name}</b><br>${point.y:,.0f}",
+            style: { fontSize: "12px" }
+          },
+          showInLegend: true
         }
       },
 
       legend: {
         enabled: true,
-        title: { text: "Año" }
-      },
-
-      accessibility: {
-        enabled: true,
-        description: "Gráfico de columnas que muestra el salario mensual medio en USD por país y año."
+        layout: "vertical",
+        align: "right",
+        verticalAlign: "middle"
       },
 
       credits: { enabled: false },
 
-      series: series
+      series: [{
+        name: "Salario medio (USD)",
+        colorByPoint: true,
+        data: slices
+      }]
     });
   }
 
@@ -123,18 +115,17 @@
         throw new Error("La base de datos está vacía. Carga los datos iniciales primero.");
       }
 
-      const { paises, series } = prepararDatosParaGrafica(datos);
+      const slices = prepararDatosParaGrafica(datos);
 
       loading = false;
 
-      // Esperamos a que Svelte renderice el contenedor
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      pintarGrafica(paises, series);
+      pintarGrafica(slices);
 
     } catch (e) {
       if (e.name === "AbortError") {
-        error = "La API ha tardado demasiado en responder. Revisa que /api/v2/average-monthly-wages funcione correctamente.";
+        error = "La API ha tardado demasiado en responder.";
       } else {
         error = e.message;
       }
@@ -160,12 +151,13 @@
     <a href="/">Inicio</a> › <a href="/analytics">Análisis grupal</a> › <span>Salarios Mensuales (MJP)</span>
   </nav>
 
-  <h1>Salario Mensual Medio por País</h1>
+  <h1>Distribución del Salario Mensual Medio por País</h1>
 
   <p class="description">
-    Esta visualización de tipo <strong>columnas agrupadas</strong> muestra el salario mensual
-    medio en dólares estadounidenses (USD) para cada país disponible en la base de datos,
-    desglosado por año. Permite comparar fácilmente la evolución salarial entre países y periodos.
+    Esta visualización de tipo <strong>circular (pie)</strong> muestra la distribución
+    del salario mensual medio en dólares estadounidenses (USD) para cada país disponible,
+    calculando la media de todos los años registrados. Permite comparar de forma visual
+    el peso relativo de cada país en términos salariales.
   </p>
 
   {#if loading}
@@ -200,9 +192,7 @@
     color: #2563eb;
     text-decoration: none;
   }
-  .breadcrumb a:hover {
-    text-decoration: underline;
-  }
+  .breadcrumb a:hover { text-decoration: underline; }
 
   h1 {
     font-size: 1.8rem;
@@ -246,9 +236,7 @@
     animation: spin 1s linear infinite;
   }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .error-container {
     background: #fff1f2;
