@@ -1,13 +1,13 @@
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, tick } from "svelte";
 
-  let chartContainer;
-  let chart;
-  let Highcharts;
-  let topology;
+  let chartContainer = $state();
+  let chart = $state();
+  let Highcharts = $state();
+  let topology = $state();
 
-  let loading = true;
-  let error = null;
+  let loading = $state(true);
+  let error = $state(null);
 
   let allRecords = [];
 
@@ -408,6 +408,9 @@
         throw new Error("No hay datos suficientes para construir el mapa.");
       }
 
+      loading = false;
+      await tick();
+
       renderMap();
     } catch (e) {
       if (e.name === "AbortError") {
@@ -459,39 +462,7 @@
       <p><strong>⚠️ Error:</strong> {error}</p>
       <button onclick={() => loadMapPage()}>Reintentar</button>
     </div>
-  {:else}
-    <div class="summary" aria-live="polite">
-      <div class="summary-grid">
-        <div class="summary-item">
-          <span class="label">Años analizados:</span>
-          <span class="value">{yearsRangeText}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Media global:</span>
-          <span class="value highlight">${globalAverage.toFixed(2)}/mes</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Países representados:</span>
-          <span class="value">{countriesRepresented}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Por encima de la media:</span>
-          <span class="value green">{countriesAboveAverage} países</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Por debajo de la media:</span>
-          <span class="value red">{countriesBelowAverage} países</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Salario más alto:</span>
-          <span class="value">{highestSalary.country} (${highestSalary.value.toFixed(2)})</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Salario más bajo:</span>
-          <span class="value">{lowestSalary.country} (${lowestSalary.value.toFixed(2)})</span>
-        </div>
-      </div>
-    </div>
+    
   {/if}
 
   <div

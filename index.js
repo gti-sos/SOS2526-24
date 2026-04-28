@@ -18,12 +18,19 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-// ---- CARGA DE MODULOS ----
+// TEST endpoint
+app.get('/api/test', (req, res) => {
+	res.json({ message: 'Backend works' });
+});
+
+// ---- CARGA DE MODULOS (ANTES del handler de SvelteKit) ----
 loadBackendIsaac(app);
 loadBackendMaria(app);
 //loadBackendElena(app);
 loadBackendElenav2(app);
 
+// SvelteKit handler - comentado para desarrollo local
+// En producción (después de npm run build), descomentar esta línea:
 app.use(handler);
 
 app.listen(port, () => {

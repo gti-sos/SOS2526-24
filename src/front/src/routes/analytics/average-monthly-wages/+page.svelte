@@ -1,12 +1,11 @@
 <script>
   import Highcharts from "highcharts";
-  import { onMount, onDestroy } from "svelte";
-
-  let chartContainer;
-  let chart;
-
-  let loading = true;
-  let error = null;
+  import { onMount, onDestroy, tick } from "svelte";
+  
+  let chartContainer = $state();
+  let chart = $state();
+  let loading = $state(true);
+  let error = $state(null);
 
   const API = "/api/v2/average-monthly-wages";
 
@@ -119,7 +118,7 @@
 
       loading = false;
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await tick();
 
       pintarGrafica(slices);
 
@@ -170,9 +169,9 @@
       <p><strong>⚠️ Error:</strong> {error}</p>
       <button onclick={() => cargarGrafica()}>Reintentar</button>
     </div>
-  {/if}
-
+  {:else}
   <div bind:this={chartContainer} class="chart-container"></div>
+  {/if}
 </section>
 
 <style>
