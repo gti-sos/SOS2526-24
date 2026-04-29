@@ -171,6 +171,101 @@ function loadBackendMaria(app) {
         });
 
     }); // fin forEach versions
+
+    // ------------------------------------------
+    // PROXIES PARA INTEGRACIONES EXTERNAS
+    // ------------------------------------------
+
+        // 1. PROXY GRUPO 25 (Arrivals)
+    app.get("/api/v1/integrations/arrivals", async (req, res) => {
+        try {
+            // Primero intenta cargar datos iniciales
+            await fetch("https://sos2526-25.onrender.com/api/v1/international-tourist-arrivals/loadInitialData");
+            
+            // Luego obtiene los datos
+            const response = await fetch("https://sos2526-25.onrender.com/api/v1/international-tourist-arrivals");
+            const data = await response.json();
+            res.status(200).json(Array.isArray(data) ? data : []);
+        } catch (error) {
+            res.status(500).json({ error: "Error Arrivals" });
+        }
+    });
+
+    // 2. PROXY GRUPO 30 (Olympics)
+    app.get("/api/v1/integrations/olympics", async (req, res) => {
+        try {
+            // 1. Carga los datos iniciales
+            await fetch("https://sos2526-30.onrender.com/api/v1/olympics-athlete-events/loadInitialData");
+            
+            // 2. Luego obtiene los datos
+            const response = await fetch("https://sos2526-30.onrender.com/api/v1/olympics-athlete-events/");
+            const json = await response.json();
+            
+            // Los datos están dentro de .data
+            const data = json.data || json;
+            res.status(200).json(Array.isArray(data) ? data : []);
+        } catch (error) {
+            res.status(500).json({ error: "Error Olympics" });
+        }
+    });
+
+// 3. CONSTRUCCIÓN - World Bank API
+    app.get("/api/v1/integrations/construction", async (req, res) => {
+        try {
+            const response = await fetch("https://api.worldbank.org/v2/country/all/indicator/NE.CON.TOTL.CD?date=2019:2024&per_page=500&format=json");
+            const data = await response.json();
+            const transformed = [];
+            if (data[1]) {
+                data[1].forEach(record => {
+                    if (record.value !== null && record.countryiso3code) {
+                        transformed.push({
+                            country: record.countryiso3code,
+                            year: parseInt(record.date),
+                            construction_cost: record.value
+                        });
+                    }
+                });
+            }
+            res.status(200).json(transformed.slice(0, 100));
+        } catch (error) {
+            res.status(500).json({ error: "Error World Bank" });
+        }
+    });
+// 4. COUNTRIES - REST Countries API
+    app.get("/api/v1/integrations/countries", async (req, res) => {
+        try {
+            const response = await fetch("https://restcountries.com/v3.1/all?fields=name,region,population,cca2,cca3");            const data = await response.json();
+            const transformed = data.map(country => ({
+                name: country.name?.common || country.name?.official || "Unknown",
+                region: country.region || "Unknown",
+                population: country.population || 0,
+                code: country.cca2 || country.cca3 || "XX"
+            }));
+            res.status(200).json(transformed);
+        } catch (error) {
+            res.status(500).json({ error: "Error REST Countries" });
+        }
+    });
+
+   // 5. EARTHQUAKES - USGS API
+    app.get("/api/v1/integrations/earthquakes", async (req, res) => {
+        try {
+            const response = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
+            const data = await response.json();
+            const transformed = data.features.map(feature => ({
+                magnitude: feature.properties.mag,
+                place: feature.properties.place,
+                time: feature.properties.time,
+                depth: feature.geometry.coordinates[2],
+                latitude: feature.geometry.coordinates[1],
+                longitude: feature.geometry.coordinates[0]
+            }));
+            res.status(200).json(transformed);
+        } catch (error) {
+            res.status(500).json({ error: "Error USGS Earthquakes" });
+        }
+    });
 }
+
 
 export { loadBackendMaria };
