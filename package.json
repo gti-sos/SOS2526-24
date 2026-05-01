@@ -44,9 +44,11 @@
     "test": "npm run test-local-Isaac-versiones && npm run test-local-MJP-versiones && npm run test-local-EBP"
   },
   "dependencies": {
+    "@amcharts/amcharts5": "^5.17.2",
     "body-parser": "^2.2.2",
     "cool-ascii-faces": "^1.3.4",
     "cors": "^2.8.6",
+    "echarts": "^6.0.0",
     "express": "^5.2.1",
     "highcharts": "^12.6.0",
     "nedb": "^1.8.0"

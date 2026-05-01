@@ -1,5 +1,7 @@
 import Datastore from "nedb";
 
+import cors from "cors";
+
 const datosIsaac = [
   { year: 2024, country: "USA", city: "New York", cost_usd_per_m2: 5723, cost_change_range: "5%", rank: 1 },
   { year: 2024, country: "Canada", city: "Toronto", cost_usd_per_m2: 2973, cost_change_range: "5.01%", rank: 24 },
@@ -22,6 +24,7 @@ let db = new Datastore({ filename: "./src/back/international-construction-costs.
 
 function loadBackendIsaac(app) {
 
+    app.use(cors());
 //rutas
     const versions = [
         { 
