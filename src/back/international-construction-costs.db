@@ -1,11 +1,11 @@
-{"year":2024,"country":"uk","city":"London","cost_usd_per_m2":4473,"cost_change_range":"15%","rank":5,"_id":"4QJFQJUmTo6see9n"}
-{"year":2023,"country":"Germany","city":"Munich","cost_usd_per_m2":3787,"cost_change_range":"17.65%","rank":17,"_id":"GlS7qPgsym1H7tMy"}
-{"year":2023,"country":"Canada","city":"Toronto","cost_usd_per_m2":2834,"cost_change_range":"5%","rank":26,"_id":"UWVeVArVylWr7pi2"}
-{"year":2023,"country":"Ireland","city":"Dublin","cost_usd_per_m2":3708,"cost_change_range":"-1.75%","rank":19,"_id":"VqNWseQB1VlYMJO3"}
-{"year":2024,"country":"USA","city":"New York","cost_usd_per_m2":5723,"cost_change_range":"5%","rank":1,"_id":"YUaSghK1zi1KFY0F"}
-{"year":2022,"country":"Poland","city":"Wasaw","cost_usd_per_m2":1667,"cost_change_range":"30.16%","rank":59,"_id":"YY8cRNmmL9Zfsy4K"}
-{"year":2023,"country":"Italy","city":"Milan","cost_usd_per_m2":2689,"cost_change_range":"-9.31%","rank":46,"_id":"ZRirrREFTtbSWtJk"}
-{"year":2023,"country":"Canada","city":"Vancouver","cost_usd_per_m2":2870,"cost_change_range":"7%","rank":30,"_id":"f8PLXbLDa9DumQ58"}
-{"year":2024,"country":"Spain","city":"Madrid","cost_usd_per_m2":2205,"cost_change_range":"2.13%","rank":48,"_id":"gs3CEQau7cPcSfUA"}
-{"year":2024,"country":"Canada","city":"Toronto","cost_usd_per_m2":2973,"cost_change_range":"5.01%","rank":24,"_id":"hnmBEEFJrmaRbWim"}
-{"year":2023,"country":"USA","city":"New York","cost_usd_per_m2":5451,"cost_change_range":"5%","rank":4,"_id":"i4h468n1x7wVf0au"}
+{"year":2023,"country":"Canada","city":"Vancouver","cost_usd_per_m2":2870,"cost_change_range":"7%","rank":30,"_id":"90TflKGdqcjpV7i8"}
+{"year":2024,"country":"Canada","city":"Toronto","cost_usd_per_m2":2973,"cost_change_range":"5.01%","rank":24,"_id":"BZbTtpVFOrn3pxoz"}
+{"year":2023,"country":"Italy","city":"Milan","cost_usd_per_m2":2689,"cost_change_range":"-9.31%","rank":46,"_id":"Dr3LCMHYh7zFASxT"}
+{"year":2022,"country":"Poland","city":"Wasaw","cost_usd_per_m2":1667,"cost_change_range":"30.16%","rank":59,"_id":"GdkXvIPcZk75b5Vx"}
+{"year":2023,"country":"Ireland","city":"Dublin","cost_usd_per_m2":3708,"cost_change_range":"-1.75%","rank":19,"_id":"IV7F6Mg1LvGeR6qA"}
+{"year":2024,"country":"uk","city":"London","cost_usd_per_m2":4473,"cost_change_range":"15%","rank":5,"_id":"RQ8QhyCoN82xId0i"}
+{"year":2024,"country":"USA","city":"New York","cost_usd_per_m2":5723,"cost_change_range":"5%","rank":1,"_id":"Upiydwdf1Maxvsgr"}
+{"year":2023,"country":"Germany","city":"Munich","cost_usd_per_m2":3787,"cost_change_range":"17.65%","rank":17,"_id":"j8KsLzlbdJUg4OUq"}
+{"year":2023,"country":"USA","city":"New York","cost_usd_per_m2":5451,"cost_change_range":"5%","rank":4,"_id":"nBNFelzsaXOJQ4N6"}
+{"year":2023,"country":"Canada","city":"Toronto","cost_usd_per_m2":2834,"cost_change_range":"5%","rank":26,"_id":"uIq50rC33BpyCVKI"}
+{"year":2024,"country":"Spain","city":"Madrid","cost_usd_per_m2":2205,"cost_change_range":"2.13%","rank":48,"_id":"xAciSwIFjIvOBTO3"}

@@ -32,6 +32,11 @@
 		"vite": "^7.3.1"
 	},
 	"dependencies": {
-		"highcharts": "^12.6.0"
+		"@amcharts/amcharts5": "^5.17.2",
+		"chart.js": "^4.5.1",
+		"echarts": "^6.0.0",
+		"highcharts": "^12.6.0",
+		"leaflet": "^1.9.4",
+		"plotly.js-dist-min": "^3.5.0"
 	}
 }
