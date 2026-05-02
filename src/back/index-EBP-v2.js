@@ -272,26 +272,28 @@ function buildQuery(queryParams) {
 // ---- FUNCION BACKEND v2 ----
 function loadBackendElenav2(app) {
 
+  // loadBackend añade las rutas de documentacion y carga inicial de datos a la app:  
+  // - /docs redirige a la documentacion en Postman  
+
   // GET /loadInitialData (INICIALIZACIÓN DE DATOS)
   app.get(EBP_API_PATH + "/loadInitialData", (req, res) => {
+    //Cuenta cuántos documentos hay en la colección
     db.count({}, (err, count) => {
-      if (err) {
-        return res.status(500).json({ error: "Error al acceder a la base de datos." });
-      }
+      //Si hay un error al acceder a la base de datos, devuelve un error 500
+      if (err) return res.status(500).json({ error: "Error al acceder a la base de datos." });
+      //Si ya existen datos en la base, devuelve un error 409 para evitar duplicados
+      if (count > 0) return res.status(409).json({ error: "La base de datos ya contiene datos." });
 
-      if (count > 0) {
-        return res.status(409).json({ error: "La base de datos ya contiene datos." });
-      }
-
+      //Inicializa la base de datos con los datos base, añadiendo las propiedades derivadas
       const initialDataWithDerived = initialBaseData.map((item) =>
         propiedadesDerivadas(parseaDatos(item))
       );
 
+      //Si la colección está vacía, inserta el array con los datos iniciales (incluyendo las propiedades derivadas)
       db.insert(initialDataWithDerived, (err, newDocs) => {
-        if (err) {
-          return res.status(500).json({ error: "Error insertando datos en la base." });
-        }
-
+        //Si hay un error al insertar los datos, devuelve un error 500
+        if (err) return res.status(500).json({ error: "Error insertando datos en la base." });
+        //Datos insertados correctamente sin _id (por la función auxliar)
         return res.status(201).json(parseaIdArray(newDocs));
       });
     });
