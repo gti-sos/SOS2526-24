@@ -301,11 +301,14 @@ function loadBackendElenav2(app) {
 
   // GET colección + búsquedas + paginación
   app.get(EBP_API_PATH, (req, res) => {
+    //Construye el objeto query a partir de los parámetros de consulta recibidos con la función auxiliar buildQuery
     const query = buildQuery(req.query);
 
+    //Define limit y offset, si no recibe usa 0 (sin límite y/ o sin offset)
     const limit = req.query.limit ? parseInt(req.query.limit) : 0;
     const offset = req.query.offset ? parseInt(req.query.offset) : 0;
 
+    //Validación de limit y offset 
     if (
       (req.query.limit !== undefined && (!Number.isInteger(limit) || limit < 0)) ||
       (req.query.offset !== undefined && (!Number.isInteger(offset) || offset < 0))
@@ -315,11 +318,10 @@ function loadBackendElenav2(app) {
       });
     }
 
-    db.find(query).skip(offset).limit(limit).exec((err, docs) => {
-      if (err) {
-        return res.status(500).json({ error: "Error en la base de datos." });
-      }
-
+    //Consulta a la base de datos NeDB
+    db.find(query).skip(offset).limit(limit).exec((err, docs) => { // Busca recursos, aplica offset y limita
+      if (err) return res.status(500).json({ error: "Error en la base de datos." });
+      //Datos obtenidos correctamente sin _id (por la función auxliar)
       return res.status(200).json(parseaIdArray(docs));
     });
   });
@@ -328,40 +330,34 @@ function loadBackendElenav2(app) {
   app.post(EBP_API_PATH, (req, res) => {
     const body = req.body;
 
-    if (!propiedadesIndividuales(body)) {
-      return res.status(400).json({
-        error:
-          "El JSON debe contener exactamente estos campos: year, country, recreation_value, total_household_consumption y population.",
-      });
-    }
+    //Comprueba que el JSON de entrada tenga la estructura correcta (solo los campos base)
+    if (!propiedadesIndividuales(body)) return res.status(400).json({error: "El JSON debe contener exactamente estos campos: year, country, recreation_value, total_household_consumption y population."});
+    
 
+    //Los datos entrantes se transforman al tipo correcto
     const normalized = parseaDatos(body);
+    //Valida los datos de entrada
     const validationError = validateBaseData(normalized);
 
-    if (validationError) {
-      return res.status(400).json({ error: validationError });
-    }
+    //Algún dato no es correcto
+    if (validationError) return res.status(400).json({ error: validationError });
 
     db.findOne(
+      //Comprobamos si los datos son correctos  o existe ya en la base de datos
       { country: normalized.country, year: normalized.year },
       (err, doc) => {
-        if (err) {
-          return res.status(500).json({ error: "Error en la base de datos." });
-        }
-
-        if (doc) {
-          return res.status(409).json({
-            error: "El recurso ya existe para ese país y año.",
-          });
-        }
+        if (err) return res.status(500).json({ error: "Error en la base de datos." });
+        if (doc) return res.status(409).json({error: "El recurso ya existe para ese país y año."});
+        
 
         const finalData = propiedadesDerivadas(normalized);
-
+        
+        //Insertamos el nuevo registro en la base de datos
         db.insert(finalData, (err, insertedDoc) => {
-          if (err) {
-            return res.status(500).json({ error: "Error insertando el recurso." });
-          }
+          //Error al insertar el nuevo recurso
+          if (err) return res.status(500).json({ error: "Error insertando el recurso." });
 
+          //Inserta el nuevo recurso con éxito
           return res.status(201).json(parseaId(insertedDoc));
         });
       }
@@ -370,15 +366,15 @@ function loadBackendElenav2(app) {
 
   // DELETE colección
   app.delete(EBP_API_PATH, (req, res) => {
+    //Elimina todos los registros de la base de datos
     db.remove({}, { multi: true }, (err, numRemoved) => {
-      if (err) {
-        return res.status(500).json({ error: "Error borrando datos." });
-      }
+      // Error borrando datos
+      if (err) return res.status(500).json({ error: "Error borrando datos." });
 
-      if (numRemoved === 0) {
-        return res.status(404).json({ error: "No hay datos para borrar." });
-      }
+      // Base de datos vacía
+      if (numRemoved === 0) return res.status(404).json({ error: "No hay datos para borrar." });
 
+      // Se eliminan los datos de la base
       return res.status(200).json({
         message: "Datos eliminados correctamente.",
         deleted: numRemoved,
@@ -388,25 +384,26 @@ function loadBackendElenav2(app) {
 
   // PUT colección no permitido
   app.put(EBP_API_PATH, (req, res) => {
-    return res.status(405).json({
-      error: "Método PUT no permitido en la colección.",
-    });
+    return res.status(405).json({error: "Método PUT no permitido en la colección.",});
   });
 
   // GET recurso individual
   app.get(EBP_API_PATH + "/:country/:year", (req, res) => {
+    //El recurso individual se identifica por dos parámetros: 
+    // -país
+    // -año
     const country = String(req.params.country);
     const year = parseInt(req.params.year);
 
+    //Buscamos el recurso que coincide con el país y año
     db.findOne({ country, year }, (err, resource) => {
-      if (err) {
-        return res.status(500).json({ error: "Error en la base de datos." });
-      }
+      //Error base de datos
+      if (err) return res.status(500).json({ error: "Error en la base de datos." });
 
-      if (!resource) {
-        return res.status(404).json({ error: "Recurso no encontrado." });
-      }
+      //No se encuentra el recurso con ese país y año
+      if (!resource) return res.status(404).json({ error: "Recurso no encontrado." });
 
+      //Devuelve el recurso solicitado sin _id
       return res.status(200).json(parseaId(resource));
     });
   });
@@ -417,6 +414,7 @@ function loadBackendElenav2(app) {
     const year = parseInt(req.params.year);
     const body = req.body;
 
+    //Requiere que solo se actualicen los campos base
     if (!propiedadesIndividuales(body)) {
       return res.status(400).json({
         error:
@@ -424,54 +422,58 @@ function loadBackendElenav2(app) {
       });
     }
 
+    //Los datos entrantes se transforman al tipo correcto
     const normalized = parseaDatos(body);
 
+    //Valida que el país y año del JSON coincidan con los de la URL
     if (normalized.country !== country || normalized.year !== year) {
       return res.status(400).json({
         error: "El ID del recurso no coincide con la URL.",
       });
     }
 
+    //Comprueba que los datos de entrada sean correctos y válidos
     const validationError = validateBaseData(normalized);
     if (validationError) {
       return res.status(400).json({ error: validationError });
     }
 
+    //Recalcula las propiedades derivadas del recurso actualizado
     const updatedResource = propiedadesDerivadas(normalized);
 
+    //Actualiza el recurso en la base de datos
     db.update({ country, year }, updatedResource, {}, (err, numReplaced) => {
-      if (err) {
-        return res.status(500).json({ error: "Error actualizando el recurso." });
-      }
+      //Error base de datos
+      if (err) return res.status(500).json({ error: "Error actualizando el recurso." });
 
-      if (numReplaced === 0) {
-        return res.status(404).json({
-          error: "Recurso no encontrado para actualizar.",
-        });
-      }
+      //Recurso no encontrado
+      if (numReplaced === 0) return res.status(404).json({error: "Recurso no encontrado para actualizar."});
 
+      //Devuelve el recurso actualizado
       return res.status(200).json({
         message: "Recurso actualizado con éxito.",
       });
     });
   });
 
-  // DELETE recurso individual
+  // DELETE recurso individual 
+  //Elimina el recurso según país y año
   app.delete(EBP_API_PATH + "/:country/:year", (req, res) => {
     const country = String(req.params.country);
     const year = parseInt(req.params.year);
 
     db.remove({ country, year }, {}, (err, numRemoved) => {
-      if (err) {
-        return res.status(500).json({ error: "Error eliminando el recurso." });
-      }
+      //Error base de datos
+      if (err) return res.status(500).json({ error: "Error eliminando el recurso." });
 
+      //No se encuentra el recurso con ese país y año para eliminar
       if (numRemoved === 0) {
         return res.status(404).json({
           error: "Recurso no encontrado para eliminar.",
         });
       }
 
+      //Información del recurso eliminado
       return res.status(200).json({
         message: "Recurso eliminado correctamente.",
       });
