@@ -30,6 +30,10 @@ export function setupProxiesEBP(app) {
   });
 }
 
+    /** -------------------- API de TicketMaster / Normal e Integración -------------------- */
+    /** -------------------- API de XX / Normal e Integración -------------------- */
+    /** -------------------- API de Spotify / OAuth e Integración -------------------- */
+
 async function fetchJson(url) {
   const response = await fetch(url);
 
