@@ -37,6 +37,6 @@
 		"echarts": "^6.0.0",
 		"highcharts": "^12.6.0",
 		"leaflet": "^1.9.4",
-		"plotly.js-dist-min": "^3.5.0"
+		"plotly.js-dist-min": "^3.5.1"
 	}
 }

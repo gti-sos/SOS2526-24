@@ -1,5 +1,5 @@
 <script>
-  let { sections = [], repoUrl = "#" } = $props();
+   let { sections = [], repoUrl = "https://github.com/gti-sos/SOS2526-24" } = $props();
 
   const fallbackSections = [
     {
@@ -7,55 +7,76 @@
       label: "Ocio y cultura",
       short: "EBP",
       member: "Elena Bejarano Periñán",
-      frontend: "/recreation-culture-expenditure",
-      apiBase: "/api/v2/recreation-culture-expenditure",
-      docs: "/api/v2/recreation-culture-expenditure/docs"
+      links: [
+        { label: "Front-end", href: "/recreation-culture-expenditure" },
+        { label: "API", href: "/api/v2/recreation-culture-expenditure" },
+        { label: "Documentación", href: "/api/v2/recreation-culture-expenditure/docs" }
+      ]
     },
     {
       key: "sueldos",
       label: "Sueldos",
       short: "MJP",
       member: "María Jesús Jiménez-Espada Pallarés",
-      frontend: "/average-monthly-wages",
-      apiBase: "/api/v1/average-monthly-wages",
-      docs: "/api/v1/average-monthly-wages/docs"
+      links: [
+        { label: "Front-end", href: "/average-monthly-wages" },
+        { label: "API", href: "/api/v1/average-monthly-wages" },
+        { label: "Documentación", href: "/api/v1/average-monthly-wages/docs" }
+      ]
     },
     {
       key: "construccion",
       label: "Construcción",
       short: "IRG",
       member: "Isaac Rodríguez Godino",
-      frontend: "/international-construction-costs",
-      apiBase: "/api/v1/international-construction-costs",
-      docs: "/api/v1/international-construction-costs/docs"
+      links: [
+        { label: "Front-end", href: "/international-construction-costs" },
+        { label: "API", href: "/api/v1/international-construction-costs" },
+        { label: "Documentación", href: "/api/v1/international-construction-costs/docs" }
+      ]
+    },
+    {
+      key: "analytics",
+      label: "Análisis",
+      short: "",
+      member: "Visualizaciones",
+      links: [
+        { label: "Visualización grupal", href: "/analytics" },
+        { label: "Ocio y cultura", href: "/analytics/recreation-culture-expenditure" },
+        { label: "Sueldos", href: "/analytics/average-monthly-wages" },
+        { label: "Construcción", href: "/analytics/international-construction-costs" }
+      ]
+    },
+    {
+      key: "integrations",
+      label: "Integraciones",
+      short: "",
+      member: "APIs externas y SOS",
+      links: [
+        { label: "Vista general", href: "/integrations" },
+        { label: "Ocio y cultura", href: "/integrations/recreation-culture-expenditure" },
+        { label: "Sueldos", href: "/integrations/mjp" },
+        { label: "Construcción", href: "/integrations/isaac" }
+      ]
     }
   ];
 
   function normalizeSections(input) {
-    if (!Array.isArray(input) || input.length === 0) {
-      return fallbackSections;
-    }
+    const source = Array.isArray(input) && input.length > 0
+      ? input
+      : fallbackSections;
 
-    return input.map((section, index) => {
-      let label = section.label;
-
-      if (!label) {
-        if (section.short === "EBP") label = "Ocio y cultura";
-        else if (section.short === "MJP") label = "Sueldos";
-        else if (section.short === "IRG") label = "Construcción";
-        else label = section.theme || section.resource || `Sección ${index + 1}`;
-      }
-
-      return {
-        key: section.resource || section.short || `section-${index}`,
-        label,
-        short: section.short || "",
-        member: section.member || "",
-        frontend: section.frontend || "#",
-        apiBase: section.apiBase || "#",
-        docs: section.docs || "#"
-      };
-    });
+    return source.map((section, index) => ({
+      key: section.key || section.resource || section.short || `section-${index}`,
+      label: section.label || section.theme || section.resource || `Sección ${index + 1}`,
+      short: section.short || "",
+      member: section.member || "",
+      links: section.links || [
+        { label: "Front-end", href: section.frontend },
+        { label: "API", href: section.apiBase },
+        { label: "Documentación", href: section.docs }
+      ].filter((link) => link.href)
+    }));
   }
 
   const navSections = normalizeSections(sections);
@@ -92,11 +113,9 @@
           openKey = null;
         }
         closeTimer = null;
-      }, 1200);
-    } else {
-      if (openKey === key) {
-        openKey = null;
-      }
+      }, 4000);
+    } else if (openKey === key) {
+      openKey = null;
     }
   }
 </script>
@@ -110,7 +129,7 @@
   </div>
 
   <nav class="center-nav" aria-label="Secciones del proyecto">
-    {#each navSections as section}
+    {#each navSections as section (section.key)}
       <details
         class="nav-dropdown"
         ontoggle={(event) => handleToggle(event, section.key)}
@@ -121,13 +140,25 @@
         </summary>
 
         <div class="dropdown-menu">
-          <p class="dropdown-member">
-            <strong>{section.short}</strong>{#if section.member} · {section.member}{/if}
-          </p>
+          {#if section.short || section.member}
+            <p class="dropdown-member">
+              {#if section.short}
+                <strong>{section.short}</strong>
+              {/if}
 
-          <a href={section.frontend}>Front-end</a>
-          <a href={section.apiBase}>API</a>
-          <a href={section.docs}>Documentación</a>
+              {#if section.short && section.member}
+                {" · "}
+              {/if}
+
+              {#if section.member}
+                {section.member}
+              {/if}
+            </p>
+          {/if}
+
+          {#each section.links as link}
+            <a href={link.href}>{link.label}</a>
+          {/each}
         </div>
       </details>
     {/each}

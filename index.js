@@ -8,8 +8,12 @@ import {loadBackendMaria} from "./src/back/index-MJP.js"; //MODULO MARIA
 //import {loadBackendElena} from "./src/back/index-EBP.js"; //MODULO ELENA
 import {loadBackendElenav2} from "./src/back/index-EBP-v2.js"; //MODULO ELENA v2
 
-import {handler} from './src/front/build/handler.js';
+// ---- IMPORTACIÓN DE PROXY ----
 import { setupProxiesIsaac } from "./src/back/proxiesIsaac.js";
+import { setupProxiesEBP } from "./src/back/proxies-EBP.js";
+
+import {handler} from './src/front/build/handler.js';
+
 const app = express();
 app.use(cors());
 const port = process.env.PORT || 3000;
@@ -31,7 +35,7 @@ loadBackendElenav2(app);
 
 //--carga de los modulos del proxy
 setupProxiesIsaac(app);
-
+setupProxiesEBP(app);
 // SvelteKit handler - comentado para desarrollo local
 // En producción (después de npm run build), descomentar esta línea:
 app.use(handler);
