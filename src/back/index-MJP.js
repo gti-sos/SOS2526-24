@@ -175,97 +175,239 @@ function loadBackendMaria(app) {
     // ------------------------------------------
     // PROXIES PARA INTEGRACIONES EXTERNAS
     // ------------------------------------------
+// GRAFICA 1: Average-Monthly-Wages + Arrivals (Series normalizadas por año)
+app.get("/api/v1/integrations/chart1", async (req, res) => {
+    try {
+        db.find({}, (err, wages) => {
+            if (err) return res.status(500).json({ error: "Error" });
 
-        // 1. PROXY GRUPO 25 (Arrivals)
-    app.get("/api/v1/integrations/arrivals", async (req, res) => {
+            // Primero cargar datos iniciales de Grupo 25
+            fetch("https://sos2526-25.onrender.com/api/v1/international-tourist-arrivals/loadInitialData")
+                .then(() => {
+                    // Luego obtener los datos de arrivals
+                    return fetch("https://sos2526-25.onrender.com/api/v1/international-tourist-arrivals");
+                })
+                .then(r => r.json())
+                .then(arrivals => {
+                    // Agrupar salarios por año - promedios
+                    const wagesByYear = {};
+                    wages.forEach(w => {
+                        if (!wagesByYear[w.year]) wagesByYear[w.year] = [];
+                        wagesByYear[w.year].push(w.avg_monthly_usd);
+                    });
+
+                    const wageAvgByYear = {};
+                    Object.keys(wagesByYear).forEach(year => {
+                        const avg = wagesByYear[year].reduce((a, b) => a + b, 0) / wagesByYear[year].length;
+                        wageAvgByYear[year] = avg;
+                    });
+
+                    // Agrupar arrivals por año - totales
+                    const arrivalsByYear = {};
+                    arrivals.forEach(a => {
+                        const totalArrivals = (a.air_arrival || 0) + (a.water_arrival || 0) + (a.land_arrival || 0);
+                        if (!arrivalsByYear[a.year]) {
+                            arrivalsByYear[a.year] = 0;
+                        }
+                        arrivalsByYear[a.year] += totalArrivals;
+                    });
+
+                    // Combinar años
+                    const allYears = new Set([...Object.keys(wageAvgByYear), ...Object.keys(arrivalsByYear)]);
+                    const combined = Array.from(allYears).sort().map(year => ({
+                        year: parseInt(year),
+                        salary: wageAvgByYear[year] || 0,
+                        arrivals: arrivalsByYear[year] || 0
+                    }));
+
+                    res.status(200).json({ combined });
+                })
+                .catch(() => res.status(500).json({ error: "Error" }));
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error" });
+    }
+});
+
+// GRAFICA 2: Average-Monthly-Wages + Olympics Medallistas (por CONTINENTE)
+    app.get("/api/v1/integrations/chart2", async (req, res) => {
         try {
-            // Primero intenta cargar datos iniciales
-            await fetch("https://sos2526-25.onrender.com/api/v1/international-tourist-arrivals/loadInitialData");
-            
-            // Luego obtiene los datos
-            const response = await fetch("https://sos2526-25.onrender.com/api/v1/international-tourist-arrivals");
-            const data = await response.json();
-            res.status(200).json(Array.isArray(data) ? data : []);
+            db.find({}, (err, wages) => {
+                if (err) return res.status(500).json({ error: "Error" });
+
+                // Mapping exhaustivo de país a continente (múltiples variantes)
+                const countryToContinent = {
+                    // North America
+                    "canada": "North America",
+                    "canadian": "North America",
+                    "usa": "North America",
+                    "us": "North America",
+                    "united states": "North America",
+                    "united states of america": "North America",
+                    "american": "North America",
+
+                    // Europe
+                    "uk": "Europe",
+                    "united kingdom": "Europe",
+                    "great britain": "Europe",
+                    "gb": "Europe",
+                    "britain": "Europe",
+                    "england": "Europe",
+                    "scotland": "Europe",
+                    "wales": "Europe",
+                    "northern ireland": "Europe",
+                    "british": "Europe",
+
+                    "spain": "Europe",
+                    "spanish": "Europe",
+                    "españa": "Europe",
+
+                    "ireland": "Europe",
+                    "republic of ireland": "Europe",
+                    "eire": "Europe",
+                    "irish": "Europe",
+
+                    "poland": "Europe",
+                    "polish": "Europe",
+                    "polen": "Europe",
+
+                    "italy": "Europe",
+                    "italian": "Europe",
+                    "italia": "Europe",
+
+                    "germany": "Europe",
+                    "german": "Europe",
+                    "deutschland": "Europe",
+                    "allemagne": "Europe",
+
+                    // Variantes adicionales comunes
+                    "north america": "North America",
+                    "europe": "Europe",
+                    "european": "Europe"
+                };
+
+                // Primero cargar datos iniciales de Grupo 30 (Olympics)
+                fetch("https://sos2526-30.onrender.com/api/v1/olympics-athlete-events/loadInitialData")
+                    .then(() => {
+                        // Luego obtener los datos de olympics
+                        return fetch("https://sos2526-30.onrender.com/api/v1/olympics-athlete-events/");
+                    })
+                    .then(r => r.json())
+                    .then(olympics => {
+                        const data = olympics.data || olympics;
+
+                        // Contar atletas y medallistas por continente
+                        const medallistsByContinent = {};
+                        const athletesByContinent = {};
+
+                        data.forEach(athlete => {
+                            const country = athlete.team ? athlete.team.toLowerCase() : "unknown";
+                            const continent = countryToContinent[country] || "Other";
+
+                            // Contar TODOS los atletas (no filtrar por medalla)
+                            athletesByContinent[continent] = (athletesByContinent[continent] || 0) + 1;
+                        });
+
+                        console.log("DEBUG Chart2 - Atletas por continente:", athletesByContinent);
+
+                        res.status(200).json({
+                            wages,
+                            athletes: athletesByContinent,
+                            debug: { totalAthletes: data.length }
+                        });
+                    })
+                    .catch((err) => {
+                        console.error("Error fetching Olympics data:", err);
+                        res.status(500).json({ error: "Error" });
+                    });
+            });
         } catch (error) {
-            res.status(500).json({ error: "Error Arrivals" });
+            res.status(500).json({ error: "Error" });
         }
     });
 
-    // 2. PROXY GRUPO 30 (Olympics)
-    app.get("/api/v1/integrations/olympics", async (req, res) => {
-        try {
-            // 1. Carga los datos iniciales
-            await fetch("https://sos2526-30.onrender.com/api/v1/olympics-athlete-events/loadInitialData");
+// GRAFICA 3: Average-Monthly-Wages + World Bank Construction
+app.get("/api/v1/integrations/chart3", async (req, res) => {
+    try {
+        db.find({}, (err, wages) => {
+            if (err) return res.status(500).json({ error: "Error" });
             
-            // 2. Luego obtiene los datos
-            const response = await fetch("https://sos2526-30.onrender.com/api/v1/olympics-athlete-events/");
-            const json = await response.json();
-            
-            // Los datos están dentro de .data
-            const data = json.data || json;
-            res.status(200).json(Array.isArray(data) ? data : []);
-        } catch (error) {
-            res.status(500).json({ error: "Error Olympics" });
-        }
-    });
-
-// 3. CONSTRUCCIÓN - World Bank API
-    app.get("/api/v1/integrations/construction", async (req, res) => {
-        try {
-            const response = await fetch("https://api.worldbank.org/v2/country/all/indicator/NE.CON.TOTL.CD?date=2019:2024&per_page=500&format=json");
-            const data = await response.json();
-            const transformed = [];
-            if (data[1]) {
-                data[1].forEach(record => {
-                    if (record.value !== null && record.countryiso3code) {
-                        transformed.push({
-                            country: record.countryiso3code,
-                            year: parseInt(record.date),
-                            construction_cost: record.value
+            fetch("https://api.worldbank.org/v2/country/all/indicator/NE.CON.TOTL.CD?date=2019:2024&per_page=500&format=json")
+                .then(r => r.json())
+                .then(data => {
+                    const construction = [];
+                    if (data[1]) {
+                        data[1].forEach(record => {
+                            if (record.value !== null && record.countryiso3code) {
+                                construction.push({
+                                    country: record.countryiso3code,
+                                    year: parseInt(record.date),
+                                    construction_value: record.value
+                                });
+                            }
                         });
                     }
-                });
-            }
-            res.status(200).json(transformed.slice(0, 100));
-        } catch (error) {
-            res.status(500).json({ error: "Error World Bank" });
-        }
-    });
-// 4. COUNTRIES - REST Countries API
-    app.get("/api/v1/integrations/countries", async (req, res) => {
-        try {
-            const response = await fetch("https://restcountries.com/v3.1/all?fields=name,region,population,cca2,cca3");            const data = await response.json();
-            const transformed = data.map(country => ({
-                name: country.name?.common || country.name?.official || "Unknown",
-                region: country.region || "Unknown",
-                population: country.population || 0,
-                code: country.cca2 || country.cca3 || "XX"
-            }));
-            res.status(200).json(transformed);
-        } catch (error) {
-            res.status(500).json({ error: "Error REST Countries" });
-        }
-    });
+                    res.status(200).json({ wages, construction });
+                })
+                .catch(() => res.status(500).json({ error: "Error World Bank" }));
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error" });
+    }
+});
 
-   // 5. EARTHQUAKES - USGS API
-    app.get("/api/v1/integrations/earthquakes", async (req, res) => {
-        try {
-            const response = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
-            const data = await response.json();
-            const transformed = data.features.map(feature => ({
-                magnitude: feature.properties.mag,
-                place: feature.properties.place,
-                time: feature.properties.time,
-                depth: feature.geometry.coordinates[2],
-                latitude: feature.geometry.coordinates[1],
-                longitude: feature.geometry.coordinates[0]
-            }));
-            res.status(200).json(transformed);
-        } catch (error) {
-            res.status(500).json({ error: "Error USGS Earthquakes" });
-        }
-    });
+// GRAFICA 4: Average-Monthly-Wages + REST Countries (Population)
+app.get("/api/v1/integrations/chart4", async (req, res) => {
+    try {
+        db.find({}, (err, wages) => {
+            if (err) return res.status(500).json({ error: "Error" });
+            
+            fetch("https://restcountries.com/v3.1/all?fields=name,region,population,cca2,cca3")
+                .then(r => r.json())
+                .then(countries => {
+                    const countryData = {};
+                    countries.forEach(c => {
+                        const code = c.cca2.toLowerCase();
+                        countryData[code] = {
+                            name: c.name.common,
+                            region: c.region,
+                            population: c.population || 0,
+                            code: c.cca2
+                        };
+                    });
+                    res.status(200).json({ wages, countries: countryData });
+                })
+                .catch(() => res.status(500).json({ error: "Error REST Countries" }));
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error" });
+    }
+});
+
+   // GRAFICA 5: Earthquakes + Average-Monthly-Wages (Radar)
+app.get("/api/v1/integrations/chart5", async (req, res) => {
+    try {
+        db.find({}, (err, wages) => {
+            if (err) return res.status(500).json({ error: "Error" });
+
+            fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson")
+                .then(r => r.json())
+                .then(data => {
+                    const earthquakes = data.features.map(feature => ({
+                        magnitude: feature.properties.mag,
+                        place: feature.properties.place,
+                        latitude: feature.geometry.coordinates[1],
+                        longitude: feature.geometry.coordinates[0]
+                    }));
+                    res.status(200).json({ wages, earthquakes });
+                })
+                .catch(() => res.status(500).json({ error: "Error USGS" }));
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error" });
+    }
+});
+
 }
-
 
 export { loadBackendMaria };
