@@ -3,22 +3,34 @@
 </svelte:head>
 
 <script>
+  import ApexCharts from 'apexcharts';
   import Chart from 'chart.js/auto';
-  import { onDestroy } from 'svelte';
+  import { onDestroy, tick } from 'svelte';
 
   // Gráfica 1: Salarios vs Llegadas Turísticas
   let mostrarGrafica1 = $state(false);
   let chart1Container = $state();
   let chart1 = $state(null);
+  let error1 = $state(null);
+  let sinDatos1 = $state(false);
 
   async function cargarGrafica1() {
     await new Promise(resolve => setTimeout(resolve, 100));
+
+    error1 = null;
+    sinDatos1 = false;
 
     try {
       const res = await fetch('/api/v1/integrations/chart1');
       const data = await res.json();
 
       const combined = data.combined;
+
+      // Validar si hay datos
+      if (!combined || combined.length === 0) {
+        sinDatos1 = true;
+        return;
+      }
 
       // Normalizar ambas series a 0-100
       const maxSalary = Math.max(...combined.map(c => c.salary));
@@ -30,52 +42,49 @@
 
       pintarGrafica1(years, normalizedSalaries, normalizedArrivals);
     } catch (e) {
-      console.error('Error:', e);
+      console.error('Error Gráfica 1:', e);
+      error1 = 'Error al cargar los datos: ' + e.message;
     }
   }
 
   function pintarGrafica1(years, salaries, arrivals) {
-    if (!chart1Container) return;
-    if (chart1) chart1.destroy();
+    if (!chart1Container) {
+      console.error('chart1Container no está disponible');
+      return;
+    }
+    if (chart1) {
+      chart1.destroy();
+      chart1 = null;
+    }
+
+    // Calcular promedios para el doughnut
+    const avgSalary = Math.round(salaries.reduce((a, b) => a + b, 0) / salaries.length);
+    const avgArrivals = Math.round(arrivals.reduce((a, b) => a + b, 0) / arrivals.length);
 
     chart1 = new Chart(chart1Container, {
-      type: 'bar',
+      type: 'doughnut',
       data: {
-        labels: years,
+        labels: ['Salario promedio (normalizado)', 'Llegadas turísticas (normalizado)'],
         datasets: [
           {
-            label: 'Salario promedio (normalizado 0-100)',
-            data: salaries,
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.6)',
-            borderWidth: 2
-          },
-          {
-            label: 'Llegadas turísticas (normalizado 0-100)',
-            data: arrivals,
-            borderColor: '#dc2626',
-            backgroundColor: 'rgba(220, 38, 38, 0.6)',
+            label: 'Valores normalizados 0-100',
+            data: [avgSalary, avgArrivals],
+            borderColor: ['#2563eb', '#dc2626'],
+            backgroundColor: ['rgba(37, 99, 235, 0.7)', 'rgba(220, 38, 38, 0.7)'],
             borderWidth: 2
           }
         ]
       },
       options: {
         responsive: true,
-        interaction: { mode: 'index', intersect: false },
-        scales: {
-          y: {
-            type: 'linear',
-            display: true,
-            beginAtZero: true,
-            max: 100,
-            title: { display: true, text: 'Valor normalizado (0-100%)' }
-          }
-        },
         plugins: {
+          legend: {
+            position: 'bottom'
+          },
           tooltip: {
             callbacks: {
               label: function(context) {
-                return `${context.dataset.label}: ${context.parsed.y}%`;
+                return `${context.label}: ${context.parsed}%`;
               }
             }
           }
@@ -627,7 +636,19 @@
       <p class="description">
         <strong>Datos normalizados:</strong> Salario mensual promedio (USD) de tu API + Número de llegadas turísticas de Grupo 25, ambos normalizados a escala 0-100%. Muestra tendencias por año para comparar cuál crece más rápido.
       </p>
-      <canvas bind:this={chart1Container}></canvas>
+      {#if error1}
+        <div class="error-message">
+          <strong>⚠️ Error:</strong> {error1}
+        </div>
+      {/if}
+      {#if sinDatos1}
+        <div class="no-data-message">
+          <strong>📭 Sin datos:</strong> No hay datos disponibles para mostrar esta gráfica. Verifica que las APIs estén disponibles y contengan información.
+        </div>
+      {/if}
+      {#if !error1 && !sinDatos1}
+        <canvas bind:this={chart1Container}></canvas>
+      {/if}
     {/if}
   </section>
 
@@ -780,5 +801,28 @@
   canvas {
     max-width: 100%;
     height: auto;
+  }
+
+  .error-message {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+  }
+
+  .no-data-message {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+  }
+
+  .chart-apexcharts {
+    width: 100%;
+    min-height: 400px;
   }
 </style>
