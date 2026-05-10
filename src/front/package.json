@@ -33,6 +33,7 @@
 	},
 	"dependencies": {
 		"@amcharts/amcharts5": "^5.17.2",
+		"apexcharts": "^5.11.0",
 		"chart.js": "^4.5.1",
 		"echarts": "^6.0.0",
 		"highcharts": "^12.6.0",
