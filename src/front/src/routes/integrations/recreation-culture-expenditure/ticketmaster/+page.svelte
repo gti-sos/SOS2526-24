@@ -8,8 +8,8 @@
 
   const OWN_API_URL = "/api/v2/recreation-culture-expenditure";
 
-  const TICKETMASTER_PROXY_URL =
-    "/api/v2/recreation-culture-expenditure/proxy/external/ticketmaster/events";
+  const TICKETMASTER_COUNTS_PROXY_URL =
+    "/api/v2/recreation-culture-expenditure/proxy/external/ticketmaster/events-count-by-country";
 
   const countryCodes = {
     Canada: "CA",
@@ -36,52 +36,66 @@
     return Array.from(latestByCountry.values());
   }
 
-  async function getTicketmasterEventsCount(countryCode) {
+  async function getTicketmasterCountsByCountry(latestRecords) {
+    const countryCodeList = latestRecords
+      .map((record) => countryCodes[record.country])
+      .filter(Boolean);
+
     const params = new URLSearchParams({
-      countryCode,
-      size: "1"
+      countryCodes: countryCodeList.join(","),
+      classificationName: "music"
     });
 
-    const response = await fetch(`${TICKETMASTER_PROXY_URL}?${params.toString()}`);
+    const response = await fetch(
+      `${TICKETMASTER_COUNTS_PROXY_URL}?${params.toString()}`
+    );
+
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "No se pudo consultar Ticketmaster");
+      throw new Error(
+        data.error || "No se pudieron consultar los eventos de Ticketmaster"
+      );
     }
 
-    return data.page?.totalElements || data._embedded?.events?.length || 0;
+    return new Map(
+      data.map((item) => [item.countryCode, Number(item.events)])
+    );
   }
 
   async function loadData() {
     try {
       loading = true;
       error = "";
+      combinedData = [];
 
       const ownApiResponse = await fetch(OWN_API_URL);
       const ownApiData = await ownApiResponse.json();
 
       if (!ownApiResponse.ok) {
-        throw new Error("No se pudieron cargar los datos de recreation-culture-expenditure");
+        throw new Error(
+          "No se pudieron cargar los datos de recreation-culture-expenditure"
+        );
       }
 
       const latestRecords = getLatestRecordByCountry(ownApiData)
         .filter((record) => countryCodes[record.country]);
 
-      combinedData = await Promise.all(
-        latestRecords.map(async (record) => {
-          const countryCode = countryCodes[record.country];
-          const ticketmasterEvents = await getTicketmasterEventsCount(countryCode);
+      const ticketmasterCounts =
+        await getTicketmasterCountsByCountry(latestRecords);
 
-          return {
-            country: record.country,
-            countryCode,
-            year: Number(record.year),
-            recreation_per_capita: Number(record.recreation_per_capita),
-            recreation_share: Number(record.recreation_share),
-            ticketmaster_events: Number(ticketmasterEvents)
-          };
-        })
-      );
+      combinedData = latestRecords.map((record) => {
+        const countryCode = countryCodes[record.country];
+
+        return {
+          country: record.country,
+          countryCode,
+          year: Number(record.year),
+          recreation_per_capita: Number(record.recreation_per_capita),
+          recreation_share: Number(record.recreation_share),
+          ticketmaster_events: Number(ticketmasterCounts.get(countryCode) || 0)
+        };
+      });
 
       await drawChart();
     } catch (err) {
@@ -115,7 +129,7 @@
         "y": {
           "field": "ticketmaster_events",
           "type": "quantitative",
-          "title": "Eventos disponibles en Ticketmaster"
+          "title": "Eventos musicales disponibles en Ticketmaster"
         },
         "size": {
           "field": "recreation_share",
@@ -128,8 +142,16 @@
           "title": "País"
         },
         "tooltip": [
-          { "field": "country", "type": "nominal", "title": "País" },
-          { "field": "year", "type": "ordinal", "title": "Año del dato" },
+          {
+            "field": "country",
+            "type": "nominal",
+            "title": "País"
+          },
+          {
+            "field": "year",
+            "type": "ordinal",
+            "title": "Año del dato"
+          },
           {
             "field": "recreation_per_capita",
             "type": "quantitative",
@@ -138,7 +160,7 @@
           {
             "field": "recreation_share",
             "type": "quantitative",
-            "title": "Porcentaje de consumo"
+            "title": "Porcentaje de ocio/cultura"
           },
           {
             "field": "ticketmaster_events",

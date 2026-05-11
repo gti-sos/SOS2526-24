@@ -135,39 +135,167 @@ export function setupProxiesEBP(app) {
   });
 
   /** -------------------- API externa: TicketMaster -------------------- */
+const ticketmasterCache = new Map();
+  const TICKETMASTER_CACHE_MS = 30 * 60 * 1000;
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function fetchTicketmasterEvents(params) {
+    const apiKey = process.env.TICKETMASTER_API_KEY;
+
+    if (!apiKey) {
+      const error = new Error("Falta configurar TICKETMASTER_API_KEY");
+      error.status = 500;
+      throw error;
+    }
+
+    const publicParams = new URLSearchParams(params);
+    const cacheKey = publicParams.toString();
+
+    const cached = ticketmasterCache.get(cacheKey);
+
+    if (cached && Date.now() - cached.timestamp < TICKETMASTER_CACHE_MS) {
+      return cached.data;
+    }
+
+    const privateParams = new URLSearchParams(publicParams);
+    privateParams.set("apikey", apiKey);
+
+    const targetUrl =
+      `https://app.ticketmaster.com/discovery/v2/events.json?${privateParams.toString()}`;
+
+    console.log("[Proxy EBP] ticketmaster events:", publicParams.toString());
+
+    const response = await fetch(targetUrl, {
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    if (response.status === 429) {
+      const error = new Error(
+        "Ticketmaster ha limitado temporalmente las peticiones. Espera unos segundos y vuelve a intentarlo."
+      );
+      error.status = 429;
+      throw error;
+    }
+
+    if (!response.ok) {
+      const error = new Error(`Error consultando Ticketmaster: HTTP ${response.status}`);
+      error.status = 502;
+      throw error;
+    }
+
+    const data = await response.json();
+
+    ticketmasterCache.set(cacheKey, {
+      timestamp: Date.now(),
+      data
+    });
+
+    return data;
+  }
+
   app.get(`${PROXY_PATH}/external/ticketmaster/events`, async (req, res) => {
     try {
-      const apiKey = process.env.TICKETMASTER_API_KEY;
-
-      if (!apiKey) {
-        return res.status(500).json({
-          error: "Falta configurar TICKETMASTER_API_KEY"
-        });
-      }
+      const allowedParams = [
+        "keyword",
+        "countryCode",
+        "city",
+        "classificationName",
+        "startDateTime",
+        "endDateTime",
+        "size",
+        "page",
+        "sort"
+      ];
 
       const params = new URLSearchParams();
 
-      for (const [key, value] of Object.entries(req.query)) {
-        params.set(key, value);
+      for (const param of allowedParams) {
+        const value = req.query[param];
+
+        if (Array.isArray(value)) {
+          value.forEach((item) => params.append(param, String(item)));
+        } else if (value !== undefined && value !== null) {
+          params.set(param, String(value));
+        }
       }
 
-      params.set("apikey", apiKey);
+      if (!params.has("countryCode")) {
+        params.set("countryCode", "ES");
+      }
 
-      const targetUrl = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
+      if (!params.has("size")) {
+        params.set("size", "1");
+      }
 
-      console.log("[Proxy EBP] ticketmaster events");
+      const data = await fetchTicketmasterEvents(params);
 
-      const data = await fetchJson(targetUrl);
       return res.status(200).json(data);
     } catch (error) {
       console.error("[Proxy EBP] Error TicketMaster:", error.message);
 
-      return res.status(502).json({
-        error: "No se pudo obtener información de la API TicketMaster"
+      return res.status(error.status || 502).json({
+        error:
+          error.message ||
+          "No se pudo obtener información de la API TicketMaster"
       });
     }
   });
 
+  app.get(`${PROXY_PATH}/external/ticketmaster/events-count-by-country`, async (req, res) => {
+    try {
+      const countryCodes = String(req.query.countryCodes || "ES")
+        .split(",")
+        .map((code) => code.trim().toUpperCase())
+        .filter((code) => /^[A-Z]{2}$/.test(code));
+
+      if (countryCodes.length === 0) {
+        return res.status(400).json({
+          error: "Debes indicar al menos un código de país válido"
+        });
+      }
+
+      const results = [];
+
+      for (const countryCode of countryCodes) {
+        const params = new URLSearchParams({
+          countryCode,
+          size: "1"
+        });
+
+        if (req.query.keyword) {
+          params.set("keyword", String(req.query.keyword));
+        }
+
+        if (req.query.classificationName) {
+          params.set("classificationName", String(req.query.classificationName));
+        }
+
+        const data = await fetchTicketmasterEvents(params);
+
+        results.push({
+          countryCode,
+          events: data.page?.totalElements || data._embedded?.events?.length || 0
+        });
+
+        await sleep(700);
+      }
+
+      return res.status(200).json(results);
+    } catch (error) {
+      console.error("[Proxy EBP] Error TicketMaster count:", error.message);
+
+      return res.status(error.status || 502).json({
+        error:
+          error.message ||
+          "No se pudo obtener el recuento de eventos de TicketMaster"
+      });
+    }
+  });
   /** -------------------- API externa: Spotify -------------------- */
   app.get(`${PROXY_PATH}/external/spotify/search`, async (req, res) => {
     try {
