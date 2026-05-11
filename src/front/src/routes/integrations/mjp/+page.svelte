@@ -3,8 +3,9 @@
 </svelte:head>
 
 <script>
-  import ApexCharts from 'apexcharts';
   import Chart from 'chart.js/auto';
+  import * as d3 from 'd3';
+  import * as echarts from 'echarts';
   import { onDestroy, tick } from 'svelte';
 
   // Gráfica 1: Salarios vs Llegadas Turísticas
@@ -199,54 +200,123 @@
 
   function pintarGrafica2(continents, wages, athletes) {
     if (!chart2Container) return;
-    if (chart2) chart2.destroy();
+
+    // Limpiar SVG anterior
+    d3.select(chart2Container).selectAll("*").remove();
 
     const scatterData = continents.map((continent, idx) => ({
+      continent: continent,
       x: wages[idx],
-      y: athletes[idx],
-      label: continent
+      y: athletes[idx]
     }));
 
-    chart2 = new Chart(chart2Container, {
-      type: 'scatter',
-      data: {
-        datasets: [
-          {
-            label: 'Salarios vs Atletas Olímpicos',
-            data: scatterData,
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.6)',
-            pointRadius: 8,
-            pointHoverRadius: 10
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const point = context.raw;
-                return `${point.label}: Salario $${point.x.toFixed(0)} USD, ${point.y} atletas`;
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            type: 'linear',
-            display: true,
-            title: { display: true, text: 'Salario promedio mensual (USD)' }
-          },
-          y: {
-            type: 'linear',
-            display: true,
-            title: { display: true, text: 'Número total de atletas olímpicos' }
-          }
-        }
-      }
+    // Dimensiones
+    const margin = { top: 20, right: 30, bottom: 60, left: 70 };
+    const width = chart2Container.clientWidth - margin.left - margin.right;
+    const height = 450 - margin.top - margin.bottom;
+
+    // Escalas
+    const xScale = d3.scaleLinear()
+      .domain([d3.min(scatterData, d => d.x) - 500, d3.max(scatterData, d => d.x) + 500])
+      .range([0, width]);
+
+    const yScale = d3.scaleLinear()
+      .domain([0, d3.max(scatterData, d => d.y) + 1])
+      .range([height, 0]);
+
+    // SVG
+    const svg = d3.select(chart2Container)
+      .append('svg')
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Ejes
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
+
+    svg.append('g')
+      .attr('transform', `translate(0,${height})`)
+      .call(xAxis);
+
+    svg.append('g')
+      .call(yAxis);
+
+    // Etiquetas ejes
+    svg.append('text')
+      .attr('x', width / 2)
+      .attr('y', height + 50)
+      .style('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .text('Salario promedio mensual (USD)');
+
+    svg.append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', 0 - margin.left)
+      .attr('x', 0 - (height / 2))
+      .attr('dy', '1em')
+      .style('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .text('Número total de atletas olímpicos');
+
+    // Puntos
+    const circles = svg.selectAll('circle')
+      .data(scatterData)
+      .enter()
+      .append('circle')
+      .attr('cx', d => xScale(d.x))
+      .attr('cy', d => yScale(d.y))
+      .attr('r', 7)
+      .attr('fill', '#2563eb')
+      .attr('opacity', 0.7)
+      .attr('stroke', '#1e40af')
+      .attr('stroke-width', 2);
+
+    // Tooltip
+    const tooltip = d3.select('body')
+      .append('div')
+      .style('position', 'absolute')
+      .style('background', '#333')
+      .style('color', 'white')
+      .style('padding', '8px 12px')
+      .style('border-radius', '4px')
+      .style('font-size', '12px')
+      .style('pointer-events', 'none')
+      .style('opacity', 0)
+      .style('z-index', 1000);
+
+    circles.on('mouseover', (event, d) => {
+      tooltip.style('opacity', 1)
+        .html(`<strong>${d.continent}</strong><br/>Salario: $${d.x.toFixed(0)} USD<br/>Atletas: ${d.y}`)
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 28) + 'px');
+    })
+    .on('mousemove', (event) => {
+      tooltip.style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 28) + 'px');
+    })
+    .on('mouseout', () => {
+      tooltip.style('opacity', 0);
     });
+
+    // Hover efecto
+    circles.on('mouseenter', function() {
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr('r', 10)
+        .attr('opacity', 1);
+    })
+    .on('mouseleave', function() {
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr('r', 7)
+        .attr('opacity', 0.7);
+    });
+
+    chart2 = svg;
   }
 
   // Gráfica 3: Salarios vs Construcción (World Bank)
@@ -606,12 +676,179 @@
     });
   }
 
+  // Gráfica 6: Salarios vs Consumo de Ozono (ECharts)
+  let mostrarGrafica6 = $state(false);
+  let chart6Container = $state();
+  let echartsInstance = $state(null);
+  let error6 = $state(null);
+  let sinDatos6 = $state(false);
+
+  async function cargarGrafica6() {
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    error6 = null;
+    sinDatos6 = false;
+
+    try {
+      const res = await fetch('/api/v1/integrations/chart6');
+      const data = await res.json();
+
+      if (!data || (!data.wages && !data.ozoneData)) {
+        sinDatos6 = true;
+        return;
+      }
+
+      const wages = data.wages || [];
+      const ozoneData = data.ozoneData || [];
+
+      // Crear mapas agregados por país (promedio de años)
+      const countryWages = {};
+      const countryOzone = {};
+
+      wages.forEach(w => {
+        if (w && w.country && w.country.toLowerCase() !== 'world' && w.year !== undefined) {
+          if (!countryWages[w.country]) countryWages[w.country] = [];
+          countryWages[w.country].push(w.value || 0);
+        }
+      });
+
+      ozoneData.forEach(o => {
+        if (o && o.country && o.country.toLowerCase() !== 'world' && o.year !== undefined) {
+          if (!countryOzone[o.country]) countryOzone[o.country] = [];
+          countryOzone[o.country].push(Math.abs(o.value || 0));
+        }
+      });
+
+      // Calcular promedios
+      const treemapData = [];
+      const allCountries = new Set([...Object.keys(countryWages), ...Object.keys(countryOzone)]);
+
+      allCountries.forEach(country => {
+        const wageVals = countryWages[country] || [0];
+        const ozoneVals = countryOzone[country] || [0];
+
+        const avgWage = wageVals.length > 0 ? wageVals.reduce((a, b) => a + b, 0) / wageVals.length : 0;
+        const avgOzone = ozoneVals.length > 0 ? ozoneVals.reduce((a, b) => a + b, 0) / ozoneVals.length : 0;
+
+        if (avgWage > 0) {
+          treemapData.push({
+            name: country.toUpperCase(),
+            value: Math.round(avgWage),
+            wageValue: avgWage,
+            ozoneValue: avgOzone
+          });
+        }
+      });
+
+      if (treemapData.length === 0) {
+        sinDatos6 = true;
+        return;
+      }
+
+      console.log('📊 Treemap Data:', treemapData);
+      pintarGrafica6(treemapData);
+    } catch (e) {
+      console.error('Error Gráfica 6:', e);
+      error6 = 'Error al cargar los datos: ' + e.message;
+    }
+  }
+
+  function pintarGrafica6(treemapData) {
+    if (!chart6Container) return;
+
+    if (echartsInstance) {
+      echartsInstance.dispose();
+      echartsInstance = null;
+    }
+
+    echartsInstance = echarts.init(chart6Container);
+
+    // Preparar datos con colores según ozono
+    const ozoneValues = treemapData.map(d => d.ozoneValue || 0).filter(v => v > 0);
+    const maxOzone = Math.max(...ozoneValues, 1);
+    const minOzone = Math.min(...ozoneValues, 0);
+
+    const colors = ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026'];
+
+    const treemapDataProcessed = treemapData.map(d => {
+      const ozone = d.ozoneValue || 0;
+      const ratio = maxOzone > minOzone ? (ozone - minOzone) / (maxOzone - minOzone) : 0.5;
+      const colorIndex = Math.floor(ratio * (colors.length - 1));
+      const color = colors[Math.max(0, Math.min(colorIndex, colors.length - 1))];
+
+      return {
+        name: d.name,
+        value: d.value,
+        itemStyle: { color: color },
+        wageValue: d.wageValue,
+        ozoneValue: ozone
+      };
+    });
+
+    const option = {
+      title: {
+        text: '🌍 Salarios vs Consumo de Ozono por País',
+        subtext: 'Tamaño = Salario promedio (USD) | Color = Consumo de Ozono (azul=bajo, rojo=alto)',
+        left: 'center',
+        top: '1%',
+        textStyle: { fontSize: 18, fontWeight: 'bold', color: '#1e293b' }
+      },
+      tooltip: {
+        formatter: function(params) {
+          if (!params || !params.data) return '';
+          const wage = params.data.wageValue || params.value;
+          const ozone = params.data.ozoneValue || 0;
+          return `<strong>${params.name}</strong><br/>💰 Salario: $${wage.toFixed(2)} USD<br/>🌍 Ozono: ${ozone.toFixed(2)} toneladas`;
+        }
+      },
+      series: [
+        {
+          type: 'treemap',
+          data: treemapDataProcessed,
+          leafDepth: 1,
+          label: {
+            show: true,
+            formatter: function(params) {
+              return `${params.name}\n$${params.value}`;
+            },
+            fontSize: 13,
+            fontWeight: 'bold',
+            color: '#fff',
+            textShadowColor: '#000',
+            textShadowBlur: 3,
+            textShadowOffsetX: 1,
+            textShadowOffsetY: 1
+          },
+          itemStyle: {
+            borderColor: '#fff',
+            borderWidth: 2,
+            gapWidth: 3
+          },
+          emphasis: {
+            itemStyle: {
+              borderColor: '#000',
+              borderWidth: 3,
+              shadowBlur: 15,
+              shadowColor: 'rgba(0,0,0,0.6)'
+            }
+          }
+        }
+      ]
+    };
+
+    echartsInstance.setOption(option);
+    window.addEventListener('resize', () => {
+      if (echartsInstance) echartsInstance.resize();
+    });
+  }
+
   onDestroy(() => {
     if (chart1) chart1.destroy();
     if (chart2) chart2.destroy();
     if (chart3) chart3.destroy();
     if (chart4) chart4.destroy();
     if (chart5) chart5.destroy();
+    if (echartsInstance) echartsInstance.dispose();
   });
 </script>
 
@@ -671,7 +908,7 @@
         <strong>Datos combinados:</strong> Salario mensual promedio (USD) de tu API + Número total de atletas olímpicos de Grupo 30.
         Muestra la relación entre participación olímpica y nivel salarial por continente: ¿Los continentes con mayores salarios tienen más atletas compitiendo?
       </p>
-      <canvas bind:this={chart2Container}></canvas>
+      <div bind:this={chart2Container} style="width: 100%; min-height: 500px;"></div>
     {/if}
   </section>
 
@@ -741,6 +978,41 @@
         Visualización radar que muestra la correlación entre salarios por país y actividad sísmica. Ambas series están normalizadas para comparabilidad.
       </p>
       <canvas bind:this={chart5Container}></canvas>
+    {/if}
+  </section>
+
+  <section class="api-section">
+    <div class="section-header">
+      <h2>🌍 Gráfica 6: Salarios vs Consumo de Ozono (ECharts)</h2>
+      <button
+        class="btn-toggle"
+        onclick={() => {
+          mostrarGrafica6 = !mostrarGrafica6;
+          if (mostrarGrafica6) cargarGrafica6();
+        }}
+      >
+        {mostrarGrafica6 ? '❌ Ocultar' : '👁️ Mostrar'}
+      </button>
+    </div>
+
+    {#if mostrarGrafica6}
+      <p class="description">
+        <strong>Integración ECharts:</strong> Salario mensual promedio (USD) de tu API + Consumo de sustancias que agotan ozono de Grupo 22.
+        Dos heatmaps lado a lado mostrando la relación entre niveles salariales y consumo de ozono por país y año, ambos normalizados a escala 0-100.
+      </p>
+      {#if error6}
+        <div class="error-message">
+          <strong>⚠️ Error:</strong> {error6}
+        </div>
+      {/if}
+      {#if sinDatos6}
+        <div class="no-data-message">
+          <strong>📭 Sin datos:</strong> No hay datos disponibles para mostrar esta gráfica. Verifica que las APIs estén disponibles y contengan información.
+        </div>
+      {/if}
+      {#if !error6 && !sinDatos6}
+        <div bind:this={chart6Container} style="width: 100%; height: 700px; margin-top: 1rem;"></div>
+      {/if}
     {/if}
   </section>
 </div>

@@ -408,6 +408,35 @@ app.get("/api/v1/integrations/chart5", async (req, res) => {
     }
 });
 
+app.get("/api/v1/integrations/chart6", async (req, res) => {
+    try {
+        db.find({}, (err, wages) => {
+            if (err) return res.status(500).json({ error: "Error en base de datos MJP" });
+
+            fetch("https://sos2526-22.onrender.com/api/v1/ozone-depleting-substance-consumptions")
+                .then(r => r.json())
+                .then(data => {
+                    // Procesar datos de ozono
+                    const ozoneData = (Array.isArray(data) ? data : data.data || []).map(item => ({
+                        country: item.country,
+                        year: item.year,
+                        value: (Math.abs(item.methyl_chloroform || 0) +
+                                Math.abs(item.methyl_bromide || 0) +
+                                Math.abs(item.carbon_tetrachloride || 0) +
+                                Math.abs(item.other_ozone_depleting_substances || 0))
+                    }));
+                    res.status(200).json({ wages, ozoneData });
+                })
+                .catch(err => {
+                    console.error("Error API Grupo 22:", err);
+                    res.status(500).json({ error: "Error al obtener datos de Grupo 22" });
+                });
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error en servidor" });
+    }
+});
+
 }
 
 export { loadBackendMaria };
