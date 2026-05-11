@@ -45,6 +45,53 @@ export function setupProxiesEBP(app) {
     }
   });
 
+    app.get(`${PROXY_PATH}/sos/stock-market/loadInitialData`, async (req, res) => {
+    try {
+      const targetUrl =
+        "https://mi-api-estable-sos.onrender.com/api/v1/daily-global-stock-market-indicators/loadInitialData";
+
+      console.log("[Proxy EBP] stock-market loadInitialData:", targetUrl);
+
+      const response = await fetch(targetUrl, {
+        headers: {
+          Accept: "application/json"
+        }
+      });
+
+      /*
+        Estados aceptables:
+        - 200: datos cargados o respuesta correcta
+        - 201: datos iniciales creados
+        - 204: operación correcta sin cuerpo
+        - 409: ya había datos, no es un error real para la gráfica
+      */
+      if ([200, 201, 204, 409].includes(response.status)) {
+        try {
+          const data = await response.json();
+          return res.status(response.status).json(data);
+        } catch {
+          return res.status(response.status).json({
+            message: "loadInitialData ejecutado correctamente sin cuerpo JSON."
+          });
+        }
+      }
+
+      return res.status(502).json({
+        error: `No se pudo ejecutar loadInitialData de G23. Estado ${response.status}`
+      });
+    } catch (error) {
+      console.error(
+        "[Proxy EBP] Error stock-market loadInitialData:",
+        error.message
+      );
+
+      return res.status(502).json({
+        error:
+          "No se pudo ejecutar loadInitialData de la API SOS daily-global-stock-market-indicators"
+      });
+    }
+  });
+
   /** -------------------- API de global-agriculture-climate-impacts / Grupo 22 -------------------- */
   app.get(`${PROXY_PATH}/sos/agriculture-climate`, async (req, res) => {
     try {

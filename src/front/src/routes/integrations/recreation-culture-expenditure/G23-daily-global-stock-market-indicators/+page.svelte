@@ -20,6 +20,27 @@
     return await response.json();
   }
 
+  async function ensureInitialData(url) {
+  const response = await fetch(url);
+
+  /*
+    loadInitialData puede devolver:
+    - 201 si ha cargado los datos iniciales
+    - 200 si la API del compañero lo tiene implementado así
+    - 409 si la base de datos ya tenía datos
+
+    El 409 no debe romper la gráfica, porque significa:
+    "ya hay datos, no hace falta volver a cargarlos".
+  */
+  if ([200, 201, 204, 409].includes(response.status)) {
+    return;
+  }
+
+  throw new Error(
+    `No se pudieron cargar los datos iniciales desde ${url}. Estado ${response.status}`
+  );
+}
+
   function getArrayFromPayload(payload) {
     if (Array.isArray(payload)) {
       return payload;
@@ -581,38 +602,56 @@
     );
   }
 
-  async function loadStockMarket() {
-    loading = true;
-    error = null;
-    chartVisible = false;
+async function loadStockMarket() {
+  loading = true;
+  error = null;
+  chartVisible = false;
 
-    try {
-      const [stockPayload, recreationPayload] = await Promise.all([
-        fetchJson(`${PROXY_BASE}/sos/stock-market`),
-        fetchJson("/api/v2/recreation-culture-expenditure")
-      ]);
+  try {
+    /*
+      Primero intentamos cargar datos iniciales.
 
-      const stockRows = normalizeStockMarketData(stockPayload);
-      const recreationRows = normalizeRecreationData(recreationPayload);
-      const joinedRows = joinStockRegionsWithRecreation(stockRows, recreationRows);
+      - La primera llamada va a la API del compañero a través de tu proxy.
+      - La segunda llamada va a tu propia API v2.
 
-      if (joinedRows.length === 0) {
-        throw new Error(
-          "No hay países de mi API que se puedan asociar a las regiones Europe, North America o Asia del compañero usando también sus datos numéricos."
-        );
-      }
+      Si los datos ya existen, normalmente loadInitialData devolverá 409.
+      Eso no debe romper la gráfica, porque significa que ya hay datos.
+    */
+    await Promise.all([
+      ensureInitialData(`${PROXY_BASE}/sos/stock-market/loadInitialData`),
+      ensureInitialData("/api/v2/recreation-culture-expenditure/loadInitialData")
+    ]);
 
-      loading = false;
+    /*
+      Después de asegurar que hay datos, pedimos ya los datos reales
+      para construir la gráfica.
+    */
+    const [stockPayload, recreationPayload] = await Promise.all([
+      fetchJson(`${PROXY_BASE}/sos/stock-market`),
+      fetchJson("/api/v2/recreation-culture-expenditure")
+    ]);
 
-      await renderStockMarketSunburst(joinedRows);
-    } catch (err) {
-      loading = false;
-      chartVisible = false;
-      error =
-        err?.message ||
-        "No se pudo cargar la integración cruzada entre G23 y recreation-culture-expenditure.";
+    const stockRows = normalizeStockMarketData(stockPayload);
+    const recreationRows = normalizeRecreationData(recreationPayload);
+    const joinedRows = joinStockRegionsWithRecreation(stockRows, recreationRows);
+
+    if (joinedRows.length === 0) {
+      throw new Error(
+        "No hay países de mi API que se puedan asociar a las regiones Europe, North America o Asia del compañero usando también sus datos numéricos."
+      );
     }
+
+    loading = false;
+
+    await renderStockMarketSunburst(joinedRows);
+  } catch (err) {
+    loading = false;
+    chartVisible = false;
+    error =
+      err?.message ||
+      "No se pudo cargar la integración cruzada entre G23 y recreation-culture-expenditure.";
   }
+}
 
   function resizeChart() {
     if (chartContainer && chartVisible) {
