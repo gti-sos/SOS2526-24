@@ -1,9 +1,10 @@
 <script>
   import { onMount, onDestroy, tick } from "svelte";
+  import { browser } from "$app/environment";
 
   const PROXY_BASE = "/api/v2/recreation-culture-expenditure/proxy";
 
-  const MY_API_URL = "/api/v2/recreation-culture-expenditure";
+  const API_URL = "/api/v2/recreation-culture-expenditure";
   const MY_LOAD_INITIAL_DATA_URL =
     "/api/v2/recreation-culture-expenditure/loadInitialData";
 
@@ -692,7 +693,7 @@
       */
       const [esportsPayload, recreationPayload] = await Promise.all([
         fetchJson(G30_ESPORTS_PROXY_URL),
-        fetchJson(MY_API_URL)
+        fetchJson(API_URL)
       ]);
 
       const esportsRows = normalizeEsportsGrowthData(esportsPayload);
@@ -758,11 +759,23 @@
   }
 
   onMount(async () => {
-    window.addEventListener("resize", resizeChart);
-    await loadEsportsGrowth();
+    try {
+      window.addEventListener("resize", resizeChart);
+      await loadEsportsGrowth();
+    } catch (err) {
+      loading = false;
+      chartVisible = false;
+      error =
+        err?.message ||
+        "No se pudo cargar la visualización de la integración G30.";
+    }
   });
 
   onDestroy(() => {
+    if (!browser) {
+      return;
+    }
+
     window.removeEventListener("resize", resizeChart);
 
     if (chartContainer && Plotly) {

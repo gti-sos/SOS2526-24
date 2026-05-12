@@ -1,9 +1,11 @@
 <script>
   import { onMount, onDestroy, tick } from "svelte";
-  import Plotly from "plotly.js-dist-min";
+  import { browser } from "$app/environment";
+
+  let Plotly;
 
   const PROXY_BASE = "/api/v2/recreation-culture-expenditure/proxy";
-  const MY_API_URL = "/api/v2/recreation-culture-expenditure";
+  const API_URL = "/api/v2/recreation-culture-expenditure";
 
   let loading = $state(false);
   let error = $state(null);
@@ -380,75 +382,79 @@
     return joinedRows.sort((a, b) => a.country.localeCompare(b.country));
   }
 
-  async function renderAgricultureClimateScatter(
-    rows,
-    chartTitle = "G22 + mi API: temperatura agrícola y gasto cultural per cápita"
-  ) {
-    chartVisible = true;
+async function renderAgricultureClimateScatter(
+  rows,
+  chartTitle = "G22 + mi API: temperatura agrícola y gasto cultural per cápita"
+) {
+  chartVisible = true;
 
-    await tick();
+  await tick();
 
-    if (!chartContainer) {
-      throw new Error("No se ha podido inicializar el contenedor de la gráfica.");
-    }
-
-    Plotly.purge(chartContainer);
-
-    await Plotly.newPlot(
-      chartContainer,
-      [
-        {
-          type: "scatter",
-          mode: "markers",
-          x: rows.map((row) => row.averageTemperature),
-          y: rows.map((row) => row.recreationPerCapita),
-          text: rows.map((row) => row.country),
-          customdata: rows.map((row) => [
-            row.country,
-            row.cropTypes.join(", "),
-            row.climateYears.join(", "),
-            row.recreationYears.join(", "),
-            formatNumber(row.averagePrecipitation),
-            formatNumber(row.recreationShare)
-          ]),
-          marker: {
-            size: rows.map((row) => {
-              const size = row.averagePrecipitation / 20;
-              return Number.isFinite(size) && size > 10 ? size : 10;
-            }),
-            opacity: 0.75
-          },
-          hovertemplate:
-            "<b>%{customdata[0]}</b><br>" +
-            "Cultivos G22: %{customdata[1]}<br>" +
-            "Años clima G22: %{customdata[2]}<br>" +
-            "Años mi API: %{customdata[3]}<br>" +
-            "Temperatura media: %{x:.2f} ºC<br>" +
-            "Precipitación media: %{customdata[4]} mm<br>" +
-            "Gasto ocio/cultura per cápita: %{y:.2f}<br>" +
-            "% ocio/cultura: %{customdata[5]}%" +
-            "<extra></extra>"
-        }
-      ],
-      {
-        title: {
-          text: chartTitle,
-          font: { size: 20 }
-        },
-        xaxis: {
-          title: "Temperatura media agrícola de G22 (ºC)"
-        },
-        yaxis: {
-          title: "Gasto medio en ocio y cultura por persona"
-        },
-        margin: { t: 70, l: 80, r: 30, b: 70 }
-      },
-      {
-        responsive: true,
-        displayModeBar: true
-      }
-    );
+  if (!chartContainer) {
+    throw new Error("No se ha podido inicializar el contenedor de la gráfica.");
   }
+
+  if (!Plotly) {
+    throw new Error("No se ha podido cargar la librería de visualización.");
+  }
+
+  Plotly.purge(chartContainer);
+
+  await Plotly.newPlot(
+    chartContainer,
+    [
+      {
+        type: "scatter",
+        mode: "markers",
+        x: rows.map((row) => row.averageTemperature),
+        y: rows.map((row) => row.recreationPerCapita),
+        text: rows.map((row) => row.country),
+        customdata: rows.map((row) => [
+          row.country,
+          row.cropTypes.join(", "),
+          row.climateYears.join(", "),
+          row.recreationYears.join(", "),
+          formatNumber(row.averagePrecipitation),
+          formatNumber(row.recreationShare)
+        ]),
+        marker: {
+          size: rows.map((row) => {
+            const size = row.averagePrecipitation / 20;
+            return Number.isFinite(size) && size > 10 ? size : 10;
+          }),
+          opacity: 0.75
+        },
+        hovertemplate:
+          "<b>%{customdata[0]}</b><br>" +
+          "Cultivos G22: %{customdata[1]}<br>" +
+          "Años clima G22: %{customdata[2]}<br>" +
+          "Años mi API: %{customdata[3]}<br>" +
+          "Temperatura media: %{x:.2f} ºC<br>" +
+          "Precipitación media: %{customdata[4]} mm<br>" +
+          "Gasto ocio/cultura per cápita: %{y:.2f}<br>" +
+          "% ocio/cultura: %{customdata[5]}%" +
+          "<extra></extra>"
+      }
+    ],
+    {
+      title: {
+        text: chartTitle,
+        font: { size: 20 }
+      },
+      xaxis: {
+        title: "Temperatura media agrícola de G22 (ºC)"
+      },
+      yaxis: {
+        title: "Gasto medio en ocio y cultura por persona"
+      },
+      margin: { t: 70, l: 80, r: 30, b: 70 }
+    },
+    {
+      responsive: true,
+      displayModeBar: true
+    }
+  );
+}
 
   async function loadAgricultureClimate() {
     loading = true;
@@ -467,7 +473,7 @@
       */
       await Promise.all([
         ensureInitialData(`${PROXY_BASE}/sos/agriculture-climate/loadInitialData`),
-        ensureInitialData(`${MY_API_URL}/loadInitialData`)
+        ensureInitialData(`${API_URL}/loadInitialData`)
       ]);
 
       /*
@@ -476,7 +482,7 @@
       */
       const [climatePayload, recreationPayload] = await Promise.all([
         fetchJson(`${PROXY_BASE}/sos/agriculture-climate`),
-        fetchJson(MY_API_URL)
+        fetchJson(API_URL)
       ]);
 
       const climateRows = normalizeAgricultureClimateData(climatePayload);
@@ -506,20 +512,36 @@
   }
 
   function resizeChart() {
-    if (chartContainer && chartVisible) {
+    if (Plotly && chartContainer && chartVisible) {
       Plotly.Plots.resize(chartContainer);
     }
   }
 
   onMount(async () => {
-    window.addEventListener("resize", resizeChart);
-    await loadAgricultureClimate();
+    try {
+      const plotlyModule = await import("plotly.js-dist-min");
+      Plotly = plotlyModule.default;
+
+      window.addEventListener("resize", resizeChart);
+
+      await loadAgricultureClimate();
+    } catch (err) {
+      loading = false;
+      chartVisible = false;
+      error =
+        err?.message ||
+        "No se pudo cargar la visualización de la integración.";
+    }
   });
 
   onDestroy(() => {
+    if (!browser) {
+      return;
+    }
+
     window.removeEventListener("resize", resizeChart);
 
-    if (chartContainer) {
+    if (Plotly && chartContainer) {
       Plotly.purge(chartContainer);
     }
   });

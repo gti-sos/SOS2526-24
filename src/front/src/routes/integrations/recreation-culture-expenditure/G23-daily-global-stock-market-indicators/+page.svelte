@@ -1,6 +1,8 @@
 <script>
   import { onMount, onDestroy, tick } from "svelte";
-  import Plotly from "plotly.js-dist-min";
+  import { browser } from "$app/environment";
+
+  let Plotly;
 
   const PROXY_BASE = "/api/v2/recreation-culture-expenditure/proxy";
 
@@ -550,10 +552,10 @@
     return { ids, labels, parents, values, customdata };
   }
 
-  async function renderStockMarketSunburst(
-    rows,
-    chartTitle = "G23 + mi API: media de índices por región y gasto per cápita por país"
-  ) {
+async function renderStockMarketSunburst(
+  rows,
+  chartTitle = "G23 + mi API: media de índices por región y gasto per cápita por país"
+) {
     const { ids, labels, parents, values, customdata } = buildSunburst(rows);
 
     chartVisible = true;
@@ -562,6 +564,10 @@
 
     if (!chartContainer) {
       throw new Error("No se ha podido inicializar el contenedor de la gráfica.");
+    }
+
+    if (!Plotly) {
+      throw new Error("No se ha podido cargar la librería de visualización.");
     }
 
     Plotly.purge(chartContainer);
@@ -654,20 +660,36 @@ async function loadStockMarket() {
 }
 
   function resizeChart() {
-    if (chartContainer && chartVisible) {
+    if (Plotly && chartContainer && chartVisible) {
       Plotly.Plots.resize(chartContainer);
     }
   }
 
   onMount(async () => {
-    window.addEventListener("resize", resizeChart);
-    await loadStockMarket();
+    try {
+      const plotlyModule = await import("plotly.js-dist-min");
+      Plotly = plotlyModule.default ?? plotlyModule;
+
+      window.addEventListener("resize", resizeChart);
+
+      await loadStockMarket();
+    } catch (err) {
+      loading = false;
+      chartVisible = false;
+      error =
+        err?.message ||
+        "No se pudo cargar la visualización de la integración G23.";
+    }
   });
 
   onDestroy(() => {
+    if (!browser) {
+      return;
+    }
+
     window.removeEventListener("resize", resizeChart);
 
-    if (chartContainer) {
+    if (Plotly && chartContainer) {
       Plotly.purge(chartContainer);
     }
   });
