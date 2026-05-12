@@ -16,6 +16,7 @@
       frontend: "/recreation-culture-expenditure",
       apiBase: "/api/v2/recreation-culture-expenditure",
       docs: "/api/v2/recreation-culture-expenditure/docs",
+      video: "",
       label: "Ocio y cultura"
     },
     {
@@ -26,6 +27,7 @@
       frontend: "/average-monthly-wages",
       apiBase: "/api/v1/average-monthly-wages",
       docs: "/api/v1/average-monthly-wages/docs",
+      video: "",
       label: "Sueldos"
     },
     {
@@ -36,6 +38,7 @@
       frontend: "/international-construction-costs",
       apiBase: "/api/v1/international-construction-costs",
       docs: "/api/v1/international-construction-costs/docs",
+      video: "",
       label: "Construcción"
     }
   ];
@@ -72,6 +75,16 @@
           <a href={section.frontend}>Front-end</a>
           <a href={section.apiBase}>API</a>
           <a href={section.docs}>Documentación</a>
+
+          {#if section.video}
+            <a href={section.video} target="_blank" rel="noreferrer">
+              Vídeo
+            </a>
+          {:else}
+            <button class="video-button-disabled" type="button" disabled>
+              Vídeo pendiente
+            </button>
+          {/if}
         </div>
       </article>
     {/each}
@@ -79,7 +92,7 @@
 
   <div class="bottom-links">
     <a class="repo-button" href={repoUrl} target="_blank" rel="noreferrer">GitHub</a>
-    <a class="about-button" href="/about">About</a>
+    <a class="about-button" href="/about">Información</a>
   </div>
 </section>
 
@@ -105,7 +118,7 @@
     font-size: 1rem;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #56716d;
+    color: #ffffff;
   }
 
   .hero-block h1 {
@@ -193,10 +206,13 @@
 
   .card-links a,
   .repo-button,
-  .about-button {
+  .about-button,
+  .video-button-disabled {
     text-decoration: none;
+    border: none;
     border-radius: 999px;
     padding: 0.82rem 1.05rem;
+    font-family: "Inter", sans-serif;
     font-size: 0.95rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   }
@@ -204,6 +220,13 @@
   .card-links a {
     background: rgba(255, 255, 255, 0.86);
     color: #37524d;
+  }
+
+  .video-button-disabled {
+    background: rgba(255, 255, 255, 0.56);
+    color: #6b7e78;
+    cursor: not-allowed;
+    font-weight: 500;
   }
 
   .card-links a:hover,
