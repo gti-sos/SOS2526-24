@@ -234,16 +234,28 @@
 
     chart = Highcharts.chart(chartContainer, {
       chart: {
-        type: "bar"
+        type: "bar",
+        height: 430,
+        spacing: [18, 24, 18, 24]
       },
 
       title: {
-        text: `Evolución comparada de indicadores del grupo en ${COUNTRY}`
+        text: `Evolución comparada de indicadores del grupo en ${COUNTRY}`,
+        style: {
+          fontFamily: '"Cormorant Garamond", serif',
+          fontSize: "1.7rem",
+          fontWeight: "700",
+          color: "#12332f"
+        }
       },
 
       subtitle: {
         text:
-          "Valores normalizados con índice base 100. Si hay varios registros del mismo país y año, se usa su media."
+          "Valores normalizados con índice base 100. Si hay varios registros del mismo país y año, se usa su media.",
+        style: {
+          color: "#526e68",
+          fontSize: "0.85rem"
+        }
       },
 
       xAxis: {
@@ -264,7 +276,8 @@
         labels: {
           overflow: "justify"
         },
-        gridLineWidth: 0
+        gridLineWidth: 0,
+        maxPadding: 0.08
       },
 
       tooltip: {
@@ -275,29 +288,54 @@
 
       plotOptions: {
         bar: {
-          borderRadius: "50%",
+          borderRadius: 4,
+          pointPadding: 0.08,
+          groupPadding: 0.14,
           dataLabels: {
             enabled: true,
-            format: "{point.y:.2f}"
-          },
-          groupPadding: 0.1
+            format: "{point.y:.2f}",
+            style: {
+              fontSize: "0.75rem",
+              textOutline: "none"
+            }
+          }
         }
       },
 
       legend: {
-        layout: "vertical",
-        align: "right",
-        verticalAlign: "top",
-        x: -40,
-        y: 80,
-        floating: true,
-        borderWidth: 1,
-        backgroundColor: "var(--highcharts-background-color, #ffffff)",
-        shadow: true
+        layout: "horizontal",
+        align: "center",
+        verticalAlign: "bottom",
+        floating: false,
+        borderWidth: 0,
+        itemStyle: {
+          color: "#12332f",
+          fontWeight: "500"
+        }
       },
 
       credits: {
         enabled: false
+      },
+
+      responsive: {
+        rules: [
+          {
+            condition: {
+              maxWidth: 700
+            },
+            chartOptions: {
+              chart: {
+                height: 380
+              },
+              legend: {
+                layout: "vertical",
+                align: "center",
+                verticalAlign: "bottom"
+              }
+            }
+          }
+        ]
       },
 
       series
@@ -361,7 +399,14 @@
 </script>
 
 <svelte:head>
-  <title>Analytics grupal - SOS2526-24</title>
+  <title>Análisis grupal - SOS2526-24</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
 </svelte:head>
 
 <section class="analytics-page">
@@ -374,11 +419,9 @@
     la media de esos registros antes de normalizar.
   </p>
 
-  {#if loading}
-    <p class="status">Cargando datos de las APIs del grupo...</p>
-  {:else if error}
+  {#if !loading && error}
     <p class="error">{error}</p>
-  {:else if warnings.length > 0}
+  {:else if !loading && warnings.length > 0}
     <div class="warning">
       <p><strong>Aviso:</strong> la gráfica se ha generado, pero faltan algunos datos.</p>
       {#each warnings as warning}
@@ -396,33 +439,31 @@
 
 <style>
   .analytics-page {
-    padding: 2rem;
+    padding: 2rem 1rem 3rem;
   }
 
   .analytics-page h1 {
     margin-bottom: 0.75rem;
-    color: #12332f;
+    color: #fbfbfb;
     text-align: center;
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.05;
   }
 
   .description {
-    max-width: 950px;
+    max-width: 900px;
     margin: 0 auto 1.5rem auto;
     text-align: center;
     color: #3f5f59;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     line-height: 1.5;
-  }
-
-  .status {
-    text-align: center;
-    font-weight: 600;
-    color: #3f5f59;
   }
 
   .error,
   .warning {
-    max-width: 950px;
+    max-width: 900px;
     margin: 1rem auto;
     padding: 1rem;
     border-radius: 0.75rem;
@@ -445,9 +486,27 @@
   }
 
   .chart-container {
-    width: 100%;
-    min-height: 560px;
-    margin-top: 1rem;
-    background: white;
+    width: min(100%, 1120px);
+    height: 430px;
+    min-height: 0;
+    margin: 1rem auto 0;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 28px rgba(18, 51, 47, 0.12);
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .analytics-page {
+      padding: 1.5rem 0.75rem 2rem;
+    }
+
+    .description {
+      font-size: 0.95rem;
+    }
+
+    .chart-container {
+      height: 380px;
+    }
   }
 </style>

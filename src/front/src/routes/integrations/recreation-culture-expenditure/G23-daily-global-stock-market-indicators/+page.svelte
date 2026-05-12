@@ -23,22 +23,49 @@
   }
 
   async function ensureInitialData(url) {
-  const response = await fetch(url);
+    const response = await fetch(url);
 
-  /*
-    loadInitialData puede devolver:
-    - 201 si ha cargado los datos iniciales
-    - 200 si la API del compañero lo tiene implementado así
-    - 409 si la base de datos ya tenía datos
-  */
-  if ([200, 201, 204, 409].includes(response.status)) {
-    return;
+    /*
+      loadInitialData puede devolver:
+      - 201 si ha cargado los datos iniciales
+      - 200 si la API lo tiene implementado así
+      - 204 si no devuelve cuerpo
+      - 409 si la base de datos ya tenía datos
+
+      El 409 no debe romper la gráfica, aunque el navegador pueda mostrarlo
+      si se llama directamente a este endpoint.
+    */
+    if ([200, 201, 204, 409].includes(response.status)) {
+      return;
+    }
+
+    throw new Error(
+      `No se pudieron cargar los datos iniciales desde ${url}. Estado ${response.status}`
+    );
   }
 
-  throw new Error(
-    `No se pudieron cargar los datos iniciales desde ${url}. Estado ${response.status}`
-  );
-}
+  async function fetchCollectionWithAutoLoad(collectionUrl, loadInitialDataUrl) {
+    /*
+      Primero pedimos los datos reales de la colección.
+      Solo si la colección viene vacía llamamos a loadInitialData.
+
+      Así evitamos llamar a loadInitialData siempre y evitamos el 409 Conflict
+      en consola cuando la API ya tenía datos cargados.
+    */
+    let payload = await fetchJson(collectionUrl);
+    let rows = getArrayFromPayload(payload);
+
+    if (rows.length > 0) {
+      return payload;
+    }
+
+    await ensureInitialData(loadInitialDataUrl);
+
+    payload = await fetchJson(collectionUrl);
+    rows = getArrayFromPayload(payload);
+
+    return payload;
+  }
 
   function getArrayFromPayload(payload) {
     if (Array.isArray(payload)) {
@@ -203,12 +230,10 @@
   }
 
   const COUNTRY_REGION_MAP = {
-    // NORTH AMERICA
     canada: "North America",
     "united states": "North America",
     mexico: "North America",
 
-    // EUROPE
     spain: "Europe",
     portugal: "Europe",
     france: "Europe",
@@ -243,7 +268,6 @@
     cyprus: "Europe",
     iceland: "Europe",
 
-    // ASIA
     china: "Asia",
     japan: "Asia",
     "south korea": "Asia",
@@ -549,10 +573,10 @@
     return { ids, labels, parents, values, customdata };
   }
 
-async function renderStockMarketSunburst(
-  rows,
-  chartTitle = "Media de indicadores de mercado por región y gasto en ocio per cápita por país"
-) {
+  async function renderStockMarketSunburst(
+    rows,
+    chartTitle = "Media de indicadores de mercado por región y gasto en ocio per cápita por país"
+  ) {
     const { ids, labels, parents, values, customdata } = buildSunburst(rows);
 
     chartVisible = true;
@@ -605,51 +629,51 @@ async function renderStockMarketSunburst(
     );
   }
 
-async function loadStockMarket() {
-  loading = true;
-  error = null;
-  chartVisible = false;
-
-  try {
-    /*
-      Primero intentamos cargar datos iniciales.
-
-      - La primera llamada API G23 a través proxy.
-      - La segunda llamada va a mi API v2.
-
-      Si los datos ya existen, loadInitialData devolverá 409.
-    */
-    await Promise.all([
-      ensureInitialData(`${PROXY_BASE}/sos/stock-market/loadInitialData`),
-      ensureInitialData("/api/v2/recreation-culture-expenditure/loadInitialData")
-    ]);
-
-    const [stockPayload, recreationPayload] = await Promise.all([
-      fetchJson(`${PROXY_BASE}/sos/stock-market`), //Llamada API G23 mediante proxy
-      fetchJson("/api/v2/recreation-culture-expenditure") //Llamada directa a mi API
-    ]);
-
-    const stockRows = normalizeStockMarketData(stockPayload);
-    const recreationRows = normalizeRecreationData(recreationPayload);
-    const joinedRows = joinStockRegionsWithRecreation(stockRows, recreationRows);
-
-    if (joinedRows.length === 0) {
-      throw new Error(
-        "No hay países de mi API que se puedan asociar a las regiones Europe, North America o Asia del compañero usando también sus datos numéricos."
-      );
-    }
-
-    loading = false;
-
-    await renderStockMarketSunburst(joinedRows);
-  } catch (err) {
-    loading = false;
+  async function loadStockMarket() {
+    loading = true;
+    error = null;
     chartVisible = false;
-    error =
-      err?.message ||
-      "No se pudo cargar la integración cruzada entre G23 y recreation-culture-expenditure.";
+
+    try {
+      /*
+        Primero intentamos leer los datos normales.
+
+        Solo si alguna API devuelve 0 registros, llamamos a su loadInitialData.
+        Así evitamos llamar siempre a loadInitialData y evitamos el 409 Conflict
+        cuando la API ya tiene datos cargados.
+      */
+      const [stockPayload, recreationPayload] = await Promise.all([
+        fetchCollectionWithAutoLoad(
+          `${PROXY_BASE}/sos/stock-market`,
+          `${PROXY_BASE}/sos/stock-market/loadInitialData`
+        ),
+        fetchCollectionWithAutoLoad(
+          "/api/v2/recreation-culture-expenditure",
+          "/api/v2/recreation-culture-expenditure/loadInitialData"
+        )
+      ]);
+
+      const stockRows = normalizeStockMarketData(stockPayload);
+      const recreationRows = normalizeRecreationData(recreationPayload);
+      const joinedRows = joinStockRegionsWithRecreation(stockRows, recreationRows);
+
+      if (joinedRows.length === 0) {
+        throw new Error(
+          "No hay países de mi API que se puedan asociar a las regiones Europe, North America o Asia del compañero usando también sus datos numéricos."
+        );
+      }
+
+      loading = false;
+
+      await renderStockMarketSunburst(joinedRows);
+    } catch (err) {
+      loading = false;
+      chartVisible = false;
+      error =
+        err?.message ||
+        "No se pudo cargar la integración cruzada entre G23 y recreation-culture-expenditure.";
+    }
   }
-}
 
   function resizeChart() {
     if (Plotly && chartContainer && chartVisible) {
@@ -706,11 +730,11 @@ async function loadStockMarket() {
     <div class="chart-header">
       <h2>G23 - Indicadores diarios del mercado de valores</h2>
       <p>
-        La visualización integra información procedente de dos APIs REST. Los países de 
-        la API de gasto en ocio y cultura se asocian con las regiones Europe, North America 
-        y Asia proporcionadas por la API de indicadores diarios del mercado de valores. Para 
-        cada región se representa un valor agregado de índices bursátiles, calculado como la 
-        media de las medias de cada índice regional. Paralelamente, para cada país se muestra 
+        La visualización integra información procedente de dos APIs REST. Los países de
+        la API de gasto en ocio y cultura se asocian con las regiones Europe, North America
+        y Asia proporcionadas por la API de indicadores diarios del mercado de valores. Para
+        cada región se representa un valor agregado de índices bursátiles, calculado como la
+        media de las medias de cada índice regional. Paralelamente, para cada país se muestra
         la media de su gasto per cápita en ocio y cultura.
       </p>
     </div>

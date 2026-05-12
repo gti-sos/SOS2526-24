@@ -18,6 +18,7 @@
   let yearsRangeText = "";
 
   const API = "/api/v2/recreation-culture-expenditure";
+  const BACK_ROUTE = "/analytics/recreation-culture-expenditure";
   const WORLD_TOPOLOGY_URL =
     "https://code.highcharts.com/mapdata/custom/world.topo.json";
 
@@ -183,7 +184,6 @@
     const countryAverages = countries
       .map((country) => {
         const recordsOfCountry = allRecords.filter((d) => d.country === country);
-
         const code = getIso2Code(country);
 
         if (!code || recordsOfCountry.length === 0) {
@@ -203,7 +203,7 @@
         return {
           code,
           country,
-          value: average,
+          value: Number(average.toFixed(2)),
           yearsCount: recordsOfCountry.length,
           firstYear: yearsOfCountry[0],
           lastYear: yearsOfCountry[yearsOfCountry.length - 1]
@@ -211,12 +211,24 @@
       })
       .filter(Boolean);
 
+    if (countryAverages.length === 0) {
+      return {
+        average: 0,
+        above: 0,
+        below: 0,
+        represented: 0,
+        data: []
+      };
+    }
+
     const average =
       countryAverages.reduce((sum, d) => sum + d.value, 0) /
       countryAverages.length;
 
+    const averageRounded = Number(average.toFixed(2));
+
     const data = countryAverages.map((d) => {
-      const isAboveOrEqual = d.value >= average;
+      const isAboveOrEqual = d.value >= averageRounded;
 
       return {
         ...d,
@@ -226,11 +238,11 @@
       };
     });
 
-    const above = data.filter((d) => d.value >= average).length;
-    const below = data.filter((d) => d.value < average).length;
+    const above = data.filter((d) => d.value >= averageRounded).length;
+    const below = data.filter((d) => d.value < averageRounded).length;
 
     return {
-      average,
+      average: averageRounded,
       above,
       below,
       represented: data.length,
@@ -258,15 +270,26 @@
     chart = Highcharts.mapChart(chartContainer, {
       chart: {
         map: topology,
-        spacingBottom: 20
+        height: 500,
+        spacing: [18, 24, 18, 24]
       },
 
       title: {
-        text: "Mapa mundial del gasto medio en ocio y cultura por persona"
+        text: "Mapa mundial del gasto medio en ocio y cultura por persona",
+        style: {
+          fontFamily: '"Cormorant Garamond", serif',
+          fontSize: "1.7rem",
+          fontWeight: "700",
+          color: "#12332f"
+        }
       },
 
       subtitle: {
-        text: `Media calculada con los años registrados (${yearsRangeText}) · Media global: ${globalAverage.toFixed(2)}`
+        text: `Media calculada con los años registrados (${yearsRangeText}) · Media global: ${globalAverage.toFixed(2)}`,
+        style: {
+          color: "#526e68",
+          fontSize: "0.85rem"
+        }
       },
 
       mapNavigation: {
@@ -278,8 +301,20 @@
       },
 
       legend: {
+        align: "center",
+        verticalAlign: "bottom",
+        layout: "horizontal",
         title: {
-          text: "Categoría"
+          text: "Categoría",
+          style: {
+            color: "#12332f",
+            fontWeight: "600"
+          }
+        },
+        itemStyle: {
+          color: "#12332f",
+          fontWeight: "500",
+          fontSize: "0.8rem"
         }
       },
 
@@ -335,6 +370,26 @@
 
       credits: {
         enabled: false
+      },
+
+      responsive: {
+        rules: [
+          {
+            condition: {
+              maxWidth: 700
+            },
+            chartOptions: {
+              chart: {
+                height: 420
+              },
+              legend: {
+                itemStyle: {
+                  fontSize: "0.72rem"
+                }
+              }
+            }
+          }
+        ]
       },
 
       series: [
@@ -420,6 +475,13 @@
 
 <svelte:head>
   <title>Mapa geoespacial - Gasto en ocio y cultura</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
 </svelte:head>
 
 <section class="analytics-map-page">
@@ -432,11 +494,15 @@
     representados.
   </p>
 
-  {#if loading}
-    <p class="status">Cargando mapa y datos de la API...</p>
-  {:else if error}
+  <div class="actions">
+    <a class="back-button" href={BACK_ROUTE}>
+      Volver a la gráfica
+    </a>
+  </div>
+
+  {#if !loading && error}
     <p class="error">{error}</p>
-  {:else}
+  {:else if !loading}
     <div class="summary" aria-live="polite">
       <p><strong>Años usados:</strong> {yearsRangeText}</p>
       <p><strong>Media global:</strong> {globalAverage.toFixed(2)}</p>
@@ -455,28 +521,61 @@
 
 <style>
   .analytics-map-page {
-    padding: 2rem;
+    padding: 2rem 1rem 3rem;
   }
 
   .analytics-map-page h1 {
     margin-bottom: 0.75rem;
-    color: #12332f;
+    color: #feffff;
     text-align: center;
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.05;
   }
 
   .description {
     max-width: 950px;
-    margin: 0 auto 1.5rem auto;
+    margin: 0 auto 1.25rem auto;
     text-align: center;
     color: #3f5f59;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     line-height: 1.5;
   }
 
-  .status {
-    text-align: center;
-    font-weight: 600;
-    color: #3f5f59;
+  .actions {
+    display: flex;
+    justify-content: center;
+    margin: 0.75rem auto 1.5rem;
+  }
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.15rem;
+    border-radius: 999px;
+    background-color: #12332f;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 18px rgba(18, 51, 47, 0.18);
+    transition:
+      transform 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .back-button:hover {
+    background-color: #1e4a43;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(18, 51, 47, 0.24);
+  }
+
+  .back-button:focus {
+    outline: 3px solid rgba(18, 51, 47, 0.28);
+    outline-offset: 3px;
   }
 
   .error {
@@ -494,9 +593,10 @@
     max-width: 900px;
     margin: 0 auto 1rem auto;
     padding: 1rem 1.25rem;
-    border-radius: 0.75rem;
+    border-radius: 1rem;
     background: #f4f7f6;
     color: #12332f;
+    box-shadow: 0 8px 20px rgba(18, 51, 47, 0.08);
   }
 
   .summary p {
@@ -504,11 +604,32 @@
   }
 
   .map-container {
-    width: 100%;
-    min-height: 650px;
-    margin-top: 1rem;
-    background: white;
-    border-radius: 0.75rem;
+    width: min(100%, 1120px);
+    height: 500px;
+    min-height: 0;
+    margin: 1rem auto 0;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 28px rgba(18, 51, 47, 0.12);
     overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .analytics-map-page {
+      padding: 1.5rem 0.75rem 2rem;
+    }
+
+    .description {
+      font-size: 0.95rem;
+    }
+
+    .back-button {
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .map-container {
+      height: 420px;
+    }
   }
 </style>

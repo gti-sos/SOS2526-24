@@ -17,11 +17,18 @@
     population: ""
   });
 
+  const crearPaginacionInicial = () => ({
+    limit: 10,
+    offset: 0
+  });
+
   let datos = $state([]);
   let nuevoDato = $state(crearDatoInicial());
   let mensaje = $state("");
   let esError = $state(false);
   let mostrarPanelFiltros = $state(false);
+  let paginacion = $state(crearPaginacionInicial());
+  let hayPaginaSiguiente = $state(false);
 
   // Estado de filtros del frontend
   let filtros = $state({
@@ -63,167 +70,255 @@
     }, 3500);
   }
 
-  async function getDatos() {
+  function tieneValor(valor) {
+    return valor !== "" && valor !== null && valor !== undefined;
+  }
+
+  function paginacionValida() {
+    const limit = Number(paginacion.limit);
+    const offset = Number(paginacion.offset);
+
+    if (!Number.isInteger(limit) || limit <= 0) {
+      mostrarMensaje(
+        "ERROR: El número de registros por página debe ser un entero mayor que 0.",
+        true
+      );
+      return false;
+    }
+
+    if (!Number.isInteger(offset) || offset < 0) {
+      mostrarMensaje(
+        "ERROR: El número de registros a saltar debe ser un entero mayor o igual que 0.",
+        true
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  function paginaActual() {
+    const limit = Number(paginacion.limit);
+    const offset = Number(paginacion.offset);
+
+    if (!Number.isInteger(limit) || limit <= 0) {
+      return 1;
+    }
+
+    if (!Number.isInteger(offset) || offset < 0) {
+      return 1;
+    }
+
+    return Math.floor(offset / limit) + 1;
+  }
+
+  function anadirFiltrosAQuery(queryParams) {
+    // =========================
+    // Búsquedas exactas
+    // =========================
+    if (filtros.country?.trim() !== "") {
+      queryParams.append("country", filtros.country.trim());
+    }
+
+    if (tieneValor(filtros.year)) {
+      queryParams.append("year", String(filtros.year));
+    }
+
+    if (tieneValor(filtros.recreation_value)) {
+      queryParams.append("recreation_value", String(filtros.recreation_value));
+    }
+
+    if (tieneValor(filtros.total_household_consumption)) {
+      queryParams.append(
+        "total_household_consumption",
+        String(filtros.total_household_consumption)
+      );
+    }
+
+    if (tieneValor(filtros.recreation_share)) {
+      queryParams.append("recreation_share", String(filtros.recreation_share));
+    }
+
+    if (tieneValor(filtros.population)) {
+      queryParams.append("population", String(filtros.population));
+    }
+
+    if (tieneValor(filtros.recreation_per_capita)) {
+      queryParams.append(
+        "recreation_per_capita",
+        String(filtros.recreation_per_capita)
+      );
+    }
+
+    // =========================
+    // Rangos de año
+    // =========================
+    if (tieneValor(filtros.from)) {
+      queryParams.append("year_gte", String(filtros.from));
+    }
+
+    if (tieneValor(filtros.to)) {
+      queryParams.append("year_lte", String(filtros.to));
+    }
+
+    // =========================
+    // Rangos de recreation_value
+    // =========================
+    if (tieneValor(filtros.min_recreation_value)) {
+      queryParams.append(
+        "recreation_value_gte",
+        String(filtros.min_recreation_value)
+      );
+    }
+
+    if (tieneValor(filtros.max_recreation_value)) {
+      queryParams.append(
+        "recreation_value_lte",
+        String(filtros.max_recreation_value)
+      );
+    }
+
+    // =========================
+    // Rangos de total_household_consumption
+    // =========================
+    if (tieneValor(filtros.min_total_household_consumption)) {
+      queryParams.append(
+        "total_household_consumption_gte",
+        String(filtros.min_total_household_consumption)
+      );
+    }
+
+    if (tieneValor(filtros.max_total_household_consumption)) {
+      queryParams.append(
+        "total_household_consumption_lte",
+        String(filtros.max_total_household_consumption)
+      );
+    }
+
+    // =========================
+    // Rangos de recreation_share
+    // =========================
+    if (tieneValor(filtros.min_recreation_share)) {
+      queryParams.append(
+        "recreation_share_gte",
+        String(filtros.min_recreation_share)
+      );
+    }
+
+    if (tieneValor(filtros.max_recreation_share)) {
+      queryParams.append(
+        "recreation_share_lte",
+        String(filtros.max_recreation_share)
+      );
+    }
+
+    // =========================
+    // Rangos de population
+    // =========================
+    if (tieneValor(filtros.min_population)) {
+      queryParams.append("population_gte", String(filtros.min_population));
+    }
+
+    if (tieneValor(filtros.max_population)) {
+      queryParams.append("population_lte", String(filtros.max_population));
+    }
+
+    // =========================
+    // Rangos de recreation_per_capita
+    // =========================
+    if (tieneValor(filtros.min_recreation_per_capita)) {
+      queryParams.append(
+        "recreation_per_capita_gte",
+        String(filtros.min_recreation_per_capita)
+      );
+    }
+
+    if (tieneValor(filtros.max_recreation_per_capita)) {
+      queryParams.append(
+        "recreation_per_capita_lte",
+        String(filtros.max_recreation_per_capita)
+      );
+    }
+  }
+
+  async function consultarDatos({ usarFiltros = false, mostrarResultado = false } = {}) {
+    if (!paginacionValida()) {
+      return;
+    }
+
     try {
-      const res = await fetch(API);
+      const queryParams = new URLSearchParams();
+
+      if (usarFiltros) {
+        anadirFiltrosAQuery(queryParams);
+      }
+
+      const limit = Number(paginacion.limit);
+      const offset = Number(paginacion.offset);
+
+      /*
+        Pedimos un registro extra para saber si existe página siguiente.
+        La API sigue devolviendo un array, así que no cambiamos el contrato REST.
+      */
+      queryParams.append("limit", String(limit + 1));
+      queryParams.append("offset", String(offset));
+
+      const url = `${API}?${queryParams.toString()}`;
+      const res = await fetch(url);
 
       if (res.ok) {
-        datos = await res.json();
+        const recibidos = await res.json();
+
+        hayPaginaSiguiente = recibidos.length > limit;
+        datos = recibidos.slice(0, limit);
+
+        if (mostrarResultado) {
+          mostrarMensaje(
+            `Búsqueda completada: ${datos.length} registros mostrados en esta página.`
+          );
+        }
+      } else if (res.status === 400) {
+        mostrarMensaje(
+          "ERROR: Los filtros o la paginación introducidos no son válidos.",
+          true
+        );
       } else {
         mostrarMensaje("ERROR: No se pudieron cargar los registros.", true);
       }
     } catch (error) {
-      mostrarMensaje("ERROR: Se produjo un problema de conexión al cargar los datos.", true);
+      mostrarMensaje(
+        "ERROR: Se produjo un problema de conexión al cargar los datos.",
+        true
+      );
     }
   }
 
-  async function buscarDatos() {
-    try {
-      const queryParams = new URLSearchParams();
+  async function getDatos() {
+    await consultarDatos({ usarFiltros: false });
+  }
 
-      const tieneValor = (valor) =>
-        valor !== "" && valor !== null && valor !== undefined;
+  async function buscarDatos(mostrarResultado = true) {
+    await consultarDatos({ usarFiltros: true, mostrarResultado });
+  }
 
-      // =========================
-      // Búsquedas exactas
-      // =========================
-      if (filtros.country?.trim() !== "") {
-        queryParams.append("country", filtros.country.trim());
-      }
+  async function paginaAnterior() {
+    const limit = Number(paginacion.limit);
+    const offset = Number(paginacion.offset);
 
-      if (tieneValor(filtros.year)) {
-        queryParams.append("year", String(filtros.year));
-      }
+    paginacion.offset = Math.max(0, offset - limit);
+    await buscarDatos(false);
+  }
 
-      if (tieneValor(filtros.recreation_value)) {
-        queryParams.append("recreation_value", String(filtros.recreation_value));
-      }
-
-      if (tieneValor(filtros.total_household_consumption)) {
-        queryParams.append(
-          "total_household_consumption",
-          String(filtros.total_household_consumption)
-        );
-      }
-
-      if (tieneValor(filtros.recreation_share)) {
-        queryParams.append("recreation_share", String(filtros.recreation_share));
-      }
-
-      if (tieneValor(filtros.population)) {
-        queryParams.append("population", String(filtros.population));
-      }
-
-      if (tieneValor(filtros.recreation_per_capita)) {
-        queryParams.append(
-          "recreation_per_capita",
-          String(filtros.recreation_per_capita)
-        );
-      }
-
-      // =========================
-      // Rangos de año
-      // =========================
-      if (tieneValor(filtros.from)) {
-        queryParams.append("year_gte", String(filtros.from));
-      }
-
-      if (tieneValor(filtros.to)) {
-        queryParams.append("year_lte", String(filtros.to));
-      }
-
-      // =========================
-      // Rangos de recreation_value
-      // =========================
-      if (tieneValor(filtros.min_recreation_value)) {
-        queryParams.append(
-          "recreation_value_gte",
-          String(filtros.min_recreation_value)
-        );
-      }
-
-      if (tieneValor(filtros.max_recreation_value)) {
-        queryParams.append(
-          "recreation_value_lte",
-          String(filtros.max_recreation_value)
-        );
-      }
-
-      // =========================
-      // Rangos de total_household_consumption
-      // =========================
-      if (tieneValor(filtros.min_total_household_consumption)) {
-        queryParams.append(
-          "total_household_consumption_gte",
-          String(filtros.min_total_household_consumption)
-        );
-      }
-
-      if (tieneValor(filtros.max_total_household_consumption)) {
-        queryParams.append(
-          "total_household_consumption_lte",
-          String(filtros.max_total_household_consumption)
-        );
-      }
-
-      // =========================
-      // Rangos de recreation_share
-      // =========================
-      if (tieneValor(filtros.min_recreation_share)) {
-        queryParams.append(
-          "recreation_share_gte",
-          String(filtros.min_recreation_share)
-        );
-      }
-
-      if (tieneValor(filtros.max_recreation_share)) {
-        queryParams.append(
-          "recreation_share_lte",
-          String(filtros.max_recreation_share)
-        );
-      }
-
-      // =========================
-      // Rangos de population
-      // =========================
-      if (tieneValor(filtros.min_population)) {
-        queryParams.append("population_gte", String(filtros.min_population));
-      }
-
-      if (tieneValor(filtros.max_population)) {
-        queryParams.append("population_lte", String(filtros.max_population));
-      }
-
-      // =========================
-      // Rangos de recreation_per_capita
-      // =========================
-      if (tieneValor(filtros.min_recreation_per_capita)) {
-        queryParams.append(
-          "recreation_per_capita_gte",
-          String(filtros.min_recreation_per_capita)
-        );
-      }
-
-      if (tieneValor(filtros.max_recreation_per_capita)) {
-        queryParams.append(
-          "recreation_per_capita_lte",
-          String(filtros.max_recreation_per_capita)
-        );
-      }
-
-      const url = queryParams.toString() ? `${API}?${queryParams.toString()}` : API;
-
-      const res = await fetch(url);
-
-      if (res.ok) {
-        datos = await res.json();
-        mostrarMensaje(`Búsqueda completada: ${datos.length} resultados encontrados.`);
-      } else {
-        mostrarMensaje("ERROR: Los filtros introducidos no son válidos.", true);
-      }
-    } catch (error) {
-      mostrarMensaje("ERROR: Se produjo un problema de conexión al realizar la búsqueda.", true);
+  async function paginaSiguiente() {
+    if (!hayPaginaSiguiente) {
+      return;
     }
+
+    const limit = Number(paginacion.limit);
+    const offset = Number(paginacion.offset);
+
+    paginacion.offset = offset + limit;
+    await buscarDatos(false);
   }
 
   async function limpiarBusqueda() {
@@ -255,6 +350,9 @@
       max_recreation_per_capita: ""
     };
 
+    paginacion = crearPaginacionInicial();
+    hayPaginaSiguiente = false;
+
     await getDatos();
     mostrarMensaje("Filtros eliminados. Se muestran todos los registros.");
   }
@@ -272,7 +370,7 @@
 
       if (res && res.ok) {
         mostrarMensaje("Datos iniciales cargados correctamente.");
-        await getDatos();
+        await buscarDatos(false);
       } else if (res && res.status === 409) {
         mostrarMensaje("ERROR: Los datos iniciales ya estaban cargados.", true);
       } else {
@@ -323,7 +421,7 @@
       if (res.status === 201) {
         mostrarMensaje("Registro creado correctamente.");
         nuevoDato = crearDatoInicial();
-        await getDatos();
+        await buscarDatos(false);
       } else if (res.status === 409) {
         mostrarMensaje(
           `ERROR: Ya existe un registro para ${payload.country} en el año ${payload.year}.`,
@@ -338,7 +436,10 @@
         mostrarMensaje("ERROR: No se pudo crear el registro.", true);
       }
     } catch (error) {
-      mostrarMensaje("ERROR: Se produjo un problema de conexión al crear el registro.", true);
+      mostrarMensaje(
+        "ERROR: Se produjo un problema de conexión al crear el registro.",
+        true
+      );
     }
   }
 
@@ -348,20 +449,23 @@
     }
 
     try {
-      const res = await fetch(`${API}/${country}/${year}`, {
+      const res = await fetch(`${API}/${encodeURIComponent(country)}/${year}`, {
         method: "DELETE"
       });
 
       if (res.ok) {
         mostrarMensaje(`Se ha borrado correctamente el registro de ${country} (${year}).`);
-        await getDatos();
+        await buscarDatos(false);
       } else if (res.status === 404) {
         mostrarMensaje(`ERROR: No existe el registro de ${country} (${year}).`, true);
       } else {
         mostrarMensaje("ERROR: No se pudo borrar el registro.", true);
       }
     } catch (error) {
-      mostrarMensaje("ERROR: Se produjo un problema de conexión al borrar el registro.", true);
+      mostrarMensaje(
+        "ERROR: Se produjo un problema de conexión al borrar el registro.",
+        true
+      );
     }
   }
 
@@ -375,12 +479,16 @@
 
       if (res.ok) {
         mostrarMensaje("Se han eliminado todos los registros de la base de datos.");
-        await getDatos();
+        paginacion.offset = 0;
+        await buscarDatos(false);
       } else {
         mostrarMensaje("ERROR: No se pudieron eliminar todos los registros.", true);
       }
     } catch (error) {
-      mostrarMensaje("ERROR: Se produjo un problema de conexión al borrar todos los registros.", true);
+      mostrarMensaje(
+        "ERROR: Se produjo un problema de conexión al borrar todos los registros.",
+        true
+      );
     }
   }
 
@@ -635,8 +743,36 @@
           </div>
         </div>
 
+        <div class="pagination-filter-box">
+          <h4>Paginación</h4>
+
+          <div class="pagination-inputs">
+            <div class="field">
+              <label for="filtro-limit">Registros por página</label>
+              <input
+                id="filtro-limit"
+                bind:value={paginacion.limit}
+                type="number"
+                min="1"
+                placeholder="Ej. 10"
+              />
+            </div>
+
+            <div class="field">
+              <label for="filtro-offset">Saltar registros</label>
+              <input
+                id="filtro-offset"
+                bind:value={paginacion.offset}
+                type="number"
+                min="0"
+                placeholder="Ej. 0"
+              />
+            </div>
+          </div>
+        </div>
+
         <div class="search-actions">
-          <button class="action-btn secondary" type="button" onclick={buscarDatos}>
+          <button class="action-btn secondary" type="button" onclick={() => buscarDatos(true)}>
             Buscar
           </button>
           <button class="action-btn clear-btn" type="button" onclick={limpiarBusqueda}>
@@ -651,7 +787,7 @@
         <div class="main-panel">
           <div class="panel-header">
             <h3>Listado de registros</h3>
-            <span class="counter-badge">{datos.length} registros</span>
+            <span class="counter-badge">{datos.length} registros en esta página</span>
           </div>
 
           <div class="list-area">
@@ -702,6 +838,32 @@
                 No hay registros cargados todavía.
               </div>
             {/if}
+          </div>
+
+          <div class="pagination-actions">
+            <span class="pagination-info">
+              Página {paginaActual()} · Mostrando {datos.length} registros
+            </span>
+
+            <div class="pagination-buttons">
+              <button
+                class="mini-btn edit"
+                type="button"
+                disabled={Number(paginacion.offset) <= 0}
+                onclick={paginaAnterior}
+              >
+                Anterior
+              </button>
+
+              <button
+                class="mini-btn edit"
+                type="button"
+                disabled={!hayPaginaSiguiente}
+                onclick={paginaSiguiente}
+              >
+                Siguiente
+              </button>
+            </div>
           </div>
 
           <div class="panel-actions">
@@ -912,6 +1074,27 @@
     gap: 12px;
   }
 
+  .pagination-filter-box {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 18px;
+    background: #fbfbfa;
+    border: 1px solid rgba(47, 58, 57, 0.07);
+  }
+
+  .pagination-filter-box h4 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2f3a39;
+  }
+
+  .pagination-inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
   .search-actions {
     display: flex;
     gap: 10px;
@@ -1075,6 +1258,27 @@
     flex-wrap: wrap;
   }
 
+  .pagination-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .pagination-info {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #53615f;
+  }
+
+  .pagination-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
   .panel-actions {
     display: flex;
     gap: 10px;
@@ -1173,6 +1377,12 @@
     font-size: 0.84rem;
   }
 
+  .mini-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
   .secondary {
     background: #7f9c96;
     color: #ffffff;
@@ -1234,6 +1444,15 @@
 
     .filters-grid {
       grid-template-columns: 1fr;
+    }
+
+    .pagination-inputs {
+      grid-template-columns: 1fr;
+    }
+
+    .pagination-actions {
+      align-items: flex-start;
+      flex-direction: column;
     }
 
     .main-panel,

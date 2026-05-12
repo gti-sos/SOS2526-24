@@ -43,24 +43,41 @@
     return await response.json();
   }
 
-  async function ensureInitialData(url) {
-    const response = await fetch(url);
+  async function ensureInitialDataOnlyIfEmpty(dataUrl, loadInitialDataUrl) {
+    /*
+      Primero comprobamos si la API ya tiene datos.
+      Si ya hay datos, NO llamamos a loadInitialData.
+      Así evitamos el 409 Conflict en consola.
+    */
+    try {
+      const payload = await fetchJson(dataUrl);
+      const rows = getArrayFromPayload(payload);
+
+      if (rows.length > 0) {
+        return;
+      }
+    } catch {
+      /*
+        Si la consulta normal falla, intentamos igualmente loadInitialData.
+        Esto permite recuperar APIs vacías o recién arrancadas.
+      */
+    }
+
+    const response = await fetch(loadInitialDataUrl);
 
     /*
-      loadInitialData puede devolver:
-      - 201 si ha cargado datos iniciales
-      - 200 si ya hay datos o si la API lo implementa así
-      - 204 si responde correctamente sin cuerpo
-      - 409 si la base de datos ya tenía datos
-
-      Esos estados no deben romper la gráfica.
+      Estados aceptables:
+      - 200: respuesta correcta
+      - 201: datos iniciales creados
+      - 204: respuesta correcta sin cuerpo
+      - 409: ya había datos, no es un error funcional para la gráfica
     */
     if ([200, 201, 204, 409].includes(response.status)) {
       return;
     }
 
     throw new Error(
-      `No se pudieron cargar los datos iniciales desde ${url}. Estado ${response.status}`
+      `No se pudieron cargar los datos iniciales desde ${loadInitialDataUrl}. Estado ${response.status}`
     );
   }
 
@@ -673,16 +690,20 @@
 
     try {
       /*
-        Primero cargamos los datos iniciales.
+        Primero comprobamos si ambas APIs tienen datos.
 
-        - G30 se carga a través del proxy.
-        - Mi API se carga directamente en v2.
-
-        Si ya hay datos, 200 o 409 no deben romper la gráfica.
+        Solo llamamos a loadInitialData si la API está vacía.
+        Esto evita el 409 Conflict innecesario al recargar la página.
       */
       await Promise.all([
-        ensureInitialData(G30_ESPORTS_LOAD_INITIAL_DATA_URL),
-        ensureInitialData(MY_LOAD_INITIAL_DATA_URL)
+        ensureInitialDataOnlyIfEmpty(
+          G30_ESPORTS_PROXY_URL,
+          G30_ESPORTS_LOAD_INITIAL_DATA_URL
+        ),
+        ensureInitialDataOnlyIfEmpty(
+          API_URL,
+          MY_LOAD_INITIAL_DATA_URL
+        )
       ]);
 
       /*
@@ -797,12 +818,12 @@
       <h2>G30 - Estadísticas de crecimiento de los eSports</h2>
       <p>
         La visualización integra información procedente de dos APIs REST. Los datos
-        de la API sobre gatos en ocio y cultura se cruzan con la API sobre el crecimiento
-        de los esport del grupo 30 para comparar el gasto per cápita en ocio y cultura con 
-        la audiencia de eSports. Cuando existen coincidencias por país y año, la comparación 
-        se realiza usando ambos campos como clave común; si no existen coincidencias exactas,
-        se comparan ambos conjuntos de datos mediante medias por país. La comparación es 
-        descriptiva y no implica causalidad.
+        de la API sobre gasto en ocio y cultura se cruzan con la API sobre el crecimiento
+        de los eSports del grupo 30 para comparar el gasto per cápita en ocio y cultura
+        con la audiencia de eSports. Cuando existen coincidencias por país y año, la
+        comparación se realiza usando ambos campos como clave común; si no existen
+        coincidencias exactas, se comparan ambos conjuntos de datos mediante medias
+        por país. La comparación es descriptiva y no implica causalidad.
       </p>
     </div>
 

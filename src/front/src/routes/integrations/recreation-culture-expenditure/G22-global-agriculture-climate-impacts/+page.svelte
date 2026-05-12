@@ -23,25 +23,26 @@
     return await response.json();
   }
 
-  async function ensureInitialData(url) {
-    const response = await fetch(url);
+  async function ensureDataAvailable(dataUrl, loadInitialDataUrl) {
+    //Llama a la API
+    const currentPayload = await fetchJson(dataUrl);
+    const currentRows = getArrayFromPayload(currentPayload);
 
-    /*
-      loadInitialData puede devolver:
-      - 201 si ha cargado los datos iniciales
-      - 200 si la API lo tiene implementado así
-      - 204 si responde correctamente sin cuerpo
-      - 409 si la base de datos ya tenía datos
-
-      El 409 no debe romper la gráfica.
-    */
-    if ([200, 201, 204, 409].includes(response.status)) {
-      return;
+    //Si obtiene un array vacío
+    if (currentRows.length > 0) {
+      return currentPayload;
     }
 
-    throw new Error(
-      `No se pudieron cargar los datos iniciales desde ${url}. Estado ${response.status}`
-    );
+    //Entonces llama a loadInitialData
+    const loadResponse = await fetch(loadInitialDataUrl);
+
+    if (![200, 201, 204, 409].includes(loadResponse.status)) {
+      throw new Error(
+        `No se pudieron cargar los datos iniciales desde ${loadInitialDataUrl}. Estado ${loadResponse.status}`
+      );
+    }
+
+    return await fetchJson(dataUrl);
   }
 
   function getArrayFromPayload(payload) {
@@ -463,25 +464,24 @@ async function renderAgricultureClimateScatter(
 
     try {
       /*
-        Primero intentamos cargar datos iniciales.
+        Primero pedimos los datos normales.
 
-        - La primera llamada a la API G22 mediante proxy.
-        - La segunda llamada a mi API v2.
+        Si alguna API devuelve un array vacío, entonces se llama a su
+        loadInitialData correspondiente.
 
-        Si los datos ya existen, loadInitialData devolverá 409.
-      */
-      await Promise.all([
-        ensureInitialData(`${PROXY_BASE}/sos/agriculture-climate/loadInitialData`),
-        ensureInitialData(`${API_URL}/loadInitialData`)
-      ]);
-
-      /*
-        Después de asegurar que hay datos, pedimos los datos reales
-        para construir la gráfica.
+        Importante:
+        - Primer parámetro: endpoint normal de datos.
+        - Segundo parámetro: endpoint loadInitialData.
       */
       const [climatePayload, recreationPayload] = await Promise.all([
-        fetchJson(`${PROXY_BASE}/sos/agriculture-climate`),
-        fetchJson(API_URL)
+        ensureDataAvailable(
+          `${PROXY_BASE}/sos/agriculture-climate`,
+          `${PROXY_BASE}/sos/agriculture-climate/loadInitialData`
+        ),
+        ensureDataAvailable(
+          API_URL,
+          `${API_URL}/loadInitialData`
+        )
       ]);
 
       const climateRows = normalizeAgricultureClimateData(climatePayload);

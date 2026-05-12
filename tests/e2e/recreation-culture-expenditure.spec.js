@@ -5,6 +5,10 @@ const URL_BASE = process.env.BASE_URL || 'http://localhost:3000';
 const URL_APP = `${URL_BASE}/recreation-culture-expenditure`;
 
 test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
+  // Como estas pruebas crean, editan y borran datos en la misma API,
+  // es más seguro ejecutarlas en serie para evitar interferencias.
+  test.describe.configure({ mode: 'serial' });
+
   test.beforeEach(async ({ page }) => {
     // Aceptar automáticamente los confirm de borrar
     page.on('dialog', async (dialog) => {
@@ -15,9 +19,15 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
   });
 
   async function abrirPanelFiltros(page) {
-    const boton = page.getByRole('button', { name: /búsqueda y filtros|ocultar búsqueda y filtros/i });
-    await boton.click();
-    await expect(page.locator('.search-panel')).toBeVisible();
+    const panel = page.locator('.search-panel');
+
+    // Si ya está abierto, no volvemos a pulsar porque lo cerraríamos.
+    if (await panel.isVisible().catch(() => false)) {
+      return;
+    }
+
+    await page.getByRole('button', { name: /^búsqueda y filtros$/i }).click();
+    await expect(panel).toBeVisible();
   }
 
   async function cargarDatosIniciales(page) {
@@ -51,6 +61,34 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
     await panelAlta.getByRole('button', { name: /añadir registro/i }).click();
   }
 
+  async function buscarPorPais(page, country) {
+    await abrirPanelFiltros(page);
+
+    const filtros = page.locator('.search-panel input');
+    const totalInputs = await filtros.count();
+
+    // Limpiamos todos los filtros para que la búsqueda sea independiente
+    // de cualquier búsqueda anterior dentro del mismo test.
+    for (let i = 0; i < totalInputs; i++) {
+      await filtros.nth(i).fill('');
+    }
+
+    // Primer input: país.
+    await filtros.nth(0).fill(country);
+
+    // Los dos últimos inputs son los de paginación:
+    // penúltimo: registros por página
+    // último: registros a saltar
+    await filtros.nth(totalInputs - 2).fill('10');
+    await filtros.nth(totalInputs - 1).fill('0');
+
+    await page.getByRole('button', { name: /^buscar$/i }).click();
+
+    await expect(page.locator('.alert-box')).toContainText(/Búsqueda completada/i, {
+      timeout: 10000
+    });
+  }
+
   test('1. Debe listar registros y permitir cargar datos iniciales', async ({ page }) => {
     // Esta prueba cubre la funcionalidad de listado
     await cargarDatosIniciales(page);
@@ -79,6 +117,10 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
 
     await expect(page.locator('.alert-box')).toContainText(/Registro creado correctamente/i);
 
+    // Con paginación, el registro creado puede no estar visible en la primera página.
+    // Por eso lo buscamos por país antes de comprobarlo.
+    await buscarPorPais(page, country);
+
     // Verifica recarga automática del listado sin refresco manual
     const filaNueva = page.locator('.records-row', { hasText: country });
     await expect(filaNueva).toContainText(String(year));
@@ -100,14 +142,7 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
 
     await expect(page.locator('.alert-box')).toContainText(/Registro creado correctamente/i);
 
-    await abrirPanelFiltros(page);
-
-    const filtros = page.locator('.search-panel input');
-    await filtros.nth(0).fill(country); // country exacto
-
-    await page.getByRole('button', { name: /^buscar$/i }).click();
-
-    await expect(page.locator('.alert-box')).toContainText(/Búsqueda completada/i);
+    await buscarPorPais(page, country);
 
     // Tras buscar, debe aparecer el registro único
     const filas = page.locator('.records-row');
@@ -130,13 +165,19 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
 
     await expect(page.locator('.alert-box')).toContainText(/Registro creado correctamente/i);
 
+    // Con paginación, buscamos el registro antes de editarlo.
+    await buscarPorPais(page, country);
+
     const fila = page.locator('.records-row', { hasText: country });
     await expect(fila).toBeVisible();
 
     await fila.getByRole('link', { name: /editar/i }).click();
 
     // Ruta dinámica /recreation-culture-expenditure/:country/:year
-    await expect(page).toHaveURL(new RegExp(`/recreation-culture-expenditure/${encodeURIComponent(country)}/${year}$`));
+    await expect(page).toHaveURL(
+      new RegExp(`/recreation-culture-expenditure/${encodeURIComponent(country)}/${year}$`)
+    );
+
     await expect(page.getByRole('heading', { name: /editar registro/i })).toBeVisible();
 
     const inputsEdicion = page.locator('.form-grid input');
@@ -146,10 +187,18 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
 
     await page.getByRole('button', { name: /guardar cambios/i }).click();
 
-    await expect(page.locator('.alert-box')).toContainText(/Los cambios se han guardado correctamente/i);
+    await expect(page.locator('.alert-box')).toContainText(
+      /Los cambios se han guardado correctamente/i
+    );
 
     // Tras guardar, la vista redirige al listado
-    await expect(page).toHaveURL(new RegExp(`/recreation-culture-expenditure$`), { timeout: 10000 });
+    await expect(page).toHaveURL(new RegExp(`/recreation-culture-expenditure$`), {
+      timeout: 10000
+    });
+
+    // Volvemos a buscar el registro porque, al regresar al listado,
+    // la paginación puede mostrar otra página.
+    await buscarPorPais(page, country);
 
     const filaActualizada = page.locator('.records-row', { hasText: country });
     await expect(filaActualizada).toContainText('5555');
@@ -170,6 +219,9 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
     });
 
     await expect(page.locator('.alert-box')).toContainText(/Registro creado correctamente/i);
+
+    // Con paginación, buscamos el registro antes de borrarlo.
+    await buscarPorPais(page, country);
 
     const fila = page.locator('.records-row', { hasText: country });
     await expect(fila).toBeVisible();
@@ -199,7 +251,7 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
   });
 
   test('7. Debe avisar al usuario si intenta crear un registro incompleto', async ({ page }) => {
-    // Esta prueba te viene bien como extra para demostrar manejo de errores comprensible
+    // Esta prueba sirve para demostrar manejo de errores comprensible
     const panelAlta = page.locator('.side-panel');
 
     const inputs = panelAlta.locator('input');
@@ -212,5 +264,46 @@ test.describe('Pruebas E2E - recreation-culture-expenditure', () => {
     await expect(page.locator('.alert-box')).toContainText(
       /Completa todos los campos obligatorios antes de añadir el registro/i
     );
+  });
+
+  test('8. Debe permitir paginar los registros desde el frontend', async ({ page }) => {
+    // Como el test 6 borra todos los datos, aquí volvemos a cargarlos.
+    await cargarDatosIniciales(page);
+
+    await abrirPanelFiltros(page);
+
+    const inputs = page.locator('.search-panel input');
+    const totalInputs = await inputs.count();
+
+    // Los inputs de paginación están al final del panel:
+    // penúltimo: registros por página
+    // último: registros a saltar
+    await inputs.nth(totalInputs - 2).fill('5');
+    await inputs.nth(totalInputs - 1).fill('0');
+
+    await page.getByRole('button', { name: /^buscar$/i }).click();
+
+    await expect(page.locator('.alert-box')).toContainText(/Búsqueda completada/i, {
+      timeout: 10000
+    });
+
+    await expect(page.locator('.records-row')).toHaveCount(5);
+    await expect(page.getByText(/Página 1/i)).toBeVisible();
+
+    const primeraPaginaTexto = await page.locator('.records-table').innerText();
+
+    await page.getByRole('button', { name: /siguiente/i }).click();
+
+    await expect(page.getByText(/Página 2/i)).toBeVisible();
+    await expect(page.locator('.records-row')).toHaveCount(5);
+
+    const segundaPaginaTexto = await page.locator('.records-table').innerText();
+
+    expect(segundaPaginaTexto).not.toEqual(primeraPaginaTexto);
+
+    await page.getByRole('button', { name: /anterior/i }).click();
+
+    await expect(page.getByText(/Página 1/i)).toBeVisible();
+    await expect(page.locator('.records-row')).toHaveCount(5);
   });
 });
