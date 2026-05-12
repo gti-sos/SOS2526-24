@@ -4,7 +4,12 @@
   const PROXY_BASE = "/api/v2/recreation-culture-expenditure/proxy";
 
   const MY_API_URL = "/api/v2/recreation-culture-expenditure";
+  const MY_LOAD_INITIAL_DATA_URL =
+    "/api/v2/recreation-culture-expenditure/loadInitialData";
+
   const G30_ESPORTS_PROXY_URL = `${PROXY_BASE}/sos/esports-growth`;
+  const G30_ESPORTS_LOAD_INITIAL_DATA_URL =
+    `${PROXY_BASE}/sos/esports-growth/loadInitialData`;
 
   let Plotly = null;
 
@@ -37,6 +42,27 @@
     }
 
     return await response.json();
+  }
+
+  async function ensureInitialData(url) {
+    const response = await fetch(url);
+
+    /*
+      loadInitialData puede devolver:
+      - 201 si ha cargado datos iniciales
+      - 200 si ya hay datos o si la API lo implementa así
+      - 204 si responde correctamente sin cuerpo
+      - 409 si la base de datos ya tenía datos
+
+      Esos estados no deben romper la gráfica.
+    */
+    if ([200, 201, 204, 409].includes(response.status)) {
+      return;
+    }
+
+    throw new Error(
+      `No se pudieron cargar los datos iniciales desde ${url}. Estado ${response.status}`
+    );
   }
 
   function getArrayFromPayload(payload) {
@@ -530,7 +556,6 @@
     const viewershipValues = limitedRows.map((row) => row.viewership);
 
     return {
-      limitedRows,
       traces: [
         {
           type: "bar",
@@ -649,6 +674,22 @@
     description = "";
 
     try {
+      /*
+        Primero cargamos los datos iniciales.
+
+        - G30 se carga a través del proxy.
+        - Mi API se carga directamente en v2.
+
+        Si ya hay datos, 200 o 409 no deben romper la gráfica.
+      */
+      await Promise.all([
+        ensureInitialData(G30_ESPORTS_LOAD_INITIAL_DATA_URL),
+        ensureInitialData(MY_LOAD_INITIAL_DATA_URL)
+      ]);
+
+      /*
+        Después pedimos los datos reales para construir la gráfica.
+      */
       const [esportsPayload, recreationPayload] = await Promise.all([
         fetchJson(G30_ESPORTS_PROXY_URL),
         fetchJson(MY_API_URL)

@@ -1,10 +1,9 @@
 <script>
   import { onMount, onDestroy, tick } from "svelte";
+  import Plotly from "plotly.js-dist-min";
 
   const PROXY_BASE = "/api/v2/recreation-culture-expenditure/proxy";
   const MY_API_URL = "/api/v2/recreation-culture-expenditure";
-
-  let Plotly;
 
   let loading = $state(false);
   let error = $state(null);
@@ -20,6 +19,27 @@
     }
 
     return await response.json();
+  }
+
+  async function ensureInitialData(url) {
+    const response = await fetch(url);
+
+    /*
+      loadInitialData puede devolver:
+      - 201 si ha cargado los datos iniciales
+      - 200 si la API lo tiene implementado así
+      - 204 si responde correctamente sin cuerpo
+      - 409 si la base de datos ya tenía datos
+
+      El 409 no debe romper la gráfica.
+    */
+    if ([200, 201, 204, 409].includes(response.status)) {
+      return;
+    }
+
+    throw new Error(
+      `No se pudieron cargar los datos iniciales desde ${url}. Estado ${response.status}`
+    );
   }
 
   function getArrayFromPayload(payload) {
@@ -114,6 +134,7 @@
       "u.s.a.": "united states",
       "united states of america": "united states",
       "estados unidos": "united states",
+      "estados unidos de america": "united states",
 
       "reino unido": "united kingdom",
       uk: "united kingdom",
@@ -165,12 +186,10 @@
           ""
         );
 
-        const year = pickNumber(row, ["year"]);
-
         return {
           country,
           countryKey: normalizeCountryName(country),
-          year,
+          year: pickNumber(row, ["year"]),
           recreationValue: pickNumber(row, [
             "recreation_value",
             "recreation-value"
@@ -275,9 +294,9 @@
   }
 
   function uniqueSortedNumbers(values) {
-    return [...new Set(values.filter((value) => Number.isFinite(Number(value))))].sort(
-      (a, b) => a - b
-    );
+    return [
+      ...new Set(values.filter((value) => Number.isFinite(Number(value))))
+    ].sort((a, b) => a - b);
   }
 
   function uniqueTexts(values) {
@@ -437,6 +456,24 @@
     chartVisible = false;
 
     try {
+      /*
+        Primero intentamos cargar datos iniciales.
+
+        - La primera llamada va a la API del grupo 22 a través de tu proxy.
+        - La segunda llamada va a tu propia API v2.
+
+        Si los datos ya existen, normalmente loadInitialData devolverá 409.
+        Eso no debe romper la gráfica.
+      */
+      await Promise.all([
+        ensureInitialData(`${PROXY_BASE}/sos/agriculture-climate/loadInitialData`),
+        ensureInitialData(`${MY_API_URL}/loadInitialData`)
+      ]);
+
+      /*
+        Después de asegurar que hay datos, pedimos los datos reales
+        para construir la gráfica.
+      */
       const [climatePayload, recreationPayload] = await Promise.all([
         fetchJson(`${PROXY_BASE}/sos/agriculture-climate`),
         fetchJson(MY_API_URL)
@@ -469,15 +506,12 @@
   }
 
   function resizeChart() {
-    if (chartContainer && chartVisible && Plotly) {
+    if (chartContainer && chartVisible) {
       Plotly.Plots.resize(chartContainer);
     }
   }
 
   onMount(async () => {
-    const plotlyModule = await import("plotly.js-dist-min");
-    Plotly = plotlyModule.default;
-
     window.addEventListener("resize", resizeChart);
     await loadAgricultureClimate();
   });
@@ -485,7 +519,7 @@
   onDestroy(() => {
     window.removeEventListener("resize", resizeChart);
 
-    if (chartContainer && Plotly) {
+    if (chartContainer) {
       Plotly.purge(chartContainer);
     }
   });
