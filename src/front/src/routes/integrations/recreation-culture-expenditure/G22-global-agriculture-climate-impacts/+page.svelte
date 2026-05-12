@@ -384,7 +384,7 @@
 
 async function renderAgricultureClimateScatter(
   rows,
-  chartTitle = "G22 + mi API: temperatura agrícola y gasto cultural per cápita"
+  chartTitle = "Relación entre temperatura agrícola y gasto en ocio per cápita"
 ) {
   chartVisible = true;
 
@@ -465,11 +465,10 @@ async function renderAgricultureClimateScatter(
       /*
         Primero intentamos cargar datos iniciales.
 
-        - La primera llamada va a la API del grupo 22 a través de tu proxy.
-        - La segunda llamada va a tu propia API v2.
+        - La primera llamada a la API G22 mediante proxy.
+        - La segunda llamada a mi API v2.
 
-        Si los datos ya existen, normalmente loadInitialData devolverá 409.
-        Eso no debe romper la gráfica.
+        Si los datos ya existen, loadInitialData devolverá 409.
       */
       await Promise.all([
         ensureInitialData(`${PROXY_BASE}/sos/agriculture-climate/loadInitialData`),
@@ -564,13 +563,14 @@ async function renderAgricultureClimateScatter(
 {:else}
   <article class="chart-card">
     <div class="chart-header">
-      <h2>G22 - Global Agriculture Climate Impacts</h2>
+      <h2>G22 - Impactos Climáticos Globales en la Agricultura</h2>
       <p>
-        Visualización que relaciona los países de mi API de gasto en ocio y
-        cultura con los países disponibles en la API del grupo 22 sobre impactos
-        climáticos en agricultura. Cada punto representa un país común entre
-        ambas fuentes. El eje horizontal muestra la temperatura media agrícola y
-        el eje vertical muestra la media del gasto per cápita en ocio y cultura.
+        Esta visualización combina datos de dos APIs REST. Por un lado, utiliza 
+        los países de la API sobre gasto en ocio y cultura; por otro, incorpora 
+        los datos de la API sobre impactos climáticos en la agricultura. La gráfica 
+        muestra únicamente los países presentes en ambas fuentes. En cada punto, el 
+        eje X representa la temperatura media agrícola y el eje Y muestra la media 
+        del gasto per cápita en ocio y cultura.
       </p>
     </div>
 

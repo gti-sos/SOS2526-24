@@ -20,8 +20,6 @@
 
   let chartContainer;
 
-  let title = $state("G30 - eSports Growth Stats");
-  let description = $state("");
   let relationMode = $state("");
 
   async function loadPlotly() {
@@ -672,7 +670,6 @@
     error = null;
     chartVisible = false;
     relationMode = "";
-    description = "";
 
     try {
       /*
@@ -715,13 +712,9 @@
 
       if (joinedRows.length > 0) {
         relationMode = "exact";
-        description =
-          "Visualización que cruza mi API con la API esportsgrowth-stats del grupo 30 usando país y año como clave común. Cada grupo de barras compara el gasto per cápita en ocio/cultura con la audiencia de eSports para el mismo país y año.";
       } else {
         joinedRows = joinByCountryAverage(recreationRows, esportsRows);
         relationMode = "average";
-        description =
-          "No había coincidencias exactas por país y año, así que la integración compara ambos datasets por país usando medias. La gráfica relaciona el gasto medio per cápita en ocio/cultura con la audiencia media de eSports por país. La comparación es descriptiva y no implica causalidad.";
       }
 
       if (joinedRows.length === 0) {
@@ -801,9 +794,15 @@
 {:else}
   <article class="chart-card">
     <div class="chart-header">
-      <h2>{title}</h2>
+      <h2>G30 - Estadísticas de crecimiento de los eSports</h2>
       <p>
-        {description}
+        La visualización integra información procedente de dos APIs REST. Los datos
+        de la API sobre gatos en ocio y cultura se cruzan con la API sobre el crecimiento
+        de los esport del grupo 30 para comparar el gasto per cápita en ocio y cultura con 
+        la audiencia de eSports. Cuando existen coincidencias por país y año, la comparación 
+        se realiza usando ambos campos como clave común; si no existen coincidencias exactas,
+        se comparan ambos conjuntos de datos mediante medias por país. La comparación es 
+        descriptiva y no implica causalidad.
       </p>
     </div>
 

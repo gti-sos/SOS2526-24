@@ -58,9 +58,7 @@
       );
     }
 
-    return new Map(
-      data.map((item) => [item.countryCode, Number(item.events)])
-    );
+    return new Map(data.map((item) => [item.countryCode, Number(item.events)]));
   }
 
   async function loadData() {
@@ -78,8 +76,9 @@
         );
       }
 
-      const latestRecords = getLatestRecordByCountry(ownApiData)
-        .filter((record) => countryCodes[record.country]);
+      const latestRecords = getLatestRecordByCountry(ownApiData).filter(
+        (record) => countryCodes[record.country]
+      );
 
       const ticketmasterCounts =
         await getTicketmasterCountsByCountry(latestRecords);
@@ -108,38 +107,70 @@
   async function drawChart() {
     const { default: embed } = await import("vega-embed");
 
+    if (chartContainer) {
+      chartContainer.innerHTML = "";
+    }
+
     const spec = {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "description": "Relación entre gasto en ocio y cultura y eventos de Ticketmaster por país",
-      "width": 650,
-      "height": 380,
+      "description":
+        "Relación entre gasto en ocio y cultura y eventos de Ticketmaster por país",
+      "width": 760,
+      "height": 390,
+      "title": {
+        "text": "Relación entre eventos musicales y gasto cultural per cápita",
+        "fontSize": 20,
+        "fontWeight": "normal",
+        "anchor": "middle",
+        "offset": 18
+      },
       "data": {
         "values": combinedData
       },
       "mark": {
         "type": "circle",
-        "opacity": 0.8
+        "opacity": 0.82
       },
       "encoding": {
         "x": {
           "field": "recreation_per_capita",
           "type": "quantitative",
-          "title": "Gasto en ocio y cultura por habitante"
+          "title": "Gasto en ocio y cultura por habitante",
+          "axis": {
+            "labelFontSize": 12,
+            "titleFontSize": 13,
+            "titlePadding": 12,
+            "grid": true
+          }
         },
         "y": {
           "field": "ticketmaster_events",
           "type": "quantitative",
-          "title": "Eventos musicales disponibles en Ticketmaster"
+          "title": "Eventos musicales disponibles en Ticketmaster",
+          "axis": {
+            "labelFontSize": 12,
+            "titleFontSize": 13,
+            "titlePadding": 12,
+            "grid": true
+          }
         },
         "size": {
           "field": "recreation_share",
           "type": "quantitative",
-          "title": "Peso del ocio y cultura (%)"
+          "title": "Peso del ocio y cultura (%)",
+          "legend": {
+            "titleFontSize": 12,
+            "labelFontSize": 11
+          }
         },
         "color": {
           "field": "country",
           "type": "nominal",
-          "title": "País"
+          "title": "País",
+          "legend": {
+            "titleFontSize": 12,
+            "labelFontSize": 11
+          }
         },
         "tooltip": [
           {
@@ -155,12 +186,14 @@
           {
             "field": "recreation_per_capita",
             "type": "quantitative",
-            "title": "Gasto per cápita"
+            "title": "Gasto per cápita",
+            "format": ".2f"
           },
           {
             "field": "recreation_share",
             "type": "quantitative",
-            "title": "Porcentaje de ocio/cultura"
+            "title": "Porcentaje de ocio/cultura",
+            "format": ".2f"
           },
           {
             "field": "ticketmaster_events",
@@ -168,11 +201,28 @@
             "title": "Eventos Ticketmaster"
           }
         ]
+      },
+      "config": {
+        "background": "transparent",
+        "view": {
+          "stroke": "transparent"
+        },
+        "axis": {
+          "labelColor": "#020617",
+          "titleColor": "#020617",
+          "gridColor": "#e5e7eb",
+          "domainColor": "#cbd5e1",
+          "tickColor": "#cbd5e1"
+        },
+        "legend": {
+          "labelColor": "#020617",
+          "titleColor": "#020617"
+        }
       }
     };
 
     await embed(chartContainer, spec, {
-      actions: false
+      actions: true
     });
   }
 
@@ -183,81 +233,146 @@
   <title>Integración Elena | Ticketmaster y ocio cultural</title>
 </svelte:head>
 
-<section class="container">
-  <h1>Integración de Ticketmaster con Recreation and Culture Expenditure</h1>
+<main class="page">
+  <section class="card">
+    <h1>Integración de gasto en ocio y cultura con Ticketmaster</h1>
 
-  <p>
-    Esta visualización compara el gasto en ocio y cultura por habitante con el
-    número de eventos disponibles en Ticketmaster para cada país.
-  </p>
+    <p class="description">
+      Esta visualización combina datos de la API de gasto per cápita en ocio y
+      cultura con información externa procedente de la API Ticketmaster. La
+      gráfica compara, para cada país, el gasto cultural por habitante con el
+      número de eventos musicales disponibles. El tamaño de cada punto representa
+      el peso del ocio y la cultura sobre el consumo total, permitiendo analizar
+      la relación entre los datos económicos propios y la actividad cultural
+      registrada por Ticketmaster.
+    </p>
 
-  {#if loading}
-    <p>Cargando datos integrados...</p>
-  {/if}
+    {#if error}
+      <p class="error">{error}</p>
+    {/if}
 
-  {#if error}
-    <p class="error">{error}</p>
-  {/if}
+    <div class="chart-wrapper">
+      <div bind:this={chartContainer} class="chart"></div>
+    </div>
 
-  <div bind:this={chartContainer} class="chart"></div>
+    {#if combinedData.length > 0}
+      <section class="table-section">
+        <h2>Datos combinados</h2>
 
-  {#if combinedData.length > 0}
-    <h2>Datos combinados</h2>
-
-    <table>
-      <thead>
-        <tr>
-          <th>País</th>
-          <th>Año</th>
-          <th>Gasto per cápita</th>
-          <th>Porcentaje ocio/cultura</th>
-          <th>Eventos Ticketmaster</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each combinedData as item}
-          <tr>
-            <td>{item.country}</td>
-            <td>{item.year}</td>
-            <td>{item.recreation_per_capita}</td>
-            <td>{item.recreation_share}%</td>
-            <td>{item.ticketmaster_events}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  {/if}
-</section>
+        <table>
+          <thead>
+            <tr>
+              <th>País</th>
+              <th>Año</th>
+              <th>Gasto per cápita</th>
+              <th>Porcentaje ocio/cultura</th>
+              <th>Eventos Ticketmaster</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each combinedData as item}
+              <tr>
+                <td>{item.country}</td>
+                <td>{item.year}</td>
+                <td>{item.recreation_per_capita.toFixed(2)}</td>
+                <td>{item.recreation_share.toFixed(2)}%</td>
+                <td>{item.ticketmaster_events}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </section>
+    {/if}
+  </section>
+</main>
 
 <style>
-  .container {
-    max-width: 950px;
+  :global(body) {
+    margin: 0;
+    background: #7f918c;
+    font-family:
+      Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+    color: #020617;
+  }
+
+  .page {
+    min-height: 100vh;
+    padding: 30px 26px;
+    box-sizing: border-box;
+    background: #7f918c;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 1115px;
+    min-height: 720px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 26px 24px 36px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
   }
 
   h1 {
-    color: #1e293b;
+    margin: 0 0 8px;
+    color: #061631;
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.03em;
   }
 
-  p {
-    color: #475569;
+  .description {
+    max-width: 1040px;
+    margin: 0 0 26px;
+    color: #061631;
+    font-size: 15.5px;
+    line-height: 1.48;
   }
 
-  .chart {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+  .status {
+    margin: 24px 0;
+    color: #334155;
+    font-weight: 600;
   }
 
   .error {
+    margin: 24px 0;
     color: #b91c1c;
-    font-weight: bold;
+    font-weight: 700;
+  }
+
+  .chart-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 22px;
+    margin-bottom: 34px;
+    overflow-x: auto;
+  }
+
+  .chart {
+    min-width: 780px;
+  }
+
+  .table-section {
+    margin-top: 18px;
+  }
+
+  h2 {
+    margin: 0 0 12px;
+    color: #061631;
+    font-size: 20px;
+    font-weight: 750;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
+    font-size: 14px;
   }
 
   th,
@@ -269,5 +384,33 @@
 
   th {
     background-color: #f8fafc;
+    color: #061631;
+    font-weight: 700;
+  }
+
+  td {
+    color: #1e293b;
+  }
+
+  @media (max-width: 900px) {
+    .page {
+      padding: 18px;
+    }
+
+    .card {
+      padding: 22px 18px 30px;
+    }
+
+    h1 {
+      font-size: 22px;
+    }
+
+    .description {
+      font-size: 14.5px;
+    }
+
+    .chart {
+      min-width: 720px;
+    }
   }
 </style>

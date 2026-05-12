@@ -30,9 +30,6 @@
     - 201 si ha cargado los datos iniciales
     - 200 si la API del compañero lo tiene implementado así
     - 409 si la base de datos ya tenía datos
-
-    El 409 no debe romper la gráfica, porque significa:
-    "ya hay datos, no hace falta volver a cargarlos".
   */
   if ([200, 201, 204, 409].includes(response.status)) {
     return;
@@ -554,7 +551,7 @@
 
 async function renderStockMarketSunburst(
   rows,
-  chartTitle = "G23 + mi API: media de índices por región y gasto per cápita por país"
+  chartTitle = "Media de indicadores de mercado por región y gasto en ocio per cápita por país"
 ) {
     const { ids, labels, parents, values, customdata } = buildSunburst(rows);
 
@@ -617,24 +614,19 @@ async function loadStockMarket() {
     /*
       Primero intentamos cargar datos iniciales.
 
-      - La primera llamada va a la API del compañero a través de tu proxy.
-      - La segunda llamada va a tu propia API v2.
+      - La primera llamada API G23 a través proxy.
+      - La segunda llamada va a mi API v2.
 
-      Si los datos ya existen, normalmente loadInitialData devolverá 409.
-      Eso no debe romper la gráfica, porque significa que ya hay datos.
+      Si los datos ya existen, loadInitialData devolverá 409.
     */
     await Promise.all([
       ensureInitialData(`${PROXY_BASE}/sos/stock-market/loadInitialData`),
       ensureInitialData("/api/v2/recreation-culture-expenditure/loadInitialData")
     ]);
 
-    /*
-      Después de asegurar que hay datos, pedimos ya los datos reales
-      para construir la gráfica.
-    */
     const [stockPayload, recreationPayload] = await Promise.all([
-      fetchJson(`${PROXY_BASE}/sos/stock-market`),
-      fetchJson("/api/v2/recreation-culture-expenditure")
+      fetchJson(`${PROXY_BASE}/sos/stock-market`), //Llamada API G23 mediante proxy
+      fetchJson("/api/v2/recreation-culture-expenditure") //Llamada directa a mi API
     ]);
 
     const stockRows = normalizeStockMarketData(stockPayload);
@@ -712,13 +704,14 @@ async function loadStockMarket() {
 {:else}
   <article class="chart-card">
     <div class="chart-header">
-      <h2>G23 - Daily Global Stock Market Indicators</h2>
+      <h2>G23 - Indicadores diarios del mercado de valores</h2>
       <p>
-        Visualización que asigna los países de mi API a las regiones Europe,
-        North America y Asia de la API del compañero. Cada región muestra la
-        media de sus índices bursátiles, calculando primero la media de cada
-        índice dentro de la región y después la media entre esos índices. Cada
-        país muestra la media de su gasto per cápita en ocio y cultura.
+        La visualización integra información procedente de dos APIs REST. Los países de 
+        la API de gasto en ocio y cultura se asocian con las regiones Europe, North America 
+        y Asia proporcionadas por la API de indicadores diarios del mercado de valores. Para 
+        cada región se representa un valor agregado de índices bursátiles, calculado como la 
+        media de las medias de cada índice regional. Paralelamente, para cada país se muestra 
+        la media de su gasto per cápita en ocio y cultura.
       </p>
     </div>
 

@@ -542,7 +542,7 @@
     const spec = {
       $schema: "https://vega.github.io/schema/vega-lite/v5.json",
       title:
-        "Nager.Date + mi API: festivos públicos y gasto per cápita por país",
+        "Relación entre festivos públicos y gasto cultural per cápita",
       width: "container",
       height: chartHeight,
       autosize: {
@@ -773,14 +773,16 @@
   {:else}
     <article class="chart-card">
       <div class="chart-header">
-        <h2>Nager.Date - Public Holidays API</h2>
+        <h2>Integración de gasto en ocio y cultura con Nager.Date</h2>
 
         <p>
-          Visualización que relaciona los países y años de mi API con los días
-          festivos públicos devueltos por Nager.Date. Cada celda representa un
-          país en un año concreto. El color muestra el gasto per cápita en ocio
-          y cultura, y al pasar el ratón se muestran los festivos públicos,
-          festivos nacionales y datos económicos integrados.
+          Esta visualización combina datos de la API de gasto per cápita en ocio 
+          y cultura con información externa procedente de la API Nager.Date. La 
+          gráfica organiza los datos por país y año, de forma que cada celda 
+          representa una combinación concreta de ambos valores. La intensidad del 
+          color refleja el gasto per cápita en ocio y cultura, y la información 
+          emergente muestra los días festivos públicos y nacionales asociados, 
+          junto con los datos económicos integrados.
         </p>
       </div>
 
