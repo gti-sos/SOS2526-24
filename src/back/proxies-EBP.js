@@ -297,68 +297,126 @@ const ticketmasterCache = new Map();
     }
   });
   /** -------------------- API externa: Spotify -------------------- */
-  app.get(`${PROXY_PATH}/external/spotify/search`, async (req, res) => {
+  const SPOTIFY_ALLOWED_COUNTRIES = {
+    ES: "España",
+    MX: "México",
+    US: "Estados Unidos",
+    GB: "Reino Unido",
+    FR: "Francia",
+    IT: "Italia",
+    DE: "Alemania",
+    BR: "Brasil",
+    AR: "Argentina",
+    CA: "Canadá"
+  };
+
+  async function getSpotifyAccessToken() {
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      const error = new Error(
+        "Faltan configurar SPOTIFY_CLIENT_ID y/o SPOTIFY_CLIENT_SECRET"
+      );
+      error.status = 500;
+      throw error;
+    }
+
+    const credentials = Buffer
+      .from(`${clientId}:${clientSecret}`)
+      .toString("base64");
+
+    const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        grant_type: "client_credentials"
+      })
+    });
+
+    if (!tokenResponse.ok) {
+      const error = new Error(
+        `Error obteniendo token de Spotify: HTTP ${tokenResponse.status}`
+      );
+      error.status = 502;
+      throw error;
+    }
+
+    const tokenData = await tokenResponse.json();
+    return tokenData.access_token;
+  }
+
+  app.get(`${PROXY_PATH}/external/spotify/country-tracks`, async (req, res) => {
     try {
-      const clientId = process.env.SPOTIFY_CLIENT_ID;
-      const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+      const country = String(req.query.country || "ES").trim().toUpperCase();
+      const limit = Number(req.query.limit || 10);
 
-      if (!clientId || !clientSecret) {
-        return res.status(500).json({
-          error: "Faltan configurar SPOTIFY_CLIENT_ID y/o SPOTIFY_CLIENT_SECRET"
-        });
-      }
-
-      const query = req.query.query || req.query.q;
-      const type = req.query.type || "artist";
-      const limit = req.query.limit || "5";
-
-      if (!query) {
+      if (!SPOTIFY_ALLOWED_COUNTRIES[country]) {
         return res.status(400).json({
-          error: "El parámetro query es obligatorio"
+          error:
+            "El país indicado no está soportado. Usa ES, MX, US, GB, FR, IT, DE, BR, AR o CA."
         });
       }
 
-      const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-
-      const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${credentials}`,
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: new URLSearchParams({
-          grant_type: "client_credentials"
-        })
-      });
-
-      if (!tokenResponse.ok) {
-        throw new Error(`Error obteniendo token de Spotify: ${tokenResponse.status}`);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 10) {
+        return res.status(400).json({
+          error: "El parámetro limit debe ser un número entero entre 1 y 10"
+        });
       }
 
-      const tokenData = await tokenResponse.json();
+      const accessToken = await getSpotifyAccessToken();
 
       const params = new URLSearchParams({
-        q: String(query),
-        type: String(type),
+        q: "genre:pop",
+        type: "track",
+        market: country,
         limit: String(limit)
       });
 
       const targetUrl = `https://api.spotify.com/v1/search?${params.toString()}`;
 
-      console.log("[Proxy EBP] spotify search");
+      console.log(
+        `[Proxy EBP] spotify country-tracks: ${country} (${SPOTIFY_ALLOWED_COUNTRIES[country]})`
+      );
 
-      const data = await fetchJson(targetUrl, {
+      const spotifyData = await fetchJson(targetUrl, {
         headers: {
-          Authorization: `Bearer ${tokenData.access_token}`
+          Authorization: `Bearer ${accessToken}`
         }
       });
 
-      return res.status(200).json(data);
-    } catch (error) {
-      console.error("[Proxy EBP] Error Spotify:", error.message);
+      const tracks = (spotifyData.tracks?.items || []).map((track) => ({
+        id: track.id,
+        name: track.name,
+        popularity: track.popularity ?? 0,
+        duration_ms: track.duration_ms,
+        explicit: track.explicit,
+        album: track.album?.name || "Álbum no disponible",
+        release_date: track.album?.release_date || "Fecha no disponible",
+        image: track.album?.images?.[0]?.url || "",
+        spotify_url: track.external_urls?.spotify || "",
+        artists: track.artists?.map((artist) => artist.name).join(", ") || "Artista no disponible",
+        market: country,
+        country_name: SPOTIFY_ALLOWED_COUNTRIES[country]
+      }));
 
-      return res.status(502).json({
-        error: "No se pudo obtener información de la API Spotify"
+      return res.status(200).json({
+        country,
+        country_name: SPOTIFY_ALLOWED_COUNTRIES[country],
+        query: "genre:pop",
+        total: tracks.length,
+        tracks
+      });
+    } catch (error) {
+      console.error("[Proxy EBP] Error Spotify country-tracks:", error.message);
+
+      return res.status(error.status || 502).json({
+        error:
+          error.message ||
+          "No se pudo obtener información de Spotify por país"
       });
     }
   });

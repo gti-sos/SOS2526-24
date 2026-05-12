@@ -53,7 +53,6 @@
       short: "",
       member: "APIs externas y SOS",
       links: [
-        { label: "Vista general", href: "/integrations" },
         { label: "Ocio y cultura", href: "/integrations/recreation-culture-expenditure" },
         { label: "Sueldos", href: "/integrations/mjp" },
         { label: "Construcción", href: "/integrations/isaac" }
