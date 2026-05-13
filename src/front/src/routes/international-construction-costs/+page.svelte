@@ -1,31 +1,75 @@
 <script>
-import { onMount } from 'svelte';
+    import { onMount } from 'svelte';
     let datos = $state([]);
     let nuevoDato = $state({ country: "", year: "", city: "", cost_usd_per_m2: "", cost_change_range: "", rank: "" });
     let mensaje = $state("");
     let esError = $state(false);
-    const API = "/api/v2/international-construction-costs"; // Usamos la v2
+    const API = "/api/v2/international-construction-costs"; 
 
+    // --- ESTADO PARA PAGINACIÓN Y LÍMITES ---
+    let limit = $state(10); 
+    let offset = $state(0); 
 
+    let mostrarFiltros = $state(false);
+    let filtros = $state({
+        from: "", to: "",          
+        country: "", city: "",     
+        min_cost: "", max_cost: ""
+    });
 
     async function getDatos() {
-        const res = await fetch(API);
+        const queryParams = new URLSearchParams();
+        
+        Object.keys(filtros).forEach(key => {
+            if (filtros[key]) queryParams.append(key, filtros[key]);
+        });
+
+        // Parámetros de paginación
+        queryParams.append("limit", limit);
+        queryParams.append("offset", offset);
+
+        const res = await fetch(`${API}?${queryParams.toString()}`);
         if (res.ok) {
             datos = await res.json();
         }
     }
 
+    function paginaSiguiente() {
+        offset += parseInt(limit);
+        getDatos();
+    }
+
+    function paginaAnterior() {
+        if (offset >= limit) {
+            offset -= parseInt(limit);
+            getDatos();
+        }
+    }
+
+    function cambiarLimite() {
+        offset = 0; 
+        getDatos();
+    }
+
     async function crearDato() {
+        // Convertimos a número antes de enviar para asegurar compatibilidad
+        const datoAEnviar = {
+            ...nuevoDato,
+            year: parseInt(nuevoDato.year),
+            cost_usd_per_m2: parseInt(nuevoDato.cost_usd_per_m2),
+            rank: parseInt(nuevoDato.rank)
+        };
+
         const res = await fetch(API, {
             method: "POST",
-            body: JSON.stringify(nuevoDato),
+            body: JSON.stringify(datoAEnviar),
             headers: { "Content-Type": "application/json" }
         });
         
         if (res.status === 201) {
             mensaje = "¡Recurso creado con éxito!";
             esError = false;
-            getDatos(); // Recargamos la lista
+            getDatos(); 
         } else if (res.status === 409) {
             mensaje = `Error: Ya existe un dato para ${nuevoDato.country} en ${nuevoDato.year}.`;
             esError = true;
@@ -55,70 +99,39 @@ import { onMount } from 'svelte';
         }
     }
 
+    async function cargarDatosIniciales() {
+        const res = await fetch(`${API}/loadInitialData`);
+        if (res.ok) {
+            const datosCargados = await res.json();
+            mensaje = `Se han cargado ${datosCargados.length} registros iniciales con éxito.`;
+            esError = false;
+            getDatos(); 
+        } else {
+            mensaje = "Error: No se han podido cargar los datos iniciales (quizás la base de datos no está vacía).";
+            esError = true;
+        }
+    }
+
+    async function buscar() {
+        offset = 0; 
+        await getDatos();
+        mensaje = `Búsqueda finalizada: ${datos.length} resultados encontrados.`;
+        esError = false;
+    }
+
+    function limpiarBusqueda() {
+        filtros = { from: "", to: "", country: "", city: "", min_cost: "", max_cost: "" };
+        offset = 0;
+        getDatos(); 
+    }
+
+    function toggleFiltros() {
+        mostrarFiltros = !mostrarFiltros; 
+    }
+
     onMount(() => {
         getDatos();
     });
-
-
-    async function cargarDatosIniciales() {
-    // Generalmente es un GET a /api/v2/recurso/loadInitialData
-    const res = await fetch(`${API}/loadInitialData`);
-    
-    if (res.ok) {
-        const datosCargados = await res.json();
-        mensaje = `Se han cargado ${datosCargados.length} registros iniciales con éxito.`;
-        esError = false;
-        getDatos(); // Refrescamos la tabla para ver los nuevos datos
-    } else {
-        mensaje = "Error: No se han podido cargar los datos iniciales (quizás la base de datos no está vacía).";
-        esError = true;
-    }
-}
-
-let mostrarFiltros = $state(false); // Empieza cerrado (false)
-
-function toggleFiltros() {
-    mostrarFiltros = !mostrarFiltros; // Cambia de true a false y viceversa
-}
-
-
-
-let filtros = $state({
-    from: "", to: "",          // Rango de años
-    country: "", city: "",     // Texto
-    min_cost: "", max_cost: "", // Rango de coste
-    min_rank: "", max_rank: ""  // Rango de ranking
-});
-
-async function buscar() {
-    const queryParams = new URLSearchParams();
-    
-    // Recorremos el objeto y añadimos solo los que tienen valor
-    Object.keys(filtros).forEach(key => {
-        if (filtros[key]) queryParams.append(key, filtros[key]);
-    });
-
-    const res = await fetch(`${API}?${queryParams.toString()}`);
-    if (res.ok) {
-        datos = await res.json();
-        mensaje = `Búsqueda finalizada: ${datos.length} resultados encontrados.`;
-        esError = false;
-    } else {
-        mensaje = "Error en los parámetros de búsqueda.";
-        esError = true;
-    }
-}
-
-
-function limpiarBusqueda() {
-    filtros.from = "";
-    filtros.to = "";
-    filtros.country = "";
-    filtros.city = "";
-    getDatos(); // Recarga la lista completa
-}
-
-
 </script>
 
 <h1>Gestión de Costes de Construcción</h1>
@@ -139,6 +152,20 @@ function limpiarBusqueda() {
     <input bind:value={nuevoDato.rank} type="number" placeholder="Ranking" />
     <button onclick={crearDato}>Añadir Registro</button>
 </section>
+
+<!-- Paginación arriba de la tabla para facilitar visibilidad -->
+<div style="margin-bottom: 15px; background: #eee; padding: 10px; display: flex; align-items: center; gap: 15px;">
+    <button onclick={paginaAnterior} disabled={offset === 0}>Anterior</button>
+    <span style="font-weight: bold;">Página {Math.floor(offset / limit) + 1}</span>
+    <button onclick={paginaSiguiente} disabled={datos.length < limit}>Siguiente</button>
+    
+    <label for="limit-select" style="margin-left: 20px;">Resultados por página:</label>
+    <select id="limit-select" bind:value={limit} onchange={cambiarLimite}>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+    </select>
+</div>
 
 <table>
     <thead>
@@ -166,27 +193,23 @@ function limpiarBusqueda() {
     </tbody>
 </table>
 
-<button onclick={borrarTodo} style="background: red; color: white; margin-top: 20px;">
+<div style="margin-top: 20px; display: flex; gap: 10px;">
+    <button onclick={borrarTodo} style="background: red; color: white;">
+        Limpiar Base de Datos Completa
+    </button>
 
-    Limpiar Base de Datos Completa
-</button>
+    <button onclick={cargarDatosIniciales} style="background: red; color: white;">
+        carga datos iniciales 
+    </button>
 
-
-<button onclick={cargarDatosIniciales} style="background: red; color: white; margin-top: 20px;">
-
-    carga datos iniciales 
-</button>
-
-
-<button onclick={toggleFiltros} style="background: #333; color: white; margin-bottom: 10px;">
-    {mostrarFiltros ? "Cerrar Filtros" : "Abrir Buscador"}
-</button>
-
+    <button onclick={toggleFiltros} style="background: #333; color: white;">
+        {mostrarFiltros ? "Cerrar Filtros" : "Abrir Buscador"}
+    </button>
+</div>
 
 {#if mostrarFiltros}
-    <section style="background: #f1f1f1; padding: 15px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
+    <section style="background: #f1f1f1; padding: 15px; margin-top: 20px; border: 1px solid #ccc;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            
             <div>
                 <label>País: <input bind:value={filtros.country} placeholder="Ej: Spain" style="width: 100%;" /></label><br/>
                 <label>Ciudad: <input bind:value={filtros.city} placeholder="Ej: Madrid" style="width: 100%; margin-top: 5px;" /></label>
@@ -195,22 +218,16 @@ function limpiarBusqueda() {
                     <label>Hasta: <input type="number" bind:value={filtros.to} style="width: 60px;" /></label>
                 </div>
             </div>
-
             <div>
                 <p style="margin: 0 0 5px 0;"><strong>Rango de Coste (USD/m²)</strong></p>
-                <input type="number" bind:value={filtros.min_cost} placeholder="Mínimo" style="width: 80px;" />
+                <input type="number" bind:value={filtros.min_cost} placeholder="Minimo" style="width: 80px;" />
                 <span> a </span>
-                <input type="number" bind:value={filtros.max_cost} placeholder="Máximo" style="width: 80px;" />
+                <input type="number" bind:value={filtros.max_cost} placeholder="Maximo" style="width: 80px;" />
             </div>
         </div>
-
         <div style="margin-top: 15px; border-top: 1px solid #ddd; padding-top: 10px;">
-            <button onclick={buscar} style="background: #007bff; color: white; padding: 5px 15px; border: none; cursor: pointer;">
-                Filtrar ahora
-            </button>
-            <button onclick={limpiarBusqueda} style="background: #6c757d; color: white; padding: 5px 15px; border: none; cursor: pointer; margin-left: 5px;">
-                Limpiar filtros
-            </button>
+            <button onclick={buscar}>Filtrar ahora</button>
+            <button onclick={limpiarBusqueda} style="margin-left: 5px;">Limpiar filtros</button>
         </div>
     </section>
 {/if}
