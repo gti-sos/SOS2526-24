@@ -35,7 +35,7 @@
           apiUrl:
             "https://sos2526-24.onrender.com/api/v1/international-construction-costs",
           docsUrl:
-            "https://sos2526-24.onrender.com/api/v1/international-construction-costs/docs"
+            "https://sos2526-24.onrender.com/api/v2/international-construction-costs/docs"
         }
       ]
     },
