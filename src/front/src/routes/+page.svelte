@@ -16,7 +16,7 @@
       frontend: "/recreation-culture-expenditure",
       apiBase: "/api/v2/recreation-culture-expenditure",
       docs: "/api/v2/recreation-culture-expenditure/docs",
-      video: "",
+      video: "https://youtu.be/SWPj_xQpAWc",
       label: "Ocio y cultura"
     },
     {
@@ -38,7 +38,7 @@
       frontend: "/international-construction-costs",
       apiBase: "/api/v1/international-construction-costs",
       docs: "/api/v1/international-construction-costs/docs",
-      video: "",
+      video: "https://youtu.be/m0RpH_ZxN38",
       label: "Construcción"
     }
   ];

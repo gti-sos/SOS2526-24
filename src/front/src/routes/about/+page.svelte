@@ -28,7 +28,7 @@
       icon: "🏗️",
       resource: "international-construction-costs",
       datasetName: "Costes internacionales de construcción",
-      videoUrl: "",
+      videoUrl: "https://youtu.be/m0RpH_ZxN38",
       apis: [
         {
           version: "v1",
@@ -46,7 +46,7 @@
       icon: "🎭",
       resource: "recreation-culture-expenditure",
       datasetName: "Gasto en ocio y cultura",
-      videoUrl: "",
+      videoUrl: "https://youtu.be/SWPj_xQpAWc",
       apis: [
         {
           version: "v1",
