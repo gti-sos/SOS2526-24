@@ -97,16 +97,15 @@
 
   // fetchJsonConRetry: para APIs externas lentas (Render cold-start, etc.)
   // timeout: ms por intento | intentos: max reintentos | backoff: espera base entre intentos
-  async function fetchJsonConRetry(url, nombreApi, { timeout = 2500000, intentos = 3, backoff = 30000 } = {}) {
+  // fetchJsonConRetry: para APIs externas lentas (Render cold-start, etc.)
+  // Sin timeout artificial, espera a que el servidor responda
+  async function fetchJsonConRetry(url, nombreApi, { intentos = 3, backoff = 8000 } = {}) {
     let ultimoError = null;
 
     for (let intento = 1; intento <= intentos; intento++) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeout);
-
       try {
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timer);
+        // Hacemos el fetch normal, sin signal, para que espere lo que haga falta
+        const response = await fetch(url);
 
         let payload = null;
         try { payload = await response.json(); } catch { payload = null; }
@@ -114,25 +113,18 @@
         return payload;
 
       } catch (e) {
-        clearTimeout(timer);
         ultimoError = e;
-        console.warn(
-          `[${nombreApi}] Intento ${intento}/${intentos} fallido` +
-          (e.name === "AbortError" ? ` (timeout ${timeout / 1000}s)` : `: ${e.message}`)
-        );
+        console.warn(`[${nombreApi}] Intento ${intento}/${intentos} fallido: ${e.message}`);
+        
         if (intento < intentos) {
-          const espera = backoff * intento; // 3s, 6s, 9s...
+          const espera = backoff * intento; 
           console.info(`[${nombreApi}] Reintentando en ${espera / 1000}s...`);
           await new Promise(r => setTimeout(r, espera));
         }
       }
     }
 
-    const msg = ultimoError?.name === "AbortError"
-      ? `${nombreApi} no respondió tras ${timeout / 1000}s (${intentos} intentos). El servidor Render puede estar iniciando.`
-      : `${nombreApi}: ${ultimoError?.message ?? "Error desconocido"} (${intentos} intentos)`;
-
-    throw new Error(msg);
+    throw new Error(`${nombreApi}: ${ultimoError?.message ?? "Error desconocido"} (${intentos} intentos)`);
   }
 
 
@@ -912,7 +904,7 @@
             Cada gauge representa un país; la aguja indica el IREF normalizado [0–100].
             Verde = riesgo bajo, naranja = medio, rojo = alto. Se cruzan los reportes
             de fraude de G30 con el coste promedio de construcción de tu API.
-            Si el país no está en tu API se usa la mediana global como fallback.
+            Si el país no está en la API se usa la mediana global como fallback.
             <em>Widget: <b>ECharts — gauge</b> (múltiple, cuadrícula 3×2).</em>
           </p>
           {#if errorG30}
