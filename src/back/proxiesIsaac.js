@@ -6,7 +6,7 @@ export function setupProxiesIsaac(app) {
   // =========================================================
   // HELPERS
   // =========================================================
-  async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+  async function fetchWithTimeout(url, options = {}, timeoutMs = 200000) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
  

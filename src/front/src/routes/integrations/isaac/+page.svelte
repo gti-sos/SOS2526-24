@@ -97,7 +97,7 @@
 
   // fetchJsonConRetry: para APIs externas lentas (Render cold-start, etc.)
   // timeout: ms por intento | intentos: max reintentos | backoff: espera base entre intentos
-  async function fetchJsonConRetry(url, nombreApi, { timeout = 25000, intentos = 3, backoff = 3000 } = {}) {
+  async function fetchJsonConRetry(url, nombreApi, { timeout = 2500000, intentos = 3, backoff = 30000 } = {}) {
     let ultimoError = null;
 
     for (let intento = 1; intento <= intentos; intento++) {
