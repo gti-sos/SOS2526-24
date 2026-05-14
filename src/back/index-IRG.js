@@ -34,7 +34,7 @@ function loadBackendIsaac(app) {
         },
         { 
             base: "/api/v2/international-construction-costs", 
-            docs: "https://documenter.getpostman.com/view/52380629/2sBXijJXME" // <--- Pon aquí el nuevo link que generes
+            docs: "https://documenter.getpostman.com/view/52380629/2sBXijJXME" 
         }
     ];
 
