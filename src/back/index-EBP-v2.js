@@ -58,13 +58,13 @@ const initialBaseData = [
   { year: 2022, country: "United States", recreation_value: 1682059000000, total_household_consumption: 19263207000000, population: 333287557 },
   { year: 2021, country: "United States", recreation_value: 1535268000000, total_household_consumption: 17574449000000, population: 332031554 },
 
-  // Finland - país añadido
+  // Finland
   { year: 2024, country: "Finland", recreation_value: 11898000000, total_household_consumption: 193316000000, population: 5617310 },
   { year: 2023, country: "Finland", recreation_value: 11942000000, total_household_consumption: 191132000000, population: 5584264 },
   { year: 2022, country: "Finland", recreation_value: 11808000000, total_household_consumption: 178373000000, population: 5563970 },
   { year: 2021, country: "Finland", recreation_value: 11067000000, total_household_consumption: 167408000000, population: 5541017 },
 
-  // Mexico - país añadido
+  // Mexico
   { year: 2023, country: "Mexico", recreation_value: 1062997000000, total_household_consumption: 24088174271000, population: 128455567 },
   { year: 2022, country: "Mexico", recreation_value: 1054829000000, total_household_consumption: 22562974793000, population: 127504125 },
   { year: 2021, country: "Mexico", recreation_value: 846841000000, total_household_consumption: 19839203150000, population: 126705138 }
