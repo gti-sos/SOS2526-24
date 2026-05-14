@@ -104,20 +104,6 @@
     return null;
   }
 
-  function formatNumber(value) {
-    if (value === undefined || value === null || value === "") {
-      return "";
-    }
-
-    const number = Number(value);
-
-    if (!Number.isFinite(number)) {
-      return String(value);
-    }
-
-    return number.toFixed(2);
-  }
-
   function normalizeCountryName(value) {
     const normalized = String(value ?? "")
       .trim()
@@ -379,6 +365,22 @@
     return [...pairs.values()];
   }
 
+  function hasPublicType(holiday) {
+    if (!Array.isArray(holiday.types)) {
+      return true;
+    }
+
+    return holiday.types.includes("Public");
+  }
+
+  function hasNonPublicTypes(holiday) {
+    if (!Array.isArray(holiday.types)) {
+      return false;
+    }
+
+    return holiday.types.some((type) => type !== "Public");
+  }
+
   async function fetchHolidaysForCountryYear(pair) {
     const url =
       `${PROXY_BASE}/external/nager/public-holidays` +
@@ -389,24 +391,37 @@
 
     const holidayRows = Array.isArray(holidays) ? holidays : [];
 
-    const publicHolidays = holidayRows.filter((holiday) => {
-      if (!Array.isArray(holiday.types)) {
-        return true;
-      }
+    const publicHolidayCount = holidayRows.filter((holiday) =>
+      hasPublicType(holiday)
+    ).length;
 
-      return holiday.types.includes("Public");
-    });
-
-    const nationalHolidays = holidayRows.filter(
+    const nationalHolidayCount = holidayRows.filter(
       (holiday) => holiday.global === true
-    );
+    ).length;
+
+    const regionalHolidayCount = holidayRows.filter(
+      (holiday) => holiday.global === false
+    ).length;
+
+    const otherHolidayCount = holidayRows.filter((holiday) =>
+      hasNonPublicTypes(holiday)
+    ).length;
+
+    const totalHolidayCount =
+      publicHolidayCount +
+      nationalHolidayCount +
+      regionalHolidayCount +
+      otherHolidayCount;
 
     return {
       countryCode: pair.countryCode,
       year: pair.year,
-      holidayCount: holidayRows.length,
-      publicHolidayCount: publicHolidays.length,
-      nationalHolidayCount: nationalHolidays.length,
+      uniqueHolidayCount: holidayRows.length,
+      publicHolidayCount,
+      nationalHolidayCount,
+      regionalHolidayCount,
+      otherHolidayCount,
+      totalHolidayCount,
       firstHolidayName:
         holidayRows[0]?.localName || holidayRows[0]?.name || "Sin festivos"
     };
@@ -464,7 +479,10 @@
           recreationShareCount: 0,
           publicHolidayCount: nagerStats.publicHolidayCount,
           nationalHolidayCount: nagerStats.nationalHolidayCount,
-          holidayCount: nagerStats.holidayCount,
+          regionalHolidayCount: nagerStats.regionalHolidayCount,
+          otherHolidayCount: nagerStats.otherHolidayCount,
+          uniqueHolidayCount: nagerStats.uniqueHolidayCount,
+          totalHolidayCount: nagerStats.totalHolidayCount,
           firstHolidayName: nagerStats.firstHolidayName,
           sourceRows: 0
         });
@@ -489,26 +507,44 @@
 
     return [...groupedRows.values()]
       .filter((row) => row.recreationPerCapitaCount > 0)
-      .map((row) => ({
-        country: row.country,
-        countryCode: row.countryCode,
-        year: row.year,
-        recreationPerCapita:
-          row.recreationPerCapitaSum / row.recreationPerCapitaCount,
-        recreationValue:
+      .map((row) => {
+        const recreationPerCapita =
+          row.recreationPerCapitaSum / row.recreationPerCapitaCount;
+
+        const recreationValue =
           row.recreationValueCount > 0
             ? row.recreationValueSum / row.recreationValueCount
-            : null,
-        recreationShare:
+            : null;
+
+        const recreationShare =
           row.recreationShareCount > 0
             ? row.recreationShareSum / row.recreationShareCount
-            : null,
-        publicHolidayCount: row.publicHolidayCount,
-        nationalHolidayCount: row.nationalHolidayCount,
-        holidayCount: row.holidayCount,
-        firstHolidayName: row.firstHolidayName,
-        sourceRows: row.sourceRows
-      }))
+            : null;
+
+        const spendingPerHoliday =
+          row.totalHolidayCount > 0
+            ? recreationPerCapita / row.totalHolidayCount
+            : null;
+
+        return {
+          country: row.country,
+          countryCode: row.countryCode,
+          year: row.year,
+          recreationPerCapita,
+          recreationValue,
+          recreationShare,
+          publicHolidayCount: row.publicHolidayCount,
+          nationalHolidayCount: row.nationalHolidayCount,
+          regionalHolidayCount: row.regionalHolidayCount,
+          otherHolidayCount: row.otherHolidayCount,
+          uniqueHolidayCount: row.uniqueHolidayCount,
+          totalHolidayCount: row.totalHolidayCount,
+          spendingPerHoliday,
+          firstHolidayName: row.firstHolidayName,
+          sourceRows: row.sourceRows
+        };
+      })
+      .filter((row) => row.spendingPerHoliday !== null)
       .sort((a, b) => {
         if (a.country !== b.country) {
           return a.country.localeCompare(b.country);
@@ -542,7 +578,7 @@
     const spec = {
       $schema: "https://vega.github.io/schema/vega-lite/v5.json",
       title:
-        "Relación entre festivos públicos y gasto cultural per cápita",
+        "Relación entre gasto en ocio y cultura y festivos totales",
       width: "container",
       height: chartHeight,
       autosize: {
@@ -581,16 +617,9 @@
           }
         },
         color: {
-          field: "recreationPerCapita",
+          field: "spendingPerHoliday",
           type: "quantitative",
-          title: "Gasto per cápita",
-          scale: {
-            scheme: "greens"
-          },
-          legend: {
-            titleColor: "#142337",
-            labelColor: "#142337"
-          }
+          title: "Gasto por festivo total"
         },
         tooltip: [
           {
@@ -609,6 +638,23 @@
             title: "Año"
           },
           {
+            field: "spendingPerHoliday",
+            type: "quantitative",
+            title: "Gasto per cápita / festivos totales",
+            format: ".2f"
+          },
+          {
+            field: "recreationPerCapita",
+            type: "quantitative",
+            title: "Gasto per cápita",
+            format: ".2f"
+          },
+          {
+            field: "totalHolidayCount",
+            type: "quantitative",
+            title: "Festivos totales calculados"
+          },
+          {
             field: "publicHolidayCount",
             type: "quantitative",
             title: "Festivos públicos"
@@ -619,15 +665,19 @@
             title: "Festivos nacionales"
           },
           {
-            field: "holidayCount",
+            field: "regionalHolidayCount",
             type: "quantitative",
-            title: "Festivos totales devueltos"
+            title: "Festivos regionales/locales"
           },
           {
-            field: "recreationPerCapita",
+            field: "otherHolidayCount",
             type: "quantitative",
-            title: "Gasto per cápita",
-            format: ".2f"
+            title: "Otros tipos de festivo"
+          },
+          {
+            field: "uniqueHolidayCount",
+            type: "quantitative",
+            title: "Festivos únicos devueltos"
           },
           {
             field: "recreationValue",
@@ -645,11 +695,6 @@
             field: "firstHolidayName",
             type: "nominal",
             title: "Primer festivo"
-          },
-          {
-            field: "sourceRows",
-            type: "quantitative",
-            title: "Registros de mi API agregados"
           }
         ]
       },
@@ -776,13 +821,12 @@
         <h2>Integración de gasto en ocio y cultura con Nager.Date</h2>
 
         <p>
-          Esta visualización combina datos de la API de gasto per cápita en ocio 
-          y cultura con información externa procedente de la API Nager.Date. La 
-          gráfica organiza los datos por país y año, de forma que cada celda 
-          representa una combinación concreta de ambos valores. La intensidad del 
-          color refleja el gasto per cápita en ocio y cultura, y la información 
-          emergente muestra los días festivos públicos y nacionales asociados, 
-          junto con los datos económicos integrados.
+          Esta visualización combina datos de la API de gasto per cápita en ocio
+          y cultura con información externa procedente de la API Nager.Date. La
+          gráfica organiza los datos por país y año, de forma que cada celda
+          representa una combinación concreta de ambos valores. La intensidad del
+          color refleja la relación entre el gasto per cápita en ocio y cultura
+          y el total de festivos calculados para ese país y año.
         </p>
       </div>
 
