@@ -27,7 +27,7 @@
       frontend: "/average-monthly-wages",
       apiBase: "/api/v1/average-monthly-wages",
       docs: "/api/v1/average-monthly-wages/docs",
-      video: "",
+      video: "https://youtu.be/WIW1ByF1ISw",
       label: "Sueldos"
     },
     {

@@ -71,7 +71,7 @@
       icon: "💶",
       resource: "average-monthly-wages",
       datasetName: "Sueldos medios mensuales",
-      videoUrl: "",
+      videoUrl: "https://youtu.be/WIW1ByF1ISw",
       apis: [
         {
           version: "v1",
