@@ -403,8 +403,6 @@ const ticketmasterCache = new Map();
     FR: "Francia",
     IT: "Italia",
     DE: "Alemania",
-    BR: "Brasil",
-    AR: "Argentina",
     CA: "Canadá"
   };
 
